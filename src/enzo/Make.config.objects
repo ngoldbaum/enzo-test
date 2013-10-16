@@ -213,7 +213,7 @@ OBJS_CONFIG_LIB = \
 	fourn.o \
 	FreeRealMem.o \
 	FreeExpansionInitialize.o \
-        FriendOfFriend.o \
+       FriendOfFriend.o \
 	FSMultiSourceInitialize.o \
 	FSProb_ComputeOpacityLW.o \
 	FSProb_constructor.o \
@@ -698,6 +698,7 @@ OBJS_CONFIG_LIB = \
         ProblemType_CollapsingCoolingCloud.o \
 	ProblemType_ExplodingCloud.o \
 	ProblemType_MagneticReconnection.o \
+    ProblemType_AgoraRestart.o \
         ProcMap.o \
         project.o \
         projectbool.o \
