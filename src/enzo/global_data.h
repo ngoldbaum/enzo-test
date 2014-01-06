@@ -570,6 +570,11 @@ EXTERN float MustRefineParticlesMinimumMass;
 
 EXTERN float MinimumShearForRefinement;
 
+/* For CellFlaggingMethod = 9,   
+   Whether to use the old method for calculating shear refinement.    */
+
+EXTERN float OldShearMethod;
+
 /* For CellFlaggingMethod = 11,
    The number of cells by which the Resistive length abs(B)/abs(curl(B)) 
    should be resolved. */
