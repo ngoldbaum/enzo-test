@@ -38,7 +38,7 @@ int FindField(int field, int farray[], int numfields);
 int grid::GrackleWrapper()
 {
 
-  if (!grackle_chemistry.use_chemistry)
+  if (!grackle_chemistry.use_grackle)
     return SUCCESS;
 
   if (ProcessorNumber != MyProcessorNumber)
@@ -141,13 +141,6 @@ int grid::GrackleWrapper()
       MetalPointer = BaryonField[SNColourNum];
   } // ENDELSE both metal types
  
-  /* Update UV background rates. */
-
-  if (update_UVbackground_rates(grackle_chemistry, grackle_units,
-                                afloat) == FAIL) {
-    ENZO_FAIL("Error in update_UVbackground_rates.\n");
-  }
-
   int temp_thermal = FALSE;
   float *thermal_energy;
   if (HydroMethod == MHD_RK){
