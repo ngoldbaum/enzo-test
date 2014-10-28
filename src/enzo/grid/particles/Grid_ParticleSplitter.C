@@ -130,7 +130,7 @@ int grid::ParticleSplitter(int level)
   
   /* Allocate space for new particles. */
   
-  int ChildrenPerParent = 12;  //12+1 = 13 will be the final number of particles per parent
+  int ChildrenPerParent = CHILDRENPERPARENT;  //12+1 = 13 will be the final number of particles per parent
   int MaximumNumberOfNewParticles = ChildrenPerParent*NumberOfParticles+1;
   tg->AllocateNewParticles(MaximumNumberOfNewParticles);
 

@@ -37,7 +37,7 @@
 #include "CosmologyParameters.h"
 #include "CommunicationUtilities.h"
 
-#define NO_DEBUG_PS 
+#define DEBUG_PS 0
 
 int RebuildHierarchy(TopGridData *MetaData,
 		     LevelHierarchyEntry *LevelArray[], int level);
@@ -77,9 +77,6 @@ int ParticleSplitter(LevelHierarchyEntry *LevelArray[], int ThisLevel,
 
   /* Initialize all star particles if this is a restart */
 
-  if (ParticleSplitterIterations > 1)
-    fprintf(stderr, "WARNING: ParticleSplitterIterations > 1 is not properly tested yet.\n");
-
   for (i = 0; i < ParticleSplitterIterations; i++) {
 
     for (level = 0; level < MAX_DEPTH_OF_HIERARCHY-1; level++) {
@@ -97,7 +94,6 @@ int ParticleSplitter(LevelHierarchyEntry *LevelArray[], int ThisLevel,
 
       RecordTotalStarParticleCount(Grids, NumberOfGrids, 
 				   TotalStarParticleCountPrevious);
-
       //      for (grid1 = 0; grid1 < NumberOfGrids; grid1++) 
       //	fprintf(stdout, "TotalStarParticleCountPrevious[grid=%d] = %d\n", grid1, 
       //		TotalStarParticleCountPrevious[grid1]);
