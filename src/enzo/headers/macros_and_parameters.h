@@ -497,7 +497,8 @@ typedef int            HDF5_hid_t;
 
 /* Number of child particles created during particle split */
 #define CHILDRENPERPARENT           12
-
+/* You probably don't want to do this too often */
+#define MAX_SPLIT_ITERATIONS        4
 /* Ways to deposit particles from a subgrid. */
 
 #define CIC_DEPOSIT        0

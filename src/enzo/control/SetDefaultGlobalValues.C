@@ -880,7 +880,13 @@ int SetDefaultGlobalValues(TopGridData &MetaData)
   ParticleSplitterIterations = 0;
   ParticleSplitterChildrenParticleSeparation = 1.0;
   ParticleSplitterRandomSeed = 131180;
-  
+  for(int i = 0; i < MAX_SPLIT_ITERATIONS; i++)
+    ParticleSplitterFraction[i] = 1.0;
+  for(int i = 0; i < MAX_DIMENSION; i++)
+    ParticleSplitterCenter[i] = -1.0;
+  for(int i = 0; i < MAX_SPLIT_ITERATIONS; i++)
+    ParticleSplitterCenterRegion[i] = -1.0;
+
   /* Magnetic Field Resetter */
 
   ResetMagneticField = FALSE;

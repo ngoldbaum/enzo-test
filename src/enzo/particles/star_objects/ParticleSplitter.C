@@ -37,7 +37,7 @@
 #include "CosmologyParameters.h"
 #include "CommunicationUtilities.h"
 
-#define DEBUG_PS 0
+#define NO_DEBUG_PS
 
 int RebuildHierarchy(TopGridData *MetaData,
 		     LevelHierarchyEntry *LevelArray[], int level);
@@ -68,6 +68,13 @@ int ParticleSplitter(LevelHierarchyEntry *LevelArray[], int ThisLevel,
   if (ParticleSplitterIterations <= 0 || 
       ParticleSplitterChildrenParticleSeparation <=0) 
     return SUCCESS;
+
+  if(ParticleSplitterIterations > MAX_SPLIT_ITERATIONS) {
+    fprintf(stderr, "WARNING: Splitting iterations exceeds maximum allowed\n" \
+	    "Resetting to %d\n",  MAX_SPLIT_ITERATIONS);
+    ParticleSplitterIterations = MAX_SPLIT_ITERATIONS;
+  }
+    
 
   /* Find total NumberOfParticles in all grids; this is needed in 
      CommunicationUpdateStarParticleCount below */
@@ -105,7 +112,7 @@ int ParticleSplitter(LevelHierarchyEntry *LevelArray[], int ThisLevel,
 		Grids[grid1]->GridData->ReturnNumberOfParticles());
 #endif
 	
-	if (Grids[grid1]->GridData->ParticleSplitter(level) == FAIL) {
+	if (Grids[grid1]->GridData->ParticleSplitter(level, i) == FAIL) {
 	  ENZO_FAIL("Error in grid::ParticleSplitter.\n");
 	}
 
