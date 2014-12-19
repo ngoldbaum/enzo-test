@@ -27,7 +27,7 @@
 #include "Grid.h"
 
 #define DEBUG_PS
-#define REGION_FRAC 0.75
+
 void mt_init(unsigned_int seed);
 
 unsigned_long_int mt_random();
@@ -65,6 +65,19 @@ int grid::CreateChildParticles(float dx, int NumberOfParticles, float *ParticleM
   mt_init(((unsigned_int) ParticleSplitterRandomSeed));
   
   FLOAT sep[3], midpoint[3], newsep[3];
+
+  /* 
+   * The following three options determine over what region 
+   * particle splitting takes place. 
+   * By default the splitting occurs over the entire most refined 
+   * region. At times this can be too large so two further options
+   * exist controlled via the parameter file. The first just selects
+   * a fraction of that region centred on the centre of the most 
+   * refined region.
+   * The second allows the user to specify the centre of the splitting
+   * and the size of the region. 
+   */
+
   /* Default Option */
   for (i = 0; i < 3; i++) {
     LeftEdge[i]  = RefineRegionLeftEdge[i];
