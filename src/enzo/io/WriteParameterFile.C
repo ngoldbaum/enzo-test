@@ -616,11 +616,11 @@ int WriteParameterFile(FILE *fptr, TopGridData &MetaData, char *name = NULL)
       fprintf(fptr, "MultiRefineRegionRadius[%"ISYM"] = %"GSYM"\n", ireg,
               MultiRefineRegionRadius[ireg]);
 
-      fprintf(fptr, "MultiRefineRegionWidth[%"ISYM"] = %"GSYM"\n",
+      fprintf(fptr, "MultiRefineRegionWidth[%"ISYM"] = %"GSYM"\n", ireg,
               MultiRefineRegionWidth[ireg]);
 
       fprintf(fptr, "MultiRefineRegionStaggeredRefinement[%"ISYM"] =%"GSYM"\n",
-              MultiRefineRegionStaggeredRefinement[ireg]);
+              ireg, MultiRefineRegionStaggeredRefinement[ireg]);
 
       fprintf(fptr, "MultiRefineRegionLeftEdge[%"ISYM"] = ", ireg);
       WriteListOfFloats(fptr, MAX_DIMENSION, MultiRefineRegionLeftEdge[ireg]);

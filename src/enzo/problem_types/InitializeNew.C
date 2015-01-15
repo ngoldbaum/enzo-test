@@ -226,7 +226,7 @@ int MHDOrszagTangInit(FILE *fptr, FILE *Outfptr, HierarchyEntry &TopGrid,
 int MHDLoopInit(FILE *fptr, FILE *Outfptr, HierarchyEntry &TopGrid,
                           TopGridData &MetaData, ExternalBoundary &Exterior);
 
-void PrintMemoryUsage(char *str);
+void PrintMemoryUsage(const char *str);
 
 int GetUnits(float *DensityUnits, float *LengthUnits,
 	     float *TemperatureUnits, float *TimeUnits,
@@ -340,7 +340,8 @@ int InitializeNew(char *filename, HierarchyEntry &TopGrid,
     // Create the top grid, prepare it, set the time and parameters
     
     TopGrid.GridData = new grid;
-    
+    TopGrid.GridData->SetLevel(0);
+
     TopGrid.GridData->PrepareGrid(MetaData.TopGridRank, MetaData.TopGridDims,
 				  DomainLeftEdge, DomainRightEdge,
 				  MetaData.NumberOfParticles);

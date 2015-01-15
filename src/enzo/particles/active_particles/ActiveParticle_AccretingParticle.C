@@ -275,8 +275,6 @@ void ActiveParticleType_AccretingParticle::DescribeSupplementalData(ActivePartic
 {
   flags.DarkMatterDensity = true;
   flags.Temperature = true;
-  flags.UnitConversions = true;
-  flags.DataFieldNumbers = true;
   flags.MetalField = true;
 }
 

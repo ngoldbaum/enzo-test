@@ -51,7 +51,7 @@ int grid::CreateChildParticles(float dx, int NumberOfParticles, float *ParticleM
   float l21 = 0.0, l22 = 0.0, l23 = 0.0;
   float l31 = 0.0, l32 = 0.0, l33 = 0.0;
   float  separation =  ParticleSplitterChildrenParticleSeparation;
-  int iterations = ParticleSplitterIterations;
+  int iterations = ParticleSplitterIterations, ParentParticles = 0;
   float therandomfraction = 0.0;
   unsigned_long_int therandominteger = 0;
   /*
@@ -165,6 +165,7 @@ int grid::CreateChildParticles(float dx, int NumberOfParticles, float *ParticleM
 	  /*
 	   * CREATE CHILDREN PARTICLES 
 	   */
+	  ParentParticles++;
 	  /* First reduce the mass of the parent down to 1/(children+parent) = 1/13 */
 	  ParticleMass[partnum] = ParticleMass[partnum] / (float)(ChildrenPerParent + 1.0);
 	  /*
@@ -355,7 +356,7 @@ int grid::CreateChildParticles(float dx, int NumberOfParticles, float *ParticleM
 #ifdef DEBUG_PS
   if(total_children > 0)
     fprintf(stdout,"Iteration %d: %d new child particles created in this grid from %d parents\n", 
-	    iter, total_children, NumberOfParticles);
+	    iter, total_children, ParentParticles);
 #endif
  
   *NumberOfNewParticles = total_children;

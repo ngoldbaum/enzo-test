@@ -880,7 +880,7 @@ int SetDefaultGlobalValues(TopGridData &MetaData)
 
   /* Particle Splitter */
 
-  ParticleSplitterIterations = 0;
+  ParticleSplitterIterations = FALSE;
   ParticleSplitterChildrenParticleSeparation = 1.0;
   ParticleSplitterRandomSeed = 131180;
   for(int i = 0; i < MAX_SPLIT_ITERATIONS; i++)

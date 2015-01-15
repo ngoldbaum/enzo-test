@@ -43,7 +43,7 @@
 void WriteListOfFloats(FILE *fptr, int N, float floats[]);
 void WriteListOfFloats(FILE *fptr, int N, FLOAT floats[]);
 void WriteListOfInts(FILE *fptr, int N, int nums[]);
-void PrintMemoryUsage(char *str);
+void PrintMemoryUsage(const char *str);
 int InitializeRateData(FLOAT Time);
 int GetUnits(float *DensityUnits, float *LengthUnits,
 	     float *TemperatureUnits, float *TimeUnits,
@@ -509,7 +509,8 @@ int CosmologySimulationInitialize(FILE *fptr, FILE *Outfptr,
     // Create a new subgrid and initialize it
  
     Subgrid->GridData = new grid;
-    Subgrid->GridData->InheritProperties(Subgrid->ParentGrid->GridData);
+    Subgrid->GridData->InheritProperties(Subgrid->ParentGrid->GridData,
+					 Subgrid->ParentGrid->GridData->GetLevel()+1);
     Subgrid->GridData->PrepareGrid(MetaData.TopGridRank,
 				   CosmologySimulationGridDimension[gridnum],
 				   CosmologySimulationGridLeftEdge[gridnum],
