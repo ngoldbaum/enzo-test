@@ -21,7 +21,8 @@
 //   based on it.
  
 #include "preincludes.h"
-
+#include <string>
+#include <sstream>
 #ifdef CONFIG_USE_LIBCONFIG
 #include <libconfig.h++>
 #endif
@@ -976,6 +977,50 @@ int ReadParameterFile(FILE *fptr, TopGridData &MetaData, float *Initialdt)
     ret += sscanf(line, "AccretingParticleLuminosity = %lg",
 		  &AccretingParticleLuminosity);
 
+    /* Radiation Particle - set Energy Bins, Luminosity and info filename*/
+    ret += sscanf(line, "NumberOfRadiationParticles = %"ISYM, &NumberOfRadiationParticles);
+    if (sscanf(line, "RadiationSourcesFileName = %s", dummy) == 1)
+      RadiationSourcesFileName = dummy;
+    ret += sscanf(line, "PhotonsPerSecond = %"FSYM, &PhotonsPerSecond);
+    ret += sscanf(line, "NumberOfEnergyBins = %"ISYM, &NumberOfEnergyBins);
+    if(strncmp(line, "RadiationPerBin", 15) == 0)
+      {
+	char *numbers;
+	char *value;
+	int count;
+	char *delims = (char*) " ";
+	numbers = strstr(line, "=")+2;
+	value = strtok(numbers, delims);
+	count = 0;
+	while (value != NULL) {
+	  RadiationBin[count++] = atof(value);
+	  value = strtok(NULL, delims);
+	  ret++;
+	}
+	//fprintf(stdout, "Radiation Bins read as:\n");
+	//for(count = 0; count < NumberOfEnergyBins; count++) {
+	// fprintf(stdout, "RadiationBin[%d] = %f\n", count, RadiationBin[count]);
+	//}
+      }
+    if(strncmp(line, "RadiationSEDPerBin", 18) == 0)
+      {
+	char *numbers;
+	char *value;
+	int count;
+	char *delims = (char*) " ";
+	numbers = strstr(line, "=")+2;
+	value = strtok(numbers, delims);
+	count = 0;
+	while (value != NULL) {
+	  RadiationBinSED[count++] = atof(value);
+	  value = strtok(NULL, delims);
+	  ret++;
+	}
+	//fprintf(stdout, "Radiation SED per bin read as:\n");
+	//for(count = 0; count < NumberOfEnergyBins; count++)
+	// fprintf(stdout, "RadiationBinSED[%d] = %f\n", count, RadiationBinSED[count]);
+      }
+   
     /* Read Movie Dump parameters */
 
     ret += sscanf(line, "MovieSkipTimestep = %"ISYM, &MovieSkipTimestep);

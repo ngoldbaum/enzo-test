@@ -26,7 +26,8 @@ ENZO_OBJS +=\
         ActiveParticle_PopIII.o \
         ActiveParticle_Skeleton.o \
         ActiveParticle_SphereContained.o \
-        ActiveParticle_SpringelHernquist.o
+        ActiveParticle_SpringelHernquist.o \
+	ActiveParticle_RadiationParticle.o
 
 # ENZO BUILD SYSTEM DIRECTORY MODULE
 #

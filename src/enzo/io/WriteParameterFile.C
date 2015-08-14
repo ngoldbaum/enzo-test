@@ -968,6 +968,21 @@ int WriteParameterFile(FILE *fptr, TopGridData &MetaData, char *name = NULL)
   fprintf(fptr, "AccretingParticleRadiation         = %"ISYM"\n", AccretingParticleRadiation);
   fprintf(fptr, "AccretingParticleLuminosity        = %lg\n\n", AccretingParticleLuminosity);
 
+  fprintf(fptr, "NumberOfRadiationParticles     = %"ISYM"\n",NumberOfRadiationParticles);
+  if (RadiationSourcesFileName != NULL)
+    {
+      fprintf(fptr, "RadiationSourcesFileName   = %s\n", RadiationSourcesFileName);
+      fprintf(fptr, "PhotonsPerSecond           = %"GSYM"\n", PhotonsPerSecond);
+      fprintf(fptr, "NumberOfEnergyBins         = %"ISYM"\n", NumberOfEnergyBins);
+      fprintf(fptr, "RadiationPerBin            = ");
+      for(int i = 0; i < NumberOfEnergyBins; i++)
+	fprintf(fptr, "%"GSYM"  ", RadiationBin[i]);
+      fprintf(fptr, "\n");
+      fprintf(fptr, "RadiationSEDPerBin         = ");
+      for(int i = 0; i < NumberOfEnergyBins; i++)
+	fprintf(fptr, "%"GSYM"  ", RadiationBinSED[i]);
+      fprintf(fptr, "\n");
+    }
   /* Most Stanford additions: */
 
   fprintf(fptr, "UseHydro                   = %"ISYM"\n", UseHydro);

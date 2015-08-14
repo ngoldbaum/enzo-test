@@ -608,6 +608,15 @@ int SetDefaultGlobalValues(TopGridData &MetaData)
   MBHInsertLocationFilename        = (char*) "mbh_insert_location.in";
   OutputWhenJetsHaveNotEjected     = FALSE;
 
+  /* Star Class Radiation Source Particle */
+  NumberOfRadiationParticles       = 1;
+  RadiationSourcesFileName         = (char*) "RadiationSourcePositions.txt";
+  PhotonsPerSecond                 = 0.0;        // s^-1
+  NumberOfEnergyBins               = 1;
+  RadiationBin[0]                  = 13.61;
+  RadiationBinSED[0]               = 1.0;
+
+
   H2StarMakerEfficiency = 0.01;
   H2StarMakerNumberDensityThreshold = 0.0;
   H2StarMakerMinimumMass = 0.0;

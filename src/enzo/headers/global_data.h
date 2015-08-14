@@ -971,6 +971,14 @@ EXTERN double MBHParticleIOTemp[30][5+MAX_DIMENSION];
 EXTERN char *MBHInsertLocationFilename;
 EXTERN int OutputWhenJetsHaveNotEjected;
 
+/* Star Class Radiation Particle IO (PARTICLE_TYPE_RAD) */
+EXTERN char *RadiationSourcesFileName;
+EXTERN int   NumberOfRadiationParticles;
+EXTERN float PhotonsPerSecond;
+EXTERN int   NumberOfEnergyBins;
+EXTERN float RadiationBin[255];
+EXTERN float RadiationBinSED[255];
+
 /* Vorticity Calculations */
 
 EXTERN int VelAnyl;
