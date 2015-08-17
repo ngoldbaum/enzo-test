@@ -194,7 +194,7 @@ int ActiveParticleType_RadiationParticle::BeforeEvolveLevel
 		  if (GlobalRadiationSources->NextSource != NULL)
 		    GlobalRadiationSources->NextSource->PreviousSource = source;
 		  GlobalRadiationSources->NextSource = source;
-		  
+
 
 		}
 	      }

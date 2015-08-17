@@ -1,0 +1,11 @@
+This is a cosmology simulation in which a radiation particle is activated at 
+z = 50. The spectrum and strength of the source is set in the parameter file.
+Some scripts are attached that can test the output. Note that the 
+results will depend on the radiation solver/species solver used. 
+You will need to specify the position of the RadiationParticle and 
+it's starting redshift in a seperate file (RadiationSourcePosition.txt).
+
+Usage:
+./inits.exe -d ActiveRadiationParticle.inits
+mpirun -np 2 ./ring.exe pv ParticlePositions ParticleVelocities
+mpirun -np 2 ./enzo.exe -d ActiveRadiationParticle.enzo
