@@ -983,7 +983,7 @@ int ReadParameterFile(FILE *fptr, TopGridData &MetaData, float *Initialdt)
       RadiationSourcesFileName = dummy;
     ret += sscanf(line, "PhotonsPerSecond = %"FSYM, &PhotonsPerSecond);
     ret += sscanf(line, "NumberOfEnergyBins = %"ISYM, &NumberOfEnergyBins);
-    if(strncmp(line, "RadiationPerBin", 15) == 0)
+    if(strncmp(line, "RadiationInEvPerBin", 15) == 0)
       {
 	char *numbers;
 	char *value;
@@ -993,14 +993,11 @@ int ReadParameterFile(FILE *fptr, TopGridData &MetaData, float *Initialdt)
 	value = strtok(numbers, delims);
 	count = 0;
 	while (value != NULL) {
-	  RadiationBin[count++] = atof(value);
+	  RadiationEnergyInBin[count++] = atof(value);
 	  value = strtok(NULL, delims);
 	  ret++;
 	}
-	//fprintf(stdout, "Radiation Bins read as:\n");
-	//for(count = 0; count < NumberOfEnergyBins; count++) {
-	// fprintf(stdout, "RadiationBin[%d] = %f\n", count, RadiationBin[count]);
-	//}
+
       }
     if(strncmp(line, "RadiationSEDPerBin", 18) == 0)
       {
@@ -1016,9 +1013,6 @@ int ReadParameterFile(FILE *fptr, TopGridData &MetaData, float *Initialdt)
 	  value = strtok(NULL, delims);
 	  ret++;
 	}
-	//fprintf(stdout, "Radiation SED per bin read as:\n");
-	//for(count = 0; count < NumberOfEnergyBins; count++)
-	// fprintf(stdout, "RadiationBinSED[%d] = %f\n", count, RadiationBinSED[count]);
       }
    
     /* Read Movie Dump parameters */

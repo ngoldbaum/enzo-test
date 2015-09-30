@@ -291,6 +291,41 @@ The parameters below are considered in ``StarParticleCreation`` method 9.
         #order: MBH mass (in Ms), MBH location[3], MBH creation time
         100000.0      0.48530579      0.51455688      0.51467896      0.0
 
+
+RadiationParticle
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The parameters below refer to the "RadiationParticle". This is an active
+particle implementation only. Only a single parameter is required to create
+the particle:
+
+``RadiationSourcesFileName`` (external)
+   Simple ascii text file name which sets the creation of this particle. All
+   that is required is an initial coordinate and a creation redshift. 
+   E.g. 0.5 0.5 0.5 40.0
+   This will create a (massless) particle at the coordinate (0.5, 0.5, 0.5) at
+   a redshift of 40.0. The parameters which subsequently control the behaviour
+   of the particle are all related to the radiation it produces and are
+   reproduced below but can also be found in the radiation parameters section.
+
+``PhotonsPerSecond`` (external)
+    For now only usable with the RadiationParticle infrastructure. Sets the
+    luminosity of the particle in number of photons per second. Default: 1e50
+``NumberOfEnergyBins`` (external)
+    The number of radiation bins that the SED will be sampled over. More bins
+    is more accurate but also more computationally expensive. Maximum = 255.
+``RadiationEnergyInBin`` (external)
+    The energy in Ev at the centre of each bin as a list of floats. E.g. 1.0
+    8.0 12.8 13.6
+``RadiationBinSED`` (external)
+    What fraction of the total energy (i.e. Photons) is emitted from which
+    bin. The sum of the fractions does not have to equal unity. E.g  0.2 0.3
+    0.3 0.2
+``NumberOfRadiationParticles`` (external)
+    The number of radiation particles required. Currently untested. 
+   
+
+
 Sink Formation and Feedback
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

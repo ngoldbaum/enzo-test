@@ -613,7 +613,7 @@ int SetDefaultGlobalValues(TopGridData &MetaData)
   RadiationSourcesFileName         = (char*) "RadiationSourcePositions.txt";
   PhotonsPerSecond                 = 0.0;        // s^-1
   NumberOfEnergyBins               = 1;
-  RadiationBin[0]                  = 13.61;
+  RadiationEnergyInBin[0]          = 13.61;
   RadiationBinSED[0]               = 1.0;
 
 

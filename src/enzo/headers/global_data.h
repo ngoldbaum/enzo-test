@@ -974,9 +974,9 @@ EXTERN int OutputWhenJetsHaveNotEjected;
 /* Star Class Radiation Particle IO (PARTICLE_TYPE_RAD) */
 EXTERN char *RadiationSourcesFileName;
 EXTERN int   NumberOfRadiationParticles;
-EXTERN float PhotonsPerSecond;
+EXTERN double PhotonsPerSecond;
 EXTERN int   NumberOfEnergyBins;
-EXTERN float RadiationBin[255];
+EXTERN float RadiationEnergyInBin[255];
 EXTERN float RadiationBinSED[255];
 
 /* Vorticity Calculations */

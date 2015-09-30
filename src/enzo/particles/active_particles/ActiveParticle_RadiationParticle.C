@@ -73,9 +73,10 @@ int ActiveParticleType_RadiationParticle::InitializeParticleType() {
   RadiationSED = new float[RadiationSEDNumberOfBins];
   for(int i = 0; i < RadiationSEDNumberOfBins; i++)
     {
-      RadiationEnergyBins[i] = RadiationBin[i];
+      RadiationEnergyBins[i] = RadiationEnergyInBin[i];
       RadiationSED[i] = RadiationBinSED[i];
     }
+  // Example of what values may look like
   // RadiationEnergyBins[1] = 25.0;
   // RadiationSED[1] = 100.0/RadiationSEDNumberOfBins;
   // RadiationEnergyBins[2] = 55.0;
@@ -138,10 +139,7 @@ int ActiveParticleType_RadiationParticle::BeforeEvolveLevel
   CosmologyComputeExpansionFactor(Time, &a, &dadt);
   current_redshift = (1 + InitialRedshift)/a - 1;
   CR = current_redshift;
-  // fprintf(stdout, "%s: RadiationParticle - z = %f\n", __FUNCTION__, 
-  // 	  current_redshift);
-  // fprintf(stdout, "%s: node->next = %p\n", __FUNCTION__, node->next);
-
+  
   RadiationParticleList = 
 	 ActiveParticleFindAll(LevelArray, &nParticles, RadiationParticleID);
 
@@ -155,8 +153,6 @@ int ActiveParticleType_RadiationParticle::BeforeEvolveLevel
       // creation time is given w.r.t. the current time
       if (current_redshift > creation_redshift) 
 	{
-	  //fprintf(stderr, "%s: Not ready to create Radiation source yet " \
-	  //	  " - please try again later\n", __FUNCTION__);
 	  node->Create = false;
 	}
       else
@@ -274,7 +270,7 @@ int ActiveParticleType_RadiationParticle::EvaluateFormation(grid *thisgrid_orig,
 	{	      
 	  mindex = (GridIndices[2] * GridDimension[1] + GridIndices[1]) * 
 	    GridDimension[0] + GridIndices[0];
-	  //printf("JR: mindex = %d\n", mindex); fflush(stdout);
+	  
 	  if (thisGrid->BaryonField[thisGrid->NumberOfBaryonFields][mindex] == 0.0) 
 	    {
 	      
@@ -305,7 +301,7 @@ int ActiveParticleType_RadiationParticle::EvaluateFormation(grid *thisgrid_orig,
 	      np->level = data.level;
 	      np->GridID = data.GridID;
 	      np->CurrentGrid = thisGrid;
-	      fprintf(stderr, "%s: A radiation particle inserted at (%lf,%lf,%lf) " \
+	      fprintf(stderr, "%s: A radiation particle inserted at (%"PSYM",%"PSYM",%"PSYM") " \
 		      "with v=(%f,%f,%f), m=%f, type=%ld, redshift = %f\n", __FUNCTION__,
 		      np->pos[0], 
 		      np->pos[1],

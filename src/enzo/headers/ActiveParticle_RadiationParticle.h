@@ -130,10 +130,6 @@ public:
 				 int ThisLevel, bool CallEvolvePhotons,
 				 int TotalActiveParticleCountPrevious[],
 				 int RadiationParticleID);
-    /* { */
-    /*   printf("JR: DEBUG: In %s now...\n", __FUNCTION__); */
-    /*   return SUCCESS; */
-    /* }; */
 
   /*
    * Perform distributed operations on the hierarchy.  This function can
@@ -171,9 +167,9 @@ public:
 	     if (RadiationParticleList[ipart]->IsARadiationSource(Time)) {
 	       ThisParticle =
 		 static_cast<ActiveParticleType_RadiationParticle*>(RadiationParticleList[ipart]);
-	       //fprintf(stdout, "In %s\n", __FUNCTION__);
-	       //ThisParticle->PrintInfo();
-	       //fprintf(stdout, "Done In %s\n", __FUNCTION__);
+	       fprintf(stdout, "In %s\n", __FUNCTION__);
+	       ThisParticle->PrintInfo();
+	       fprintf(stdout, "Done In %s\n", __FUNCTION__);
 	     }
 	   }
 	 }
@@ -237,7 +233,8 @@ public:
    * useful for storing the value of a runtime parameter, for example.
    */
   static int RadiationNumSources, RadiationSEDNumberOfBins;
-  static float *RadiationEnergyBins, *RadiationSED, RadiationLifetime, RadiationPhotonsPerSecond;
+  static float *RadiationEnergyBins, *RadiationSED, RadiationLifetime; 
+  static double RadiationPhotonsPerSecond;
   static InitData *Root;
 
   /*
