@@ -504,7 +504,7 @@ int ActiveParticleType_RadiationParticle::ReadRadiationParameterFile()
 		    }
 		  else
 		    {
-		      fprintf(stdout, "Particle Positions = (%f, %f, %f)\n", 
+		      fprintf(stdout, "Particle Positions = (%"PSYM", %"PSYM", %"PSYM")\n", 
 			      cnode->Position[0], cnode->Position[1], cnode->Position[2]);
 		      fprintf(stdout,"Particle will be created at z <= %f\n", cnode->Redshift);
 		    }
