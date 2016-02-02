@@ -64,7 +64,6 @@ public:
   float ReturnMetallicity(void) { return Metallicity; };
   int   ReturnType(void) { return type; };
   int   ReturnLevel(void) { return level; };
-  int   ReturnDestProcessor(void) { return dest_processor; };
   int   ReturnGridID(void) { return GridID; };
   grid *ReturnCurrentGrid(void) { return CurrentGrid; };
 
@@ -74,7 +73,6 @@ public:
   void  IncreaseLevel(int x) { level += x; };
   void  SetLevel(int i) { level = i; };
   void  SetGridID(int i) { GridID = i; };
-  void  SetDestProcessor(int i) { dest_processor = i; };
   void  AssignCurrentGrid(grid *a) { this->CurrentGrid = a; };
   void  AddMass(double dM) { Mass += dM; };
   void  AdjustMassByFactor(double factor) { Mass *= factor; };
@@ -126,7 +124,6 @@ protected:
   PINT Identifier;
   int level;
   int GridID;
-  int dest_processor;  // used for communication
   int type;
 
 private: /* Cannot be accessed by subclasses! */
@@ -141,13 +138,6 @@ private: /* Cannot be accessed by subclasses! */
 struct cmp_ap_grid {
   bool operator()(ActiveParticleType* const& a, ActiveParticleType* const& b) const {
     if (a->ReturnGridID() < b->ReturnGridID()) return true;
-    else return false;
-  }
-};
-
-struct cmp_ap_proc {
-  bool operator()(ActiveParticleType* const& a, ActiveParticleType* const& b) const {
-    if (a->ReturnDestProcessor() < b->ReturnDestProcessor()) return true;
     else return false;
   }
 };

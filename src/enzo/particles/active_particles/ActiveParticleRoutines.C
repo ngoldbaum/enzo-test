@@ -67,7 +67,6 @@ ActiveParticleType::ActiveParticleType(ActiveParticleType* part)
   GridID = part->GridID;
   type = part->type;
   CurrentGrid = part->CurrentGrid;
-  dest_processor = part->dest_processor;
 }
 
 ActiveParticleType::ActiveParticleType(grid *_grid, ActiveParticleFormationData &data)
@@ -84,7 +83,6 @@ ActiveParticleType::ActiveParticleType(grid *_grid, ActiveParticleFormationData 
   /* The correct indices are assigned in CommunicationUpdateActiveParticleCount 
      in ActiveParticleFinalize.*/
   Identifier = INT_UNDEFINED;
-  dest_processor = -1;
 }
 
 
@@ -143,7 +141,6 @@ void ActiveParticleType::operator=(ActiveParticleType *a)
   level = a->level;
   GridID = a->GridID;
   type = a->type;
-  dest_processor = -1;
   return;
 }
 
@@ -171,7 +168,6 @@ active_particle_class *ActiveParticleType::copy(void)
   a->level = level;
   a->GridID = GridID;
   a->type = type;
-  a->dest_processor = -1;
   return a;
 }
 

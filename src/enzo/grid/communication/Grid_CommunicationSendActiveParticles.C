@@ -174,7 +174,6 @@ int grid::CommunicationSendActiveParticles(grid *ToGrid, int ToProcessor, bool D
         for (i = 0; i < NumberOfActiveParticles; i++) {
           if (ActiveParticles[i]->ReturnType() == type) {
 	        SendParticles[position] = ActiveParticles[i];
-	        SendParticles[position]->SetDestProcessor(ToProcessor);
 	        SendParticles[position]->SetGridID(ToGrid->GetGridID());
 	        position++;
 	  } // for type

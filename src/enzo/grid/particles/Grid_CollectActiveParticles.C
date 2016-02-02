@@ -63,7 +63,6 @@ int grid::CollectActiveParticles(int GridNum, int* &NumberToMove,
     for (i = 0, n1 = StartIndex; i < NumberOfActiveParticles; i++, n1++) {
       List[n1] = ActiveParticles[i];
       List[n1]->SetGridID(GridNum);
-      List[n1]->SetDestProcessor(ProcessorNumber);
     } // ENDFOR stars
 
     StartIndex = n1;

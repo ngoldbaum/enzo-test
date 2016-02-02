@@ -50,7 +50,6 @@ int CommunicationShareActiveParticles(int *NumberToMove,
   CommunicationAllReduceValues(&GlobalNumberToMove, 1, MPI_SUM);
 #endif
   if (GlobalNumberToMove == 0) return SUCCESS;
-  //std::sort(SendList, SendList+TotalNumberToMove, cmp_ap_proc());
 
   SharedList = NULL;
 

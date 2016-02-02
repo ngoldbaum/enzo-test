@@ -152,7 +152,6 @@ int grid::TransferSubgridActiveParticles
 	if (subgrid[i] >= 0) {
 	  List[n1] = OldActiveParticles[i];
 	  proc = (KeepLocal) ? MyProcessorNumber : Subgrids[subgrid[i]]->ReturnProcessorNumber();
-	  List[n1]->SetDestProcessor(proc);
 	  List[n1]->SetGridID(subgrid[i]);
 	  // Increase the level if moving to a subgrid
 	  if (IncludeGhostZones == FALSE) {

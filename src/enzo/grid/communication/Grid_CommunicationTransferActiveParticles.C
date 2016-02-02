@@ -152,7 +152,6 @@ int grid::CommunicationTransferActiveParticles(grid* Grids[], int NumberOfGrids,
 	grid = ToGrid[i];
 	if (grid != ThisGridNum) {
 	  List[n1] = OldActiveParticles[i];
-	  List[n1]->SetDestProcessor(MyProcessorNumber);
 	  List[n1]->SetGridID(grid);
 	  n1++;
 	} else {

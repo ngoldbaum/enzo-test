@@ -134,8 +134,6 @@ class grid
   int NumberOfActiveParticles;
   float* ActiveParticleAcceleration[MAX_DIMENSION+1];
   ActiveParticleType **ActiveParticles;
-  class ParticleBufferHandler **GetParticleBuffers();
-  class ParticleBufferHandler **GetParticleBuffers(bool *mask);
   // At present this is synched up in CommunicationSyncNumberOfParticles.
   // Therefore below should be accurate as often as NumberOfParticles and
   // NumberOfActiveParticles are.
