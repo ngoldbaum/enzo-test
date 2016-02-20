@@ -628,9 +628,6 @@ int SetDefaultGlobalValues(TopGridData &MetaData)
   AccretingParticleRadiation = FALSE;
   AccretingParticleLuminosity = 1e47;
   
-  GMCParticleRNGSeed               = INT_UNDEFINED;
-  GMCParticleRNGCalls              = 0;
-
   NumberOfParticleAttributes       = INT_UNDEFINED;
   AddParticleAttributes            = FALSE;
   LastSupernovaTime                = FLOAT_UNDEFINED;
