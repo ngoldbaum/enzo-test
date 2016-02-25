@@ -147,11 +147,11 @@ active_particle_class** ActiveParticleType_AccretingParticle::MergeAccretingPart
     }
   }
 
-  delete [] groupsize;
+  free(groupsize);
   groupsize = NULL;
   for (i=0; i<*ngroups; i++)
-    delete [] grouplist[i];
-  delete [] grouplist;
+    free(grouplist[i]);
+  free(grouplist);
   grouplist = NULL;
 
   /* Loop over the grids and check if any of the merged particles have
