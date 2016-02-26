@@ -12,10 +12,6 @@
 /
 /  NOTE: communication modeled after the optimized version of 
 /        CommunicationTransferParticles.
-
-/  NOTE1: If MoveActiveParticles is false, the temp. memory is still 
-/         allocated and deallocated but nothing is moved.  This is a 
-/         bit inefficient but reduced the number of if-statements.
 /
 ************************************************************************/
 #ifdef USE_MPI
@@ -63,7 +59,7 @@ int CommunicationShareActiveParticles(int *NumberToMove, ActiveParticleType** &S
 int CommunicationCollectParticles(LevelHierarchyEntry *LevelArray[],
 				  int level, bool ParticlesAreLocal, 
 				  bool SyncNumberOfParticles, 
-				  bool MoveActiveParticles, int CollectMode)
+				  int CollectMode)
 {
 
   /* Create pointer arrays and count grids */
@@ -181,10 +177,9 @@ int CommunicationCollectParticles(LevelHierarchyEntry *LevelArray[],
 	     ZeroOnAllProcs);
 	}
 
-	if (MoveActiveParticles)
-	  GridHierarchyPointer[j]->GridData->TransferSubgridActiveParticles
-	    (SubgridPointers, NumberOfSubgrids, APNumberToMove, Zero, Zero, 
-	     APSendList, KeepLocal, ParticlesAreLocal, COPY_OUT, FALSE, TRUE); 
+    GridHierarchyPointer[j]->GridData->TransferSubgridActiveParticles
+      (SubgridPointers, NumberOfSubgrids, APNumberToMove, Zero, Zero, 
+       APSendList, KeepLocal, ParticlesAreLocal, COPY_OUT, FALSE, TRUE); 
 
 	GridHierarchyPointer[j]->GridData->TransferSubgridParticles
 	  (SubgridPointers, NumberOfSubgrids, NumberToMove, Zero, Zero, 
@@ -212,9 +207,8 @@ int CommunicationCollectParticles(LevelHierarchyEntry *LevelArray[],
 	    GridHierarchyPointer[j]->GridData->ReturnNumberOfActiveParticles() == 0)
 	  continue;
 
-	if (MoveActiveParticles)
-	  GridHierarchyPointer[j]->GridData->TransferSubgridActiveParticles
-	    (SubgridPointers, NumberOfSubgrids, APNumberToMove, Zero, Zero, 
+    GridHierarchyPointer[j]->GridData->TransferSubgridActiveParticles
+        (SubgridPointers, NumberOfSubgrids, APNumberToMove, Zero, Zero, 
 	     APSendList, KeepLocal, ParticlesAreLocal, COPY_OUT, FALSE, FALSE); 
 
 	GridHierarchyPointer[j]->GridData->TransferSubgridParticles
@@ -239,20 +233,17 @@ int CommunicationCollectParticles(LevelHierarchyEntry *LevelArray[],
 
       /* active particles second */
 
-      if (MoveActiveParticles) {
 	APSharedList = APSendList;
 	APNumberOfReceives = APNumberToMove[MyProcessorNumber];
 	std::sort(APSharedList, APSharedList+APNumberOfReceives, cmp_ap_grid());
-      }
 
     } // ENDIF local
     else {
 
       CommunicationShareParticles(NumberToMove, SendList, NumberOfReceives,
 				  SharedList);
-      if (MoveActiveParticles)
-	CommunicationShareActiveParticles
-	  (APNumberToMove, APSendList, APNumberOfReceives, APSharedList);
+      CommunicationShareActiveParticles(
+          APNumberToMove, APSendList, APNumberOfReceives, APSharedList);
 
     } // ENDELSE local
 
@@ -288,14 +279,13 @@ int CommunicationCollectParticles(LevelHierarchyEntry *LevelArray[],
 
     // Copy shared stars to grids, if any
 
-    if (MoveActiveParticles) {
-
     if (APNumberOfReceives > 0)
       for (j = 0; j < NumberOfSubgrids && jend < APNumberOfReceives; j++) {
-	while (APSharedList[jend]->ReturnGridID() <= j) {
-	  jend++;
-	  if (jend == APNumberOfReceives) break;
-	}
+        while (APSharedList[jend]->ReturnGridID() <= j) {
+          jend++;
+          if (jend == APNumberOfReceives) 
+            break;
+        }
 
 	SubgridPointers[j]->TransferSubgridActiveParticles
 	  (SubgridPointers, NumberOfSubgrids, APNumberToMove, jstart, jend,
@@ -304,8 +294,6 @@ int CommunicationCollectParticles(LevelHierarchyEntry *LevelArray[],
 	jstart = jend;
       } // ENDFOR grids
     
-    } // ENDIF MoveActiveParticles
-
     /************************************************************************
        If the particles and stars are only on the grid's host
        processor, set number of particles so everybody agrees. 
@@ -454,12 +442,10 @@ int CommunicationCollectParticles(LevelHierarchyEntry *LevelArray[],
       GridHierarchyPointer[j]->GridData->CollectParticles
 	(j, NumberToMove, StartNum, Zero, SendList, COPY_OUT);
 
-    if (MoveActiveParticles) {
-      StartNum = 0;
-      for (j = StartGrid; j < EndGrid; j++)
-	GridHierarchyPointer[j]->GridData->CollectActiveParticles
-	  (j, APNumberToMove, StartNum, Zero, APSendList, COPY_OUT);
-    } // ENDIF MoveActiveParticles
+    StartNum = 0;
+    for (j = StartGrid; j < EndGrid; j++)
+      GridHierarchyPointer[j]->GridData->CollectActiveParticles
+        (j, APNumberToMove, StartNum, Zero, APSendList, COPY_OUT);
 
     /* Share the particle move list */
 
@@ -468,10 +454,8 @@ int CommunicationCollectParticles(LevelHierarchyEntry *LevelArray[],
     CommunicationShareParticles(NumberToMove, SendList, NumberOfReceives,
 				SharedList);
 
-    if (MoveActiveParticles) {
-      CommunicationShareActiveParticles
-	(APNumberToMove, APSendList, APNumberOfReceives, APSharedList);
-    }
+    CommunicationShareActiveParticles(APNumberToMove, APSendList, 
+        APNumberOfReceives, APSharedList);
 
     /*******************************************************************/
     /****************** Copy particles back to grids. ******************/
@@ -511,8 +495,6 @@ int CommunicationCollectParticles(LevelHierarchyEntry *LevelArray[],
     jstart = 0;
     jend = 0;
     
-    if (MoveActiveParticles) {
-
     // Copy shared stars to grids, if any
     if (APNumberOfReceives > 0)
       for (j = StartGrid; j < EndGrid && jend < APNumberOfReceives; j++) {
@@ -526,8 +508,6 @@ int CommunicationCollectParticles(LevelHierarchyEntry *LevelArray[],
 
 	jstart = jend;
       } // ENDFOR grids
-
-    } // ENDIF MoveActiveParticles
 
 #ifdef DEBUG_CCP
     for (i = StartGrid; i < EndGrid; i++)
@@ -562,8 +542,7 @@ int CommunicationCollectParticles(LevelHierarchyEntry *LevelArray[],
 	if (MyProcessorNumber != 
 	    GridHierarchyPointer[i]->GridData->ReturnProcessorNumber()) {
 	  GridHierarchyPointer[i]->GridData->SetNumberOfParticles(0);
-	  if (MoveActiveParticles)
-	    GridHierarchyPointer[i]->GridData->SetNumberOfActiveParticles(0);
+      GridHierarchyPointer[i]->GridData->SetNumberOfActiveParticles(0);
 	}
     }
 
