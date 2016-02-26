@@ -86,32 +86,6 @@ ActiveParticleType::ActiveParticleType(grid *_grid, ActiveParticleFormationData 
 }
 
 
-ActiveParticleType::ActiveParticleType(grid *_grid, int _id, int _level)
-{
-
-  assert(_id < _grid->NumberOfParticles);
-
-  int dim;
-  for (dim = 0; dim < MAX_DIMENSION; dim++) {
-    pos[dim] = _grid->ParticlePosition[dim][_id];
-    vel[dim] = _grid->ParticleVelocity[dim][_id];
-  }
-  CurrentGrid = _grid;
-  level = _level;
-
-  GridID = _grid->ID;
-  type = _grid->ParticleType[_id];
-  Identifier = _grid->ParticleNumber[_id];
-  Mass = (double)(_grid->ParticleMass[_id]);
-
-
-  // No more attributes.  Everything stored in active particles.
-//  BirthTime = _grid->ParticleAttribute[0][_id];
-//  DynamicalTime = _grid->ParticleAttribute[1][_id];
-//  Metallicity = _grid->ParticleAttribute[2][_id];
-  this->ConvertMassToSolar();
-}
-
 /* No need to delete the accretion arrays because the pointers are
    stored in the copies located in the grid class. */
 
