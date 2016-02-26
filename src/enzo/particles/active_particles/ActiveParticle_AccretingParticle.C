@@ -387,8 +387,8 @@ int ActiveParticleType_AccretingParticle::Accrete(int nParticles, ActiveParticle
 
       float AccretionRate = 0;
 
-      if (FeedbackZone->AccreteOntoAccretingParticle(&ParticleList[i],
-			      AccretionRadius*dx,&AccretionRate) == FAIL)
+      if (FeedbackZone->AccreteOntoAccretingParticle(ParticleList[i],
+			      AccretionRadius*dx, &AccretionRate) == FAIL)
 	return FAIL;
 
       // No need to communicate the accretion rate to the other CPUs since this particle is already local.
