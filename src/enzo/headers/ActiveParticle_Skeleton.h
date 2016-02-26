@@ -34,7 +34,16 @@ public:
       // Copy values of instance members using data from the particle instance
       // that is passed as an argument to this function
     }
-
+  
+  // Needed to Create a copy of a particle when only a pointer to the base
+  // class is available.
+  ActiveParticleType* clone() 
+    {
+      return static_cast<ActiveParticleType*>(
+          new ActiveParticleType_Skeleton(this)
+        );
+    }
+  
 
   /*
    * Run an algorithm to determine whether a particle forms in a grid.

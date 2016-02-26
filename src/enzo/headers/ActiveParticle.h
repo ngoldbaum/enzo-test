@@ -49,7 +49,7 @@ public:
   ActiveParticleType(void);
   ActiveParticleType(grid *_grid, ActiveParticleFormationData &data);
   ActiveParticleType(ActiveParticleType* part);
-  ~ActiveParticleType(void);
+  virtual ~ActiveParticleType(void);
 
   void operator=(ActiveParticleType *a);
 
@@ -106,6 +106,7 @@ public:
   virtual int GetEnabledParticleID(int id = -1) {
     ENZO_FAIL("Not implemented.");
   };
+  virtual ActiveParticleType* clone(void) = 0;
 
 #ifdef TRANSFER
   RadiationSourceEntry* RadiationSourceInitialize(void);

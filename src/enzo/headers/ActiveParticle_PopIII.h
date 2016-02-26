@@ -35,6 +35,18 @@ public:
   ActiveParticleType_PopIII(void) : ActiveParticleType() {
     Lifetime = 0; 
   };
+  ActiveParticleType_PopIII(ActiveParticleType_PopIII* part) : 
+      ActiveParticleType(static_cast<ActiveParticleType*>(part)) {
+    this->Lifetime = part->Lifetime;
+  };
+  ActiveParticleType* clone() {
+    return static_cast<ActiveParticleType*>(
+        new ActiveParticleType_PopIII(this)
+      );
+  }
+
+  
+
   static int EvaluateFormation(grid *thisgrid_orig, ActiveParticleFormationData &supp_data);
   static void DescribeSupplementalData(ActiveParticleFormationDataFlags &flags);
   static int EvaluateFeedback(grid *thisgrid_orig, ActiveParticleFormationData &data);

@@ -30,6 +30,15 @@ class ActiveParticleType_SpringelHernquist : public ActiveParticleType
 public:
   // Constructors
   ActiveParticleType_SpringelHernquist(void) : ActiveParticleType() {};
+  ActiveParticleType_SpringelHernquist(
+      ActiveParticleType_SpringelHernquist* part) : 
+    ActiveParticleType(static_cast<ActiveParticleType*>(part)) {};
+  ActiveParticleType* clone() {
+    return static_cast<ActiveParticleType*>(
+        new ActiveParticleType_SpringelHernquist(this)
+      );
+  };
+
 
   // Static members
   static int EvaluateFormation(grid *thisgrid_orig, ActiveParticleFormationData &data);

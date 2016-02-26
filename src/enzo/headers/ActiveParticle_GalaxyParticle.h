@@ -36,7 +36,11 @@ public:
     Radius = part->Radius;
     initialized = part->initialized;
   };
-
+  ActiveParticleType* clone() {
+    return static_cast<ActiveParticleType*>(
+        new ActiveParticleType_GalaxyParticle(this)
+      );
+  }
   // Static members
   static int EvaluateFormation(grid *thisgrid_orig, ActiveParticleFormationData &data);
   static void DescribeSupplementalData(ActiveParticleFormationDataFlags &flags);

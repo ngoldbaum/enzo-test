@@ -20,7 +20,14 @@ class ActiveParticleType_Kravtsov : public ActiveParticleType
 public:
   // Constructors
   ActiveParticleType_Kravtsov(void) : ActiveParticleType() {};
+  ActiveParticleType_Kravtsov(ActiveParticleType_Kravtsov* part) :
+    ActiveParticleType(static_cast<ActiveParticleType*>(part)) {};
 
+  ActiveParticleType* clone() {
+    return static_cast<ActiveParticleType*>(
+        new ActiveParticleType_Kravtsov(this)
+      );
+  }
   // Static members
   static int EvaluateFormation(grid *thisgrid_orig, ActiveParticleFormationData &supp_data);
   static void DescribeSupplementalData(ActiveParticleFormationDataFlags &flags);

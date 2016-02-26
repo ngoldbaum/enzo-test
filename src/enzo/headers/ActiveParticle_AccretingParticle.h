@@ -44,6 +44,11 @@ public:
     AccretionRate = part->AccretionRate;
   };
   static int EvaluateFormation(grid *thisgrid_orig, ActiveParticleFormationData &data);
+  ActiveParticleType* clone() {
+    return static_cast<ActiveParticleType*>(
+        new ActiveParticleType_AccretingParticle(this)
+      );
+  };
   static void DescribeSupplementalData(ActiveParticleFormationDataFlags &flags);
   static int EvaluateFeedback(grid *thisgrid_orig, ActiveParticleFormationData &data);
   template <class active_particle_class>
