@@ -63,14 +63,19 @@ public:
   static int SetFlaggingField(LevelHierarchyEntry *LevelArray[], int level, int TopGridDims[], int ActiveParticleID);
   // Galaxy Particle helper routines.
   static int SubtractMassFromGrid(int nParticles,
-    ActiveParticleType** ParticleList, LevelHierarchyEntry *LevelArray[],
-    FLOAT dx, int ThisLevel);
+      ActiveParticleList<ActiveParticleType>& ParticleList, 
+      LevelHierarchyEntry *LevelArray[],
+      FLOAT dx, int ThisLevel);
   static int InitializeParticleType(void);
-  static int GalaxyParticleFeedback(int nParticles, ActiveParticleType** ParticleList,
+  static int GalaxyParticleFeedback(
+             int nParticles, 
+             ActiveParticleList<ActiveParticleType>& ParticleList,
 		     FLOAT dx, LevelHierarchyEntry *LevelArray[], int ThisLevel,
 		     FLOAT period[3]);
   
-  static int GalaxyParticleGravity(int nParticles, ActiveParticleType** ParticleList,
+  static int GalaxyParticleGravity(
+             int nParticles, 
+             ActiveParticleList<ActiveParticleType>& ParticleList,
 		     FLOAT dx, LevelHierarchyEntry *LevelArray[], int ThisLevel,
 		     FLOAT period[3]);
   
@@ -86,8 +91,9 @@ public:
 
 int GenerateGridArray(LevelHierarchyEntry *LevelArray[], int level,
 		      HierarchyEntry **Grids[]);
-int AssignActiveParticlesToGrids(ActiveParticleType** ParticleList, int nParticles, 
-				 LevelHierarchyEntry *LevelArray[]); 
+int AssignActiveParticlesToGrids(
+    ActiveParticleList<ActiveParticleType>& ParticleList, int nParticles, 
+    LevelHierarchyEntry *LevelArray[]); 
 
 template <class active_particle_class>
 int ActiveParticleType_GalaxyParticle::BeforeEvolveLevel(HierarchyEntry *Grids[], TopGridData *MetaData,
@@ -115,9 +121,10 @@ int ActiveParticleType_GalaxyParticle::AfterEvolveLevel(HierarchyEntry *Grids[],
 
       /* Generate a list of all galaxy particles in the simulation box */
       int i,nParticles;
-      ActiveParticleType** ParticleList = NULL;
+      ActiveParticleList<ActiveParticleType> ParticleList;
 
-      ParticleList = ActiveParticleFindAll(LevelArray, &nParticles, GalaxyParticleID);
+      ActiveParticleFindAll(LevelArray, &nParticles, GalaxyParticleID, 
+          ParticleList);
 
       /* Return if there are no galaxy particles */
       
@@ -143,8 +150,6 @@ int ActiveParticleType_GalaxyParticle::AfterEvolveLevel(HierarchyEntry *Grids[],
         dx, LevelArray, ThisLevel, period) == FAIL)
 	ENZO_FAIL("Galaxy Particle Feedback failed. \n");
 
-    delete [] ParticleList;
-
     }
 
   return SUCCESS;
@@ -162,9 +167,10 @@ int ActiveParticleType_GalaxyParticle::DepositMass(HierarchyEntry *Grids[], TopG
 
       /* Generate a list of all galaxy particles in the simulation box */
       int i,nParticles;
-      ActiveParticleType** ParticleList = NULL;
+      ActiveParticleList<ActiveParticleType> ParticleList;
 
-      ParticleList = ActiveParticleFindAll(LevelArray, &nParticles, GalaxyParticleID);
+      ActiveParticleFindAll(LevelArray, &nParticles, GalaxyParticleID, 
+          ParticleList);
 
       /* Return if there are no galaxy particles */
       
@@ -189,8 +195,6 @@ int ActiveParticleType_GalaxyParticle::DepositMass(HierarchyEntry *Grids[], TopG
       if (GalaxyParticleGravity(nParticles, ParticleList,
         dx, LevelArray, ThisLevel, period) == FAIL)
 	ENZO_FAIL("Galaxy Particle Gravity failed. \n");
-
-    delete [] ParticleList;
 
     }
 

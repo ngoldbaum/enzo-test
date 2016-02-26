@@ -93,8 +93,8 @@ int grid::UpdateParticlePosition(float TimeStep, int OffProcessorUpdate)
       apvel = ActiveParticles[i]->ReturnVelocity();
 
       for (dim = 0; dim < GridRank; dim++)
-	appos[dim] += Coefficient*apvel[dim];
-    
+        appos[dim] += Coefficient*apvel[dim];
+
       ActiveParticles[i]->SetPosition(appos);
     }
 

@@ -49,9 +49,6 @@ int grid::ActiveParticleHandler(HierarchyEntry* SubgridPointer, int level,
   if (NumberOfBaryonFields == 0)
     return SUCCESS;
 
-  /*fprintf(stderr, "G_APH: Currently have %"ISYM"\n",
-          this->NumberOfActiveParticles);*/
- 
   /* First, set under_subgrid field */
   HierarchyEntry *Subgrid;
   this->ZeroSolutionUnderSubgrid(NULL, ZERO_UNDER_SUBGRID_FIELD);
@@ -96,8 +93,7 @@ int grid::ActiveParticleHandler(HierarchyEntry* SubgridPointer, int level,
    * array */
 
   if (NumberOfNewParticles > 0) {
-    this->AddActiveParticles(supplemental_data.NewParticles,
-			     NumberOfNewParticles);
+    this->AddActiveParticles(supplemental_data.NewParticles, 0, NumberOfNewParticles);
     if (debug2)
       printf("Creating %d new active particles\n", NumberOfNewParticles);
   }

@@ -61,18 +61,21 @@ int grid::MoveSubgridActiveParticles(int NumberOfSubgrids, grid* ToGrids[],
   int i0 = 0, j0 = 0, k0 = 0;
   int NumberToMoveLocal = 0;
   ActiveParticleType *np;
-  ActiveParticleType **OldParticles = NULL;
+  ActiveParticleList<ActiveParticleType> *OldParticles = NULL;
 
   if (MyProcessorNumber == ProcessorNumber) {
     for (i = 0; i < NumberOfActiveParticles; i++) {
 
       /* Compute index of particle position. */
 
-      i0 = int((ActiveParticles[i]->pos[0] - CellLeftEdge[0][0])/CellWidth[0][0]);
+      i0 = int((this->ActiveParticles[i]->pos[0] - CellLeftEdge[0][0]) / 
+          CellWidth[0][0]);
       if (GridRank > 1)
-	j0 = int((ActiveParticles[i]->pos[1] - CellLeftEdge[1][0])/CellWidth[1][0]);
+        j0 = int((this->ActiveParticles[i]->pos[1] - CellLeftEdge[1][0]) / 
+            CellWidth[1][0]);
       if (GridRank > 2)
-	k0 = int((ActiveParticles[i]->pos[2] - CellLeftEdge[2][0])/CellWidth[2][0]);
+        k0 = int((this->ActiveParticles[i]->pos[2] - CellLeftEdge[2][0]) / 
+            CellWidth[2][0]);
 
       i0 = max(min(GridEndIndex[0], i0), GridStartIndex[0]);
       j0 = max(min(GridEndIndex[1], j0), GridStartIndex[1]);
@@ -98,30 +101,25 @@ int grid::MoveSubgridActiveParticles(int NumberOfSubgrids, grid* ToGrids[],
     for (dim = 0; dim < GridRank; dim++)
       MassIncrease *= RefinementFactors[dim];
 
-    OldParticles = this->ActiveParticles;
-    delete [] this->ActiveParticles;
-    this->ActiveParticles = 
-      new ActiveParticleType*[NumberOfActiveParticles-NumberToMoveLocal]();
-    
     index = 0;
     for (i = 0; i < NumberOfActiveParticles; i++) {
       if (subgrid[i] >= 0) {
-	np = OldParticles[i];
-	np->CurrentGrid = ToGrids[subgrid[i]];
-	np->IncreaseLevel();
-	np->AdjustMassByFactor(MassIncrease);
-	np->GridID = ToGrids[subgrid[i]]->ID;
-	int Actual;
-	ToGrids[subgrid[i]]->AddActiveParticles(&np, 1);
+        np = this->ActiveParticles[i]->clone();
+        this->ActiveParticles.erase(i);
 
-	this->NumberOfActiveParticles--;
-	ToGrids[subgrid[i]]->NumberOfActiveParticles++;
-	NumberToMove[subgrid[i]]++;
+        np->CurrentGrid = ToGrids[subgrid[i]];
+        np->IncreaseLevel();
+        np->AdjustMassByFactor(MassIncrease);
+        np->GridID = ToGrids[subgrid[i]]->ID;
+        
+        ToGrids[subgrid[i]]->AddActiveParticle(np);
+        delete np;
 
+        this->NumberOfActiveParticles--;
+        ToGrids[subgrid[i]]->NumberOfActiveParticles++;
+        NumberToMove[subgrid[i]]++;
+        
       } // end: if (subgrid[i] >= 0)
-      else {
-	this->ActiveParticles[index++] = OldParticles[i];
-      }
 
     }  // end: loop over stars
     
@@ -139,14 +137,14 @@ int grid::MoveSubgridActiveParticles(int NumberOfSubgrids, grid* ToGrids[],
   int sg;
   for (sg = 0; sg < NumberOfSubgrids; sg++)
     if ((MyProcessorNumber == ProcessorNumber ||
-         MyProcessorNumber == ToGrids[sg]->ProcessorNumber) &&
-	ProcessorNumber != ToGrids[sg]->ProcessorNumber)
+            MyProcessorNumber == ToGrids[sg]->ProcessorNumber) &&
+        ProcessorNumber != ToGrids[sg]->ProcessorNumber)
       if (NumberToMove[sg] > 0) {
-	if (this->CommunicationSendActiveParticles(ToGrids[sg], 
-		  ToGrids[sg]->ProcessorNumber) == FAIL) {
-	  ENZO_FAIL("Error in grid->CommunicationSendStars.\n");
-
-	}
+        if (this->CommunicationSendActiveParticles(ToGrids[sg], 
+                ToGrids[sg]->ProcessorNumber) == FAIL) {
+          ENZO_FAIL("Error in grid->CommunicationSendStars.\n");
+          
+        }
       }
 
   delete[] NumberToMove;

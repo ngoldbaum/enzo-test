@@ -332,7 +332,6 @@ void ActiveParticleType::ConstructData(grid *_grid,
   //printf("Star type \n");
 
   data.MaxNumberOfNewParticles = size;
-  data.NewParticles = new ActiveParticleType*[size];
 
   return;
 }
@@ -354,7 +353,7 @@ void ActiveParticleType::DestroyData(grid *_grid,
     /* We convert back from Fractions to Values */
     _grid->ConvertColorFieldsFromFractions();
 
-    delete [] data.NewParticles;
+    data.NewParticles.clear();
 
     /* We don't need to reset anything else. */
 
@@ -382,6 +381,7 @@ void ActiveParticleType::SetupBaseParticleAttributes(
     handlers.push_back(new Handler<ap, PINT, &ap::Identifier>("identifier"));
     handlers.push_back(new Handler<ap, int, &ap::level>("level"));
     handlers.push_back(new Handler<ap, int, &ap::GridID>("GridID"));
+    handlers.push_back(new Handler<ap, int, &ap::WillDelete>("WillDelete"));
 }
 
 void ActiveParticleType::OutputPositionInformation()

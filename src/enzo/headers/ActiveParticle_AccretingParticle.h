@@ -39,18 +39,21 @@ public:
   ActiveParticleType_AccretingParticle(void) : ActiveParticleType() {
     AccretionRate = 0;
   };
-  ActiveParticleType_AccretingParticle(ActiveParticleType_AccretingParticle* part) :
+  ActiveParticleType_AccretingParticle(
+      ActiveParticleType_AccretingParticle* part) :
     ActiveParticleType(static_cast<ActiveParticleType*>(part)) {
     AccretionRate = part->AccretionRate;
   };
-  static int EvaluateFormation(grid *thisgrid_orig, ActiveParticleFormationData &data);
   ActiveParticleType* clone() {
     return static_cast<ActiveParticleType*>(
         new ActiveParticleType_AccretingParticle(this)
       );
   };
+  static int EvaluateFormation(
+      grid *thisgrid_orig, ActiveParticleFormationData &data);
   static void DescribeSupplementalData(ActiveParticleFormationDataFlags &flags);
-  static int EvaluateFeedback(grid *thisgrid_orig, ActiveParticleFormationData &data);
+  static int EvaluateFeedback(
+      grid *thisgrid_orig, ActiveParticleFormationData &data);
   template <class active_particle_class>
     static int BeforeEvolveLevel(HierarchyEntry *Grids[], TopGridData *MetaData,
 				 int NumberOfGrids, LevelHierarchyEntry *LevelArray[], 
@@ -66,7 +69,11 @@ public:
     static int DepositMass(HierarchyEntry *Grids[], TopGridData *MetaData,
 				int NumberOfGrids, LevelHierarchyEntry *LevelArray[], 
 				int ThisLevel, int GalaxyParticleID) {return SUCCESS; };
-  static int SetFlaggingField(LevelHierarchyEntry *LevelArray[], int level, int TopGridDims[], int ActiveParticleID);
+  static int SetFlaggingField(
+      LevelHierarchyEntry *LevelArray[], 
+      int level, 
+      int TopGridDims[], 
+      int ActiveParticleID);
   static int InitializeParticleType();
   ENABLED_PARTICLE_ID_ACCESSOR
   bool IsARadiationSource(FLOAT Time);
@@ -74,13 +81,16 @@ public:
   // sink helper routines
 
   template <class active_particle_class>
-    static active_particle_class** MergeAccretingParticles(int *nParticles, ActiveParticleType** ParticleList, 
-							   FLOAT LinkingLength,int *ngroups, 
-							   LevelHierarchyEntry *LevelArray[], int ThisLevel);
+  static void MergeAccretingParticles(
+      int *nParticles, ActiveParticleList<ActiveParticleType>& ParticleList, 
+      FLOAT LinkingLength,int *ngroups, 
+      LevelHierarchyEntry *LevelArray[], int ThisLevel, 
+      ActiveParticleList<active_particle_class>& MergedParticles);
 
-  static int Accrete(int nParticles, ActiveParticleType** ParticleList,
-		     int AccretionRadius, FLOAT dx, 
-		     LevelHierarchyEntry *LevelArray[], int ThisLevel);
+  static int Accrete(int nParticles, 
+      ActiveParticleList<ActiveParticleType>& ParticleList,
+      int AccretionRadius, FLOAT dx, 
+      LevelHierarchyEntry *LevelArray[], int ThisLevel);
 
   static int AccreteOntoAccretingParticle(grid* AccretionZone, 
 					  ActiveParticleType_AccretingParticle* ThisParticle,
@@ -103,9 +113,10 @@ int GenerateGridArray(LevelHierarchyEntry *LevelArray[], int level,
 		      HierarchyEntry **Grids[]);
 
 template <class active_particle_class>
-active_particle_class** ActiveParticleType_AccretingParticle::MergeAccretingParticles
-(int *nParticles, ActiveParticleType** ParticleList, FLOAT LinkingLength, 
- int *ngroups, LevelHierarchyEntry *LevelArray[], int ThisLevel)
+void ActiveParticleType_AccretingParticle::MergeAccretingParticles(
+    int *nParticles, ActiveParticleList<ActiveParticleType>& ParticleList, 
+    FLOAT LinkingLength, int *ngroups, LevelHierarchyEntry *LevelArray[], 
+    int ThisLevel, ActiveParticleList<active_particle_class>& MergedParticles)
 {
   int i,j;
   int dim;
@@ -113,7 +124,6 @@ active_particle_class** ActiveParticleType_AccretingParticle::MergeAccretingPart
   FLOAT* tempPos = NULL;
   int *groupsize = NULL;
   int **grouplist = NULL;
-  active_particle_class **MergedParticles = NULL;
 
   HierarchyEntry** LevelGrids = NULL;
 
@@ -130,27 +140,32 @@ active_particle_class** ActiveParticleType_AccretingParticle::MergeAccretingPart
 
   /* Find mergeable groups using an FOF search */
 
-  *ngroups = FofList((*nParticles), ParticleCoordinates, LinkingLength, GroupNumberAssignment, &groupsize, &grouplist);
+  *ngroups = FofList((*nParticles), ParticleCoordinates, LinkingLength, 
+      GroupNumberAssignment, &groupsize, &grouplist);
   
-  MergedParticles = new active_particle_class*[*ngroups]();
+  MergedParticles.reserve(*ngroups);
   
   /* Merge the mergeable groups */
 
   for (i=0; i<*ngroups; i++) {
-    MergedParticles[i] = static_cast<active_particle_class*>(ParticleList[grouplist[i][0]]);
+    MergedParticles.copy_and_insert(
+        *(static_cast<active_particle_class*>(ParticleList[grouplist[i][0]])));
     if (groupsize[i] != 1) {
       for (j=1; j<groupsize[i]; j++) {
-	MergedParticles[i]->Merge(static_cast<active_particle_class*>(ParticleList[grouplist[i][j]]));
-	if (ParticleList[grouplist[i][j]]->DisableParticle(LevelArray,MergedParticles[i]->
-							   ReturnCurrentGrid()->ReturnProcessorNumber()) == FAIL)
-	  ENZO_FAIL("MergeAccretingParticles: DisableParticle failed!\n");
-	if (NumberOfProcessors > 1) {
-	  delete ParticleList[grouplist[i][j]];
-	  ParticleList[grouplist[i][j]] = NULL;
-	}
+        MergedParticles[i]->Merge(
+            static_cast<active_particle_class*>(ParticleList[grouplist[i][j]]));
+        if (ParticleList[grouplist[i][j]]->DisableParticle(
+                LevelArray, 
+                MergedParticles[i]->ReturnCurrentGrid()->ReturnProcessorNumber()
+              ) == FAIL)
+        {
+          ENZO_FAIL("MergeAccretingParticles: DisableParticle failed!\n");
+        }
       }
     }
   }
+  
+  ParticleList.clear();
 
   free(groupsize);
   groupsize = NULL;
@@ -166,27 +181,32 @@ active_particle_class** ActiveParticleType_AccretingParticle::MergeAccretingPart
   int NewGrid = -1;
 
   for (i = 0; i < *ngroups; i++) {
-    if (MergedParticles[i]->ReturnCurrentGrid()->PointInGrid(MergedParticles[i]->ReturnPosition()) == false) {
+    if (MergedParticles[i]->ReturnCurrentGrid()->PointInGrid(
+            MergedParticles[i]->ReturnPosition()) == false) {
       // Find the grid to transfer to 
       for (j = 0; j < NumberOfGrids; j++) {
-	if (LevelGrids[j]->GridData->PointInGrid(MergedParticles[i]->ReturnPosition())) {
-	  NewGrid = j;
-	  break;
-	}
+        if (LevelGrids[j]->GridData->PointInGrid(
+                MergedParticles[i]->ReturnPosition())) {
+          NewGrid = j;
+          break;
+        }
       }
       if (NewGrid == -1)
-	ENZO_FAIL("Cannot assign particle to grid after merging!\n");
+        ENZO_FAIL("Cannot assign particle to grid after merging!\n");
       int OldProc = MergedParticles[i]->CurrentGrid->ReturnProcessorNumber();
-      active_particle_class *temp = new active_particle_class(MergedParticles[i]);
-      MergedParticles[i]->DisableParticle(LevelArray,LevelGrids[NewGrid]->GridData->ReturnProcessorNumber()); 
-      if (LevelGrids[NewGrid]->GridData->AddActiveParticle(static_cast<ActiveParticleType*>(temp)) == FAIL)
+      active_particle_class *temp = static_cast<active_particle_class*>(
+          MergedParticles[i]->clone());
+      MergedParticles[i]->DisableParticle(LevelArray, 
+          LevelGrids[NewGrid]->GridData->ReturnProcessorNumber()); 
+      if (LevelGrids[NewGrid]->GridData->AddActiveParticle(
+              static_cast<ActiveParticleType*>(temp)) == FAIL)
       	ENZO_FAIL("Active particle grid assignment failed!\n");
       if (MyProcessorNumber == OldProc) {
-	delete MergedParticles[i];
-	MergedParticles[i] = new active_particle_class(temp);
+        MergedParticles.erase(i);
+        MergedParticles.insert(*temp);
       }
       else if (MyProcessorNumber != temp->CurrentGrid->ReturnProcessorNumber())
-	delete temp;
+        delete temp;
       MergedParticles[i]->AssignCurrentGrid(LevelGrids[NewGrid]->GridData);
     }
   }
@@ -195,21 +215,22 @@ active_particle_class** ActiveParticleType_AccretingParticle::MergeAccretingPart
 
   *nParticles = *ngroups;
 
-  return MergedParticles;
 }
 
 
 int GenerateGridArray(LevelHierarchyEntry *LevelArray[], int level,
 		      HierarchyEntry **Grids[]);
  
-int AssignActiveParticlesToGrids(ActiveParticleType** ParticleList, int nParticles, 
-				 LevelHierarchyEntry *LevelArray[]); 
+int AssignActiveParticlesToGrids(
+    ActiveParticleList<ActiveParticleType>& ParticleList, int nParticles, 
+    LevelHierarchyEntry *LevelArray[]); 
 
 template <class active_particle_class>
-int ActiveParticleType_AccretingParticle::AfterEvolveLevel(HierarchyEntry *Grids[], TopGridData *MetaData,
-							   int NumberOfGrids, LevelHierarchyEntry *LevelArray[], 
-							   int ThisLevel, int TotalStarParticleCountPrevious[],
-							   int AccretingParticleID)
+int ActiveParticleType_AccretingParticle::AfterEvolveLevel(
+    HierarchyEntry *Grids[], TopGridData *MetaData,
+    int NumberOfGrids, LevelHierarchyEntry *LevelArray[], 
+    int ThisLevel, int TotalStarParticleCountPrevious[],
+    int AccretingParticleID)
 {
 
   /* Accreting particles live on the maximum refinement level.  If we are on a lower level, this does not concern us */
@@ -219,91 +240,88 @@ int ActiveParticleType_AccretingParticle::AfterEvolveLevel(HierarchyEntry *Grids
 
       /* Generate a list of all sink particles in the simulation box */
       int i,nParticles,NumberOfMergedParticles;
-      ActiveParticleType** ParticleList = NULL;
+      ActiveParticleList<ActiveParticleType> ParticleList;
 
-      ParticleList = ActiveParticleFindAll(LevelArray, &nParticles, AccretingParticleID);
+      ActiveParticleFindAll(LevelArray, &nParticles, AccretingParticleID,
+        ParticleList);
 
       /* Return if there are no accreting particles */
       
       if (nParticles == 0)
-	return SUCCESS;
+        return SUCCESS;
 
       /* Calculate CellWidth on maximum refinement level */
 
       // This assumes a cubic box and may not work for simulations with MinimumMassForRefinementLevelExponent
       FLOAT dx = (DomainRightEdge[0] - DomainLeftEdge[0]) /
-	(MetaData->TopGridDims[0]*POW(FLOAT(RefineBy),FLOAT(MaximumRefinementLevel)));
+        (MetaData->TopGridDims[0]*POW(FLOAT(RefineBy),FLOAT(MaximumRefinementLevel)));
 
       /* Do Merging   */
 
-      active_particle_class **MergedParticles = NULL;
+      ActiveParticleList<active_particle_class> MergedParticles;
       
       /* Generate new merged list of sink particles */
       
-      MergedParticles = MergeAccretingParticles
-	<active_particle_class>(&nParticles, ParticleList, LinkingLength*dx,
-				&NumberOfMergedParticles,LevelArray,ThisLevel);
+      MergeAccretingParticles<active_particle_class>(
+          &nParticles, ParticleList, LinkingLength*dx,
+          &NumberOfMergedParticles, LevelArray, ThisLevel, MergedParticles);
 
-      delete [] ParticleList;
-   
+      ParticleList.clear();
+
       // Do merging twice to catch pathological cases where merging
       // leaves multiple sinks inside the same accretion zone.
 
-      ParticleList = new ActiveParticleType*[NumberOfMergedParticles];
-
       for (i = 0; i<NumberOfMergedParticles; i++)
-	ParticleList[i] = static_cast<ActiveParticleType*>(MergedParticles[i]);
+      {
+        ParticleList.copy_and_insert(
+            *(static_cast<ActiveParticleType*>(MergedParticles[i])));
+      }
 
-      delete [] MergedParticles;
+      MergedParticles.clear();
 
-      MergedParticles = MergeAccretingParticles
-	<active_particle_class>(&nParticles, ParticleList, LinkingLength*dx,
-				&NumberOfMergedParticles,LevelArray,ThisLevel);
-
-      delete [] ParticleList;
-
+      MergeAccretingParticles<active_particle_class>(
+          &nParticles, ParticleList, LinkingLength*dx,
+          &NumberOfMergedParticles, LevelArray, ThisLevel, MergedParticles);
+      
+      ParticleList.clear();
+      
       if (debug)
-	printf("Number of particles after merging: %"ISYM"\n",NumberOfMergedParticles);
-
+        printf("Number of particles after merging: %"ISYM"\n",NumberOfMergedParticles);
+      
       /* Assign local particles to grids */
- 
-      ParticleList = new ActiveParticleType*[NumberOfMergedParticles];
-
+      
+      ParticleList.reserve(NumberOfMergedParticles);
+      
       // need to use a bit of redirection because C++ pointer arrays have
       // trouble with polymorphism
       for (i = 0; i<NumberOfMergedParticles; i++)
-	ParticleList[i] = static_cast<ActiveParticleType*>(MergedParticles[i]);
+      {
+        ParticleList.copy_and_insert(
+            *(static_cast<ActiveParticleType*>(MergedParticles[i])));
+      }
 
-      if (AssignActiveParticlesToGrids(ParticleList,NumberOfMergedParticles, LevelArray) == FAIL)
-	return FAIL;
-
-      delete [] ParticleList;
-
-      for (i = 0; i<NumberOfMergedParticles; i++)
-	if (MergedParticles[i]->ReturnCurrentGrid()->ReturnProcessorNumber() != MyProcessorNumber) {
-	  delete MergedParticles[i];
-	  MergedParticles[i] = NULL;
-	}
-
-      delete [] MergedParticles;
+      if (AssignActiveParticlesToGrids(ParticleList, NumberOfMergedParticles, 
+              LevelArray) == FAIL)
+        return FAIL;
+      
+      ParticleList.clear();
+      MergedParticles.clear();
       
       /* Regenerate the global active particle list */
       
-      ParticleList = ActiveParticleFindAll(LevelArray, &nParticles, AccretingParticleID);
+      ActiveParticleFindAll(LevelArray, &nParticles, AccretingParticleID, 
+        ParticleList);
 
       /* Do accretion */
-      if (Accrete(nParticles,ParticleList,AccretionRadius,dx,LevelArray,ThisLevel) == FAIL)
-	ENZO_FAIL("Accreting Particle accretion failed. \n");
+      if (Accrete(nParticles, ParticleList, AccretionRadius, dx, LevelArray, 
+              ThisLevel) == FAIL)
+        ENZO_FAIL("Accreting Particle accretion failed. \n");
       
-      for (i = 0; i < nParticles; i++)
-	if (ParticleList[i]->ReturnCurrentGrid()->ReturnProcessorNumber() != MyProcessorNumber) {
-	  delete ParticleList[i];
-	  ParticleList[i] = NULL;
-	}
+      if (AssignActiveParticlesToGrids(ParticleList, NumberOfMergedParticles, 
+              LevelArray) == FAIL)
+        return FAIL;      
 
-      // Accrete takes care of its own memory management - no need to free ParticleList.
-
-      delete [] ParticleList;
+      ParticleList.clear();
 
     }
 

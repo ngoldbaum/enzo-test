@@ -232,7 +232,8 @@ int ActiveParticleType_CenOstriker::EvaluateFormation(grid *thisgrid_orig, Activ
 	 */
 
 	ActiveParticleType_CenOstriker *np = new ActiveParticleType_CenOstriker();
-	data.NewParticles[data.NumberOfNewParticles++] = np;
+    data.NumberOfNewParticles++;
+    data.NewParticles.insert(*np);
 
 	np->level = data.level;
 	np->GridID = data.GridID;

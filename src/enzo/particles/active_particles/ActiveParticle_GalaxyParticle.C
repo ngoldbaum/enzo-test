@@ -131,7 +131,8 @@ int ActiveParticleType_GalaxyParticle::EvaluateFormation
 	  return FAIL;
 
     ActiveParticleType_GalaxyParticle *np = new ActiveParticleType_GalaxyParticle();
-	data.NewParticles[data.NumberOfNewParticles++] = np;
+    data.NumberOfNewParticles++;
+    data.NewParticles.insert(*np);
 	
 	np->type = np->GetEnabledParticleID();
 	np->BirthTime = thisGrid->ReturnTime();
@@ -207,10 +208,11 @@ int ActiveParticleType_GalaxyParticle::SetFlaggingField
   /* Generate a list of all galaxy particles in the simulation box */
   int i, nParticles;
   FLOAT *pos = NULL, dx=0, rad;
-  ActiveParticleType **GalaxyParticleList = NULL;
+  ActiveParticleList<ActiveParticleType> GalaxyParticleList;
   LevelHierarchyEntry *Temp = NULL;
   
-  GalaxyParticleList = ActiveParticleFindAll(LevelArray, &nParticles, GalaxyParticleID);
+  ActiveParticleFindAll(LevelArray, &nParticles, GalaxyParticleID, 
+      GalaxyParticleList);
   
   /* Calculate CellWidth on maximum refinement level */
   
@@ -220,18 +222,13 @@ int ActiveParticleType_GalaxyParticle::SetFlaggingField
   
   for (i=0 ; i<nParticles; i++){
     pos = GalaxyParticleList[i]->ReturnPosition();
-    rad = static_cast<ActiveParticleType_GalaxyParticle*>(GalaxyParticleList[i])->Radius;
+    rad = static_cast<ActiveParticleType_GalaxyParticle*>(
+        GalaxyParticleList[i])->Radius;
     for (Temp = LevelArray[level]; Temp; Temp = Temp->NextGridThisLevel)
       if (Temp->GridData->DepositRefinementZone(level,pos,rad) == FAIL) {
 	ENZO_FAIL("Error in grid->DepositRefinementZone.\n")
 	  }
   }
-
-  if (NumberOfProcessors > 1)
-    for (i = 0; i < nParticles; i++)
-      delete GalaxyParticleList[i];
-
-  delete GalaxyParticleList;
 
   return SUCCESS;
 }
@@ -244,7 +241,7 @@ int DistributeFeedbackZone(grid* FeedbackZones, HierarchyEntry** Grids,
 			   int NumberOfGrids, int SendField);
 
 int ActiveParticleType_GalaxyParticle::SubtractMassFromGrid(int nParticles,
-    ActiveParticleType** ParticleList, LevelHierarchyEntry *LevelArray[],
+    ActiveParticleList<ActiveParticleType>& ParticleList, LevelHierarchyEntry *LevelArray[],
     FLOAT dx, int ThisLevel)
 {
 
@@ -314,7 +311,7 @@ int ActiveParticleType_GalaxyParticle::SubtractMassFromGrid(int nParticles,
 }
 
 int ActiveParticleType_GalaxyParticle::GalaxyParticleFeedback(int nParticles,
-    ActiveParticleType** ParticleList, FLOAT dx, 
+    ActiveParticleList<ActiveParticleType>& ParticleList, FLOAT dx, 
 	LevelHierarchyEntry *LevelArray[], int ThisLevel, FLOAT period[MAX_DIMENSION])
 {
   
@@ -337,7 +334,8 @@ int ActiveParticleType_GalaxyParticle::GalaxyParticleFeedback(int nParticles,
   
   FeedbackRadius = new int[nParticles];
   for (i = 0; i < nParticles; i++) {
-    FeedbackRadius[i] = nint(static_cast<ActiveParticleType_GalaxyParticle*>(ParticleList[i])->Radius / dx);
+    FeedbackRadius[i] = nint(static_cast<ActiveParticleType_GalaxyParticle*>(
+            ParticleList[i])->Radius / dx);
   }
   
   for (i = 0; i < nParticles; i++) {
@@ -366,7 +364,7 @@ int ActiveParticleType_GalaxyParticle::GalaxyParticleFeedback(int nParticles,
 }
 
 int ActiveParticleType_GalaxyParticle::GalaxyParticleGravity(int nParticles,
-    ActiveParticleType** ParticleList, FLOAT dx, 
+    ActiveParticleList<ActiveParticleType>& ParticleList, FLOAT dx, 
 	LevelHierarchyEntry *LevelArray[], int ThisLevel, FLOAT period[MAX_DIMENSION])
 {
   
@@ -389,7 +387,8 @@ int ActiveParticleType_GalaxyParticle::GalaxyParticleGravity(int nParticles,
   
   FeedbackRadius = new int[nParticles];
   for (i = 0; i < nParticles; i++) {
-    FeedbackRadius[i] = nint(static_cast<ActiveParticleType_GalaxyParticle*>(ParticleList[i])->Radius / dx);
+    FeedbackRadius[i] = nint(static_cast<ActiveParticleType_GalaxyParticle*>(
+            ParticleList[i])->Radius / dx);
   }
   
   for (i = 0; i < nParticles; i++) {

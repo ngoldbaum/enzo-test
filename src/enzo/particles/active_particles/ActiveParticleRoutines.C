@@ -44,7 +44,7 @@ ActiveParticleType::ActiveParticleType(void)
     pos[dim] = vel[dim] = 0.0;
   Mass = BirthTime = DynamicalTime = 0.0;
   level = GridID = type = 0;
-
+  WillDelete = false;
 
   /* The correct indices are assigned in CommunicationUpdateActiveParticleCount 
      in ActiveParticleFinalize.*/
@@ -67,6 +67,7 @@ ActiveParticleType::ActiveParticleType(ActiveParticleType* part)
   GridID = part->GridID;
   type = part->type;
   CurrentGrid = part->CurrentGrid;
+  WillDelete = part->WillDelete;
 }
 
 ActiveParticleType::ActiveParticleType(grid *_grid, ActiveParticleFormationData &data)
@@ -83,11 +84,11 @@ ActiveParticleType::ActiveParticleType(grid *_grid, ActiveParticleFormationData 
   /* The correct indices are assigned in CommunicationUpdateActiveParticleCount 
      in ActiveParticleFinalize.*/
   Identifier = INT_UNDEFINED;
+
+  // Assume newly created particles will not be immediately deleted
+  WillDelete = false;
 }
 
-
-/* No need to delete the accretion arrays because the pointers are
-   stored in the copies located in the grid class. */
 
 ActiveParticleType::~ActiveParticleType(void)
 {
@@ -321,6 +322,11 @@ void ActiveParticleType::PrintInfo(void)
   printf("\t mass = %"GSYM", type = %"ISYM", grid %"ISYM", lvl %"ISYM"\n", 
 	 Mass, type, GridID, level);
   return;
+}
+
+bool ActiveParticleType::ShouldDelete(void)
+{
+  return this->WillDelete != 0;
 }
 
 

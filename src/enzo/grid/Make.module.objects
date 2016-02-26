@@ -59,7 +59,7 @@ ENZO_OBJS +=\
 	Grid_AddMassAndMomentumToAccretingParticle.o \
 	Grid_AddOneParticleFromList.o \
 	Grid_AddParticlesFromList.o \
-	Grid_AppendActiveParticlesToList.o \
+    Grid_AppendActiveParticlesToList.o \
 	Grid_ApplyGalaxyParticleFeedback.o \
 	Grid_ApplyGalaxyParticleGravity.o \
 	Grid_ChangeParticleTypeBeforeSN.o \

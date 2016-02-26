@@ -44,56 +44,33 @@ int grid::AddActiveParticle(ActiveParticleType* ThisParticle)
       TPpos[2] < GridRightEdge[2]) {
     IsHere = true;
   }
-  
-  /* We should already have checked if the particle is on this grid so this should
-     never happen */
-  if (!IsHere) {
+
+  /* We should already have checked if the particle is on this grid so this
+     should never happen */
+
+  if (! IsHere) {
     return FAIL;
   }
 
-  /* Copy the old and new active particles to a new list 
-     and get rid of the old list */
+  /* 
+     If this particle is already on the list, it needs to be moved to
+     the end of the list. 
+  */
 
-  /* If this particle is already on the list, it needs to be moved to
-     the end of the list. This needs to happen since the copy of the
-     particle in the grid list needs to be updated */
-
-  int iskip = -1;
   for (i = 0; i < NumberOfActiveParticles; i++) 
-    if (ThisParticle->ReturnID() == ActiveParticles[i]->ReturnID()) {
-	iskip = i;   
+    if (ThisParticle->ReturnID() == this->ActiveParticles[i]->ReturnID()) {
+      this->ActiveParticles.move_to_end(i);
+      this->ActiveParticles.erase(this->ActiveParticles.size()-1);
+      this->ActiveParticles.copy_and_insert(*ThisParticle);
+      return SUCCESS;
     }
-
-  if (iskip != -1) {
-    NumberOfActiveParticles--;
-  }
-
-  ActiveParticleType **OldActiveParticles = ActiveParticles;
-  ActiveParticles = new ActiveParticleType*[NumberOfActiveParticles+1]();
-  
-  j = 0;
-  if (NumberOfActiveParticles > 0) {
-    for (i = 0; i <= NumberOfActiveParticles; i++) {
-      if (i == iskip) {
-	delete OldActiveParticles[i];
-	OldActiveParticles[i] = NULL;
-	continue;
-      } else {
-	ActiveParticles[j] = OldActiveParticles[i];    
-	j++;
-      }
-    }
-  } 
-  else if (iskip != -1) {
-    delete OldActiveParticles[0];
-    OldActiveParticles[0] = NULL;
-  }
 
   ThisParticle->SetGridID(ID);
   ThisParticle->AssignCurrentGrid(this);
-  ActiveParticles[NumberOfActiveParticles++] = ThisParticle;
+  this->ActiveParticles.copy_and_insert(*ThisParticle);
+  NumberOfActiveParticles++;
 
-  delete [] OldActiveParticles;
-  
+  // ThisParticle should be deallocated outside this function
+
   return SUCCESS;
 }

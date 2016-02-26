@@ -22,6 +22,7 @@
 #include "ParticleAttributeHandler.h"
 #include "h5utilities.h"
 
+template <class ap_type> class ActiveParticleList;
 struct ActiveParticleFormationData;
 struct ActiveParticleFormationDataFlags;
 
@@ -95,6 +96,7 @@ public:
   int   SphereContained(LevelHierarchyEntry *LevelArray[], int level,
 			float Radius);
   void  PrintInfo(void);
+  bool  ShouldDelete(void);
   //void  ActivateNewStar(FLOAT Time, float Timestep);
   //void  DeleteCopyInGrid(void);
   //int   DeleteCopyInGridGlobal(LevelHierarchyEntry *LevelArray[]);
@@ -103,10 +105,8 @@ public:
 
   virtual bool IsARadiationSource(FLOAT Time) { return false; };
   virtual bool Mergable(ActiveParticleType *a);
-  virtual int GetEnabledParticleID(int id = -1) {
-    ENZO_FAIL("Not implemented.");
-  };
   virtual ActiveParticleType* clone(void) = 0;
+  virtual int GetEnabledParticleID(int id = -1) {ENZO_FAIL("Not implemented.");};
 
 #ifdef TRANSFER
   RadiationSourceEntry* RadiationSourceInitialize(void);
@@ -124,10 +124,12 @@ protected:
   int level;
   int GridID;
   int type;
+  int WillDelete;
 
 private: /* Cannot be accessed by subclasses! */
 
   friend class grid;
+  friend class ActiveParticleList<ActiveParticleType>;
   friend class ActiveParticleType_info;
 
 };
@@ -338,7 +340,7 @@ void ActiveParticleList<ap_class>::sort_number(
 struct ActiveParticleFormationData {
   int NumberOfNewParticles;
   int MaxNumberOfNewParticles;
-  ActiveParticleType **NewParticles;
+  ActiveParticleList<ActiveParticleType> NewParticles;
   /* This is where all the pointers that normally get passed into
    * formation routines gets placed. Things like fractional h2, dark
    * matter density, etc etc. Anything that's derived.  It's okay to
@@ -372,7 +374,7 @@ struct ActiveParticleFormationData {
 const struct ActiveParticleFormationData data_default = {
   0,        // NumberOfNewParticles
   0,        // MaxNumberOfNewParticles
-  NULL,     // NewParticles
+  ActiveParticleList<ActiveParticleType>(), // NewParticles
   NULL,     // DarkMatterDensity
   NULL,     // H2Fraction
   NULL,     // CoolingTime
@@ -459,7 +461,7 @@ namespace ActiveParticleHelpers {
   }
 
   template <class APClass> void WriteParticles(
-          ActiveParticleType **InList, int ParticleTypeID,
+          ActiveParticleList<ActiveParticleType>& InList, int ParticleTypeID,
           int TotalParticles,
           const std::string name, hid_t grid_node)
   {
@@ -506,8 +508,8 @@ namespace ActiveParticleHelpers {
   }
 
   template <class APClass> int ReadParticles(
-          ActiveParticleType **OutList, int &offset, const std::string name,
-          hid_t grid_node)
+      ActiveParticleList<ActiveParticleType> &OutList, int &offset, 
+      const std::string name, hid_t grid_node)
   {
       int i, size = 0;
       AttributeVector &handlers = APClass::AttributeHandlers;
@@ -525,18 +527,27 @@ namespace ActiveParticleHelpers {
       int ndims = 1;
       hsize_t dims[1] = {Count};
       for (i = 0; i < Count; i++) {
-          OutList[i+offset] = new APClass();
+        OutList.insert(*(new APClass()));
       }
 
       for (AttributeVector::iterator it = handlers.begin();
           it != handlers.end(); ++it) {
           size = Count * (*it)->element_size;
-          _buffer = buffer = new char[size];
+          _buffer = buffer = new char[size]();
           _name = (*it)->name.c_str();
-          APClass::ReadDataset(ndims, dims, _name, node,
-                               (*it)->hdf5type, buffer);
+          if (strcmp(_name, "WillDelete") != 0)
+          {
+            APClass::ReadDataset(ndims, dims, _name, node,
+                (*it)->hdf5type, buffer);
+          }
+          else {
+            // WillDelete isn't present in legacy active particle datasets.
+            // Since we shouldn't be deleting particles on read, unconditionally
+            // set it to 0
+            buffer[0] = (char)(0);
+          }
           for (i = 0; i < Count; i++) {
-              (*it)->SetAttribute(&_buffer, OutList[i+offset]);
+            (*it)->SetAttribute(&_buffer, OutList[i+offset]);
           }
           delete [] buffer;
       }
@@ -550,8 +561,8 @@ namespace ActiveParticleHelpers {
 
 
   template <class APClass> int FillBuffer(
-          ActiveParticleType **InList_, int InCount, char *buffer_) {
-
+          ActiveParticleList<ActiveParticleType> &InList, int InCount, char *buffer_) {
+    
       int i;
       int size = 0;
 
@@ -563,28 +574,28 @@ namespace ActiveParticleHelpers {
 
       AttributeVector &handlers = APClass::AttributeHandlers;
 
-      APClass *In;
-
       for (i = 0; i < InCount; i++) {
-          In = dynamic_cast<APClass*>(InList_[i]);
-          /* We'll put debugging output here */
-          for(AttributeVector::iterator it = handlers.begin();
-              it != handlers.end(); ++it) {
-              size += (*it)->GetAttribute(buffer, In);
-          }
-          /*
+        APClass *In = dynamic_cast<APClass*>(InList[i]);
+
+        for(AttributeVector::iterator it = handlers.begin();
+            it != handlers.end(); ++it) {
+          size += (*it)->GetAttribute(buffer, In);
+        }
+        
+        /* We'll put debugging output here */
+
+        /*
           std::cout << "APF[" << MyProcessorNumber << "] " << i << " " << size << " ";
           PrintActiveParticle<APClass>(In);
-           */
+        */
       }
       return size;
   }
 
   template <class APClass> void Unpack(
           char *buffer_, int offset,
-          ActiveParticleType** OutList_, int OutCount) {
-
-      APClass **OutList = reinterpret_cast<APClass**>(OutList_);
+          ActiveParticleList<ActiveParticleType> &OutList, int OutCount) {
+    
       AttributeVector &handlers = APClass::AttributeHandlers;
       APClass *Out;
       int i;
@@ -592,11 +603,12 @@ namespace ActiveParticleHelpers {
 
       for (i = 0; i < OutCount; i++) {
           Out = new APClass();
-          OutList[i + offset] = Out;
           for(AttributeVector::iterator it = handlers.begin();
               it != handlers.end(); ++it) {
               (*it)->SetAttribute(&buffer, Out);
           }
+          OutList.copy_and_insert(*Out);
+          delete Out;
           /*
           std::cout << "APU[" << MyProcessorNumber << "] " << i << " ";
           PrintActiveParticle<APClass>(Out);
@@ -615,8 +627,12 @@ ActiveParticleMap &get_active_particle_types();
 
 void EnableActiveParticleType(char *active_particle_type_name);
 
-ActiveParticleType** ActiveParticleFindAll(LevelHierarchyEntry *LevelArray[], int *GlobalNumberOfActiveParticles,
-					   int ActiveParticleIDToFind);
+void ActiveParticleFindAll(
+    LevelHierarchyEntry *LevelArray[], 
+    int *GlobalNumberOfActiveParticles,
+    int ActiveParticleIDToFind,
+    ActiveParticleList<ActiveParticleType>& GlobalList
+  );
 
 class ActiveParticleType_info
 {
@@ -644,14 +660,14 @@ public:
 				int ThisLevel, int GalaxyParticleID),
    int (*flagfield)(LevelHierarchyEntry *LevelArray[], int level, int TopGridDims[], int ActiveParticleID),
    void (*allocate_buffer)(int Count, char **buffer),
-   int (*fill_buffer)(ActiveParticleType **InList_, int InCount, char *buffer),
-   void (*unpack_buffer)(char *buffer, int offset, ActiveParticleType** Outlist,
+   int (*fill_buffer)(ActiveParticleList<ActiveParticleType> &InList_, int InCount, char *buffer),
+   void (*unpack_buffer)(char *buffer, int offset, ActiveParticleList<ActiveParticleType> &Outlist,
                        int OutCount),
    int (*element_size)(void),
-   void (*write_particles)(ActiveParticleType **particles,
+   void (*write_particles)(ActiveParticleList<ActiveParticleType> &particles,
                          int type_id, int total_particles,
                          const std::string name, hid_t node),
-   int (*read_particles)(ActiveParticleType **particles, int &offset, const
+   int (*read_particles)(ActiveParticleList<ActiveParticleType> &particles, int &offset, const
                          std::string name, hid_t node),
    ActiveParticleType *particle)
    {
@@ -704,14 +720,14 @@ public:
   int (*SetFlaggingField)(LevelHierarchyEntry *LevelArray[], int level, int TopGridDims[], int ActiveParticleID);
   void (*DescribeSupplementalData)(ActiveParticleFormationDataFlags &flags);
   void (*AllocateBuffer)(int Count, char **buffer);
-  void (*UnpackBuffer)(char *buffer, int offset, ActiveParticleType **Outlist,
+  void (*UnpackBuffer)(char *buffer, int offset, ActiveParticleList<ActiveParticleType> &Outlist,
                        int OutCount);
-  int (*FillBuffer)(ActiveParticleType **InList, int InCount, char *buffer);
+  int (*FillBuffer)(ActiveParticleList<ActiveParticleType> &InList, int InCount, char *buffer);
   int (*ReturnElementSize)(void);
-  void (*WriteParticles)(ActiveParticleType **InList,
+  void (*WriteParticles)(ActiveParticleList<ActiveParticleType> &InList,
                        int ParticleTypeID, int TotalParticles,
                        const std::string name, hid_t node);
-  int (*ReadParticles)(ActiveParticleType **OutList, int &offset, const
+  int (*ReadParticles)(ActiveParticleList<ActiveParticleType> &OutList, int &offset, const
                        std::string name, hid_t node);
   ActiveParticleType* particle_instance;
   std::string particle_name;

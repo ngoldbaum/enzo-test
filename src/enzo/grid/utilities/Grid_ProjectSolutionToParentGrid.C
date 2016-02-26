@@ -133,7 +133,7 @@ int grid::ProjectSolutionToParentGrid(grid &ParentGrid)
       ParentSize *= ParentDim[dim];
     }
     for (field = 0; field < NumberOfBaryonFields; field++) {
-      delete ParentGrid.BaryonField[field];
+      delete [] ParentGrid.BaryonField[field];
       ParentGrid.BaryonField[field] = new float[ParentSize];
     }
   }
@@ -280,7 +280,7 @@ int grid::ProjectSolutionToParentGrid(grid &ParentGrid)
 	  }
 	  if( ParentGrid.ProcessorNumber != MyProcessorNumber) {
 	    fprintf(stderr,"allocating magnetic field\n");
-	    delete ParentGrid.MagneticField[field];
+	    delete [] ParentGrid.MagneticField[field];
 	    ParentGrid.MagneticField[field] = new float[MHDParentSize[field]];
 	    
 	  }
@@ -462,7 +462,7 @@ int grid::ProjectSolutionToParentGrid(grid &ParentGrid)
   if (ParentGrid.ProcessorNumber != MyProcessorNumber)
 
     for (field = 0; field < NumberOfBaryonFields; field++) {
-      delete ParentGrid.BaryonField[field];
+      delete [] ParentGrid.BaryonField[field];
       ParentGrid.BaryonField[field] = NULL;
     }
  

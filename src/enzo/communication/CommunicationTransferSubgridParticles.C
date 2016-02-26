@@ -45,8 +45,9 @@ int CommunicationSyncNumberOfParticles(HierarchyEntry *GridHierarchyPointer[],
 int CommunicationShareParticles(int *NumberToMove, particle_data* &SendList,
 				int &NumberOfReceives,
 				particle_data* &SharedList);
-int CommunicationShareActiveParticles(int *NumberToMove, ActiveParticleType** &SendList,
-				      int &NumberOfReceives, ActiveParticleType** &SharedList);
+int CommunicationShareActiveParticles(int *NumberToMove, 
+        ActiveParticleList<ActiveParticleType> &SendList, int &NumberOfReceives, 
+        ActiveParticleList<ActiveParticleType> &SharedList);
 
 int CommunicationTransferSubgridParticles(LevelHierarchyEntry *LevelArray[],
 					  TopGridData *MetaData, int level)
@@ -66,8 +67,8 @@ int CommunicationTransferSubgridParticles(LevelHierarchyEntry *LevelArray[],
 
   particle_data *SendList = NULL;
   particle_data *SharedList = NULL;
-  ActiveParticleType **APSendList = NULL;
-  ActiveParticleType **APSharedList = NULL;
+  ActiveParticleList<ActiveParticleType> APSendList;
+  ActiveParticleList<ActiveParticleType> APSharedList;
 
   int NumberOfReceives = 0, APNumberOfReceives = 0;
   int *NumberToMove = new int[NumberOfProcessors];
@@ -172,7 +173,6 @@ int CommunicationTransferSubgridParticles(LevelHierarchyEntry *LevelArray[],
   }
 
   SendList = new particle_data[TotalNumber];
-  APSendList = new ActiveParticleType*[APTotalNumber]();
 
   for (grid1 = 0; grid1 < NumberOfGrids; grid1++) {
 
@@ -272,9 +272,6 @@ int CommunicationTransferSubgridParticles(LevelHierarchyEntry *LevelArray[],
   if (SendList != SharedList)
     delete [] SendList;
   delete [] SharedList;
-  if (APSendList != APSharedList)
-    delete [] APSendList;
-  delete [] APSharedList;
 
   delete [] Grids;
   delete [] GridPointers;

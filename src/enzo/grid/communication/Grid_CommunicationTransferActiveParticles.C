@@ -35,7 +35,7 @@ int search_lower_bound(int *arr, int value, int low, int high,
 
 int grid::CommunicationTransferActiveParticles(grid* Grids[], int NumberOfGrids, 
 	       int ThisGridNum, int TopGridDims[], int *&NumberToMove, 
-	       int StartIndex, int EndIndex, ActiveParticleType** &List, 
+	       int StartIndex, int EndIndex, ActiveParticleList<ActiveParticleType> &List, 
 	       int *Layout, int *GStartIndex[], int *GridMap, int CopyDirection)
 {
  
@@ -56,7 +56,7 @@ int grid::CommunicationTransferActiveParticles(grid* Grids[], int NumberOfGrids,
 
     /* If there are no active particles to move, we're done. */
  
-    if (NumberOfActiveParticles == 0)
+    if (this->NumberOfActiveParticles == 0)
       return SUCCESS;
 
 //    if (MyProcessorNumber != ProcessorNumber)
@@ -70,7 +70,7 @@ int grid::CommunicationTransferActiveParticles(grid* Grids[], int NumberOfGrids,
 
     /* Count active particles to move.  Apply perioidic wrap to them. */
  
-    ToGrid = new int[NumberOfActiveParticles];
+    ToGrid = new int[this->NumberOfActiveParticles];
 
     float DomainWidth[MAX_DIMENSION], DomainWidthInv[MAX_DIMENSION];
     for (dim = 0; dim < MAX_DIMENSION; dim++) {
@@ -80,90 +80,74 @@ int grid::CommunicationTransferActiveParticles(grid* Grids[], int NumberOfGrids,
 
     // Periodic boundaries
     for (dim = 0; dim < GridRank; dim++) 
-      for (i = 0; i < NumberOfActiveParticles; i++) {
-	if (ActiveParticles[i]->pos[dim] > DomainRightEdge[dim])
-	  ActiveParticles[i]->pos[dim] -= DomainWidth[dim];
-	else if (ActiveParticles[i]->pos[dim] < DomainLeftEdge[dim])
-	  ActiveParticles[i]->pos[dim] += DomainWidth[dim];
+      for (i = 0; i < this->NumberOfActiveParticles; i++) {
+        if (this->ActiveParticles[i]->pos[dim] > DomainRightEdge[dim])
+          this->ActiveParticles[i]->pos[dim] -= DomainWidth[dim];
+        else if (ActiveParticles[i]->pos[dim] < DomainLeftEdge[dim])
+          this->ActiveParticles[i]->pos[dim] += DomainWidth[dim];
       }
 
 
-    for (i = 0; i < NumberOfActiveParticles; i++) {
-
+    for (i = 0; i < this->NumberOfActiveParticles; i++) {
+      
       for (dim = 0; dim < GridRank; dim++) {
 
-	if (Layout[dim] == 1) {
-	  GridPosition[dim] = 0;
-	} else {
+        if (Layout[dim] == 1) {
+          GridPosition[dim] = 0;
+        } else {
+          
+          CenterIndex = 
+            (int) (TopGridDims[dim] * 
+                (ActiveParticles[i]->pos[dim] - DomainLeftEdge[dim]) *
+                DomainWidthInv[dim]);
 
-	  CenterIndex = 
-	  (int) (TopGridDims[dim] * 
-		 (ActiveParticles[i]->pos[dim] - DomainLeftEdge[dim]) *
-		 DomainWidthInv[dim]);
-
-	  GridPosition[dim] = 
-	    search_lower_bound(GStartIndex[dim], CenterIndex, 0, Layout[dim],
-			       Layout[dim]);
-	  GridPosition[dim] = min(GridPosition[dim], Layout[dim]-1);
-
-	} // ENDELSE Layout
-
+          GridPosition[dim] = 
+            search_lower_bound(GStartIndex[dim], CenterIndex, 0, Layout[dim],
+                Layout[dim]);
+          GridPosition[dim] = min(GridPosition[dim], Layout[dim]-1);
+          
+        } // ENDELSE Layout
+        
       } // ENDFOR dim
 
       grid_num = GridPosition[0] + 
-	Layout[0] * (GridPosition[1] + Layout[1]*GridPosition[2]);
+        Layout[0] * (GridPosition[1] + Layout[1]*GridPosition[2]);
       grid = GridMap[grid_num];
       if (grid != ThisGridNum) {
-	proc = Grids[grid]->ReturnProcessorNumber();
-	NumberToMove[proc]++;
+        proc = Grids[grid]->ReturnProcessorNumber();
+        NumberToMove[proc]++;
       }
-
+      
       ToGrid[i] = grid;
-
+      
     } // ENDFOR active particles
 
     /* Allocate space. */
+
+    /* Move active particles into list */
+
+    int n1 = PreviousTotalToMove;
 
     int TotalToMove = 0;
     for (proc = 0; proc < NumberOfProcessors; proc++)
       TotalToMove += NumberToMove[proc];
     int NumberToMoveThisGrid = TotalToMove - PreviousTotalToMove;
-    int NumberLeft = NumberOfActiveParticles - NumberToMoveThisGrid;
+    int NumberLeft = this->NumberOfActiveParticles - NumberToMoveThisGrid;
 
     if (NumberToMoveThisGrid > 0) {
  
-      // Increase the size of the list to include the active particles
-      // from this grid
-
-      ActiveParticleType **NewList = new ActiveParticleType*[TotalToMove]();
-      for (i = 0; i < PreviousTotalToMove; i++)
-	NewList[i] = List[i];
-      delete [] List;
-      List = NewList;
- 
-      /* Move active particles into list */
-
-      int n1 = PreviousTotalToMove;
-      int index = 0;
-      ActiveParticleType **OldActiveParticles = ActiveParticles;
-      ActiveParticles = new ActiveParticleType*[NumberLeft]();
-
-      for (i = 0; i < NumberOfActiveParticles; i++) {
-	grid = ToGrid[i];
-	if (grid != ThisGridNum) {
-	  List[n1] = OldActiveParticles[i];
-	  List[n1]->SetGridID(grid);
-	  n1++;
-	} else {
-	  ActiveParticles[index++] = OldActiveParticles[i];
-	}
+      for (i = 0; i < this->NumberOfActiveParticles; i++) {
+        grid = ToGrid[i];
+        if (grid != ThisGridNum) {
+          List.copy_and_insert(*ActiveParticles[i]);
+          ActiveParticles.mark_for_deletion(i);
+          List[n1++]->SetGridID(grid);
+        }
       } // ENDFOR particles
 
+      ActiveParticles.delete_marked_particles();
       this->NumberOfActiveParticles = NumberLeft;
-      if (NumberLeft == 0) ActiveParticles = NULL;
 
-      delete [] OldActiveParticles;
-      
     } // ENDIF NumberToMoveThisProc > 0
 
     delete [] ToGrid;
@@ -185,9 +169,7 @@ int grid::CommunicationTransferActiveParticles(grid* Grids[], int NumberOfGrids,
     /* Copy active particles from buffer */
 
     if (NumberOfNewActiveParticles > 0) {
-      for (i = 0; i < NumberOfNewActiveParticles; i++) {
-        this->AddActiveParticle(List[i]);
-      }
+      this->AddActiveParticles(List, StartIndex, EndIndex);
     }
 
 

@@ -29,7 +29,7 @@
 
 int grid::TransferSubgridActiveParticles
 (grid* Subgrids[], int NumberOfSubgrids, int* &NumberToMove, int StartIndex, 
- int EndIndex, ActiveParticleType** &List, bool KeepLocal, 
+ int EndIndex, ActiveParticleList<ActiveParticleType> &List, bool KeepLocal, 
  bool ParticlesAreLocal, int CopyDirection, int IncludeGhostZones, 
  int CountOnly)
 {
@@ -60,13 +60,13 @@ int grid::TransferSubgridActiveParticles
     int StartIndex[] = {1,1,1}, EndIndex[] = {1,1,1};
     if (IncludeGhostZones)
       for (dim = 0; dim < GridRank; dim++) {
-	StartIndex[dim] = 0;
-	EndIndex[dim] = GridDimension[dim]-1;
+        StartIndex[dim] = 0;
+        EndIndex[dim] = GridDimension[dim]-1;
       }
     else
       for (dim = 0; dim < GridRank; dim++) {
-	StartIndex[dim] = GridStartIndex[dim];
-	EndIndex[dim] = GridEndIndex[dim];
+        StartIndex[dim] = GridStartIndex[dim];
+        EndIndex[dim] = GridEndIndex[dim];
       }
  
     /* Count the number of stars already moved */
@@ -84,11 +84,14 @@ int grid::TransferSubgridActiveParticles
 
       /* Compute index of star position. */
  
-      i0 = int((ActiveParticles[i]->pos[0] - CellLeftEdge[0][0])/CellWidth[0][0]);
+      i0 = int((this->ActiveParticles[i]->pos[0] - CellLeftEdge[0][0]) / 
+          CellWidth[0][0]);
       if (GridRank > 0)
-       j0 = int((ActiveParticles[i]->pos[1] - CellLeftEdge[1][0])/CellWidth[1][0]);
+        j0 = int((this->ActiveParticles[i]->pos[1] - CellLeftEdge[1][0]) / 
+            CellWidth[1][0]);
       if (GridRank > 1)
-       k0 = int((ActiveParticles[i]->pos[2] - CellLeftEdge[2][0])/CellWidth[2][0]);
+        k0 = int((this->ActiveParticles[i]->pos[2] - CellLeftEdge[2][0]) / 
+            CellWidth[2][0]);
  
       i0 = max(min(EndIndex[0], i0), StartIndex[0]);
       j0 = max(min(EndIndex[1], j0), StartIndex[1]);
@@ -101,19 +104,19 @@ int grid::TransferSubgridActiveParticles
 
       subgrid[i] = nint(BaryonField[NumberOfBaryonFields][index])-1;
       if (subgrid[i] >= 0) {
-	if (KeepLocal)
-	  proc = MyProcessorNumber;
-	else
-	  proc = Subgrids[subgrid[i]]->ReturnProcessorNumber();
-	NumberToMove[proc]++;
+        if (KeepLocal)
+          proc = MyProcessorNumber;
+        else
+          proc = Subgrids[subgrid[i]]->ReturnProcessorNumber();
+        NumberToMove[proc]++;
       }
       if (subgrid[i] < -1 || subgrid[i] > NumberOfSubgrids-1) {
-	ENZO_VFAIL("star subgrid (%"ISYM"/%"ISYM") out of range\n", 
-		subgrid[i], NumberOfSubgrids)
-      }
-
+        ENZO_VFAIL("star subgrid (%"ISYM"/%"ISYM") out of range\n", 
+            subgrid[i], NumberOfSubgrids)
+          }
+      
     } // ENDFOR particles
-
+    
     if (CountOnly == TRUE) {
       delete[] subgrid;
       return SUCCESS;
@@ -133,7 +136,7 @@ int grid::TransferSubgridActiveParticles
       float RefinementFactors[MAX_DIMENSION], MassIncrease = 1.0;
       this->ComputeRefinementFactorsFloat(Subgrids[0], RefinementFactors);
       for (dim = 0; dim < GridRank; dim++)
-	MassIncrease *= RefinementFactors[dim];
+        MassIncrease *= RefinementFactors[dim];
 
       /* Move active particles */
       
@@ -143,29 +146,25 @@ int grid::TransferSubgridActiveParticles
       /* Move particles from grid array to a separate list. */
 
       n1 = PreviousTotalToMove;
-
-      ActiveParticleType **OldActiveParticles = ActiveParticles;
-      ActiveParticles = new ActiveParticleType*[ParticlesLeft]();
-
-      index = 0;
+      
       for (i = 0; i < NumberOfActiveParticles; i++) {
-	if (subgrid[i] >= 0) {
-	  List[n1] = OldActiveParticles[i];
-	  proc = (KeepLocal) ? MyProcessorNumber : Subgrids[subgrid[i]]->ReturnProcessorNumber();
-	  List[n1]->SetGridID(subgrid[i]);
-	  // Increase the level if moving to a subgrid
-	  if (IncludeGhostZones == FALSE) {
-	    List[n1]->IncreaseLevel();
-	    List[n1]->AdjustMassByFactor(MassIncrease);
-	  }
-	  n1++;
-	} // ENDIF subgrid
-	else {
-	  ActiveParticles[index++] = OldActiveParticles[i];
-	}
+        if (subgrid[i] >= 0) {
+          List.copy_and_insert(*ActiveParticles[i]);
+
+          ActiveParticles.mark_for_deletion(i);
+
+          List[n1]->SetGridID(subgrid[i]);
+          // Increase the level if moving to a subgrid
+          if (IncludeGhostZones == FALSE) {
+            List[n1]->IncreaseLevel();
+            List[n1]->AdjustMassByFactor(MassIncrease);
+          }
+          n1++;
+        } // ENDIF subgrid
       } // ENDFOR particles
 
-      delete[] OldActiveParticles;
+      ActiveParticles.delete_marked_particles();
+
       NumberOfActiveParticles = ParticlesLeft;
 
     } // ENDIF stars to move
@@ -192,14 +191,11 @@ int grid::TransferSubgridActiveParticles
 //	for (i = StartIndex; i < EndIndex; i++) {
 //	}
       
-      this->AddActiveParticles(List, NumberOfNewActiveParticles, StartIndex);
+      this->AddActiveParticles(List, StartIndex, EndIndex);
 
     } // ENDIF new particles
 
-    //this->DebugActiveParticles(-1);
-  
   } // end: if (COPY_IN)
-
  
   return SUCCESS;
 }
