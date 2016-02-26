@@ -100,7 +100,6 @@ ENZO_OBJS +=\
 	Grid_TracerParticleSetVelocity.o \
 	Grid_UpdateParticlePosition.o \
 	Grid_UpdateParticleVelocity.o \
-	Grid_UpdateParticleWithActiveParticle.o \
 	Grid_UpdateStarParticles.o \
 
 # ENZO BUILD SYSTEM DIRECTORY MODULE
