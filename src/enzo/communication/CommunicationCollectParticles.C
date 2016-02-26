@@ -181,6 +181,10 @@ int CommunicationCollectParticles(LevelHierarchyEntry *LevelArray[],
       (SubgridPointers, NumberOfSubgrids, APNumberToMove, Zero, Zero, 
        APSendList, KeepLocal, ParticlesAreLocal, COPY_OUT, FALSE, TRUE); 
 
+    // SendList is NULL at this point, but this is ok because it will not be
+    // manipulated in this function since CountOnly (the last argument) is
+    // unconditionally TRUE
+
 	GridHierarchyPointer[j]->GridData->TransferSubgridParticles
 	  (SubgridPointers, NumberOfSubgrids, NumberToMove, Zero, Zero, 
 	   SendList, KeepLocal, ParticlesAreLocal, COPY_OUT, FALSE, TRUE);
