@@ -29,20 +29,19 @@ class ActiveParticleType
 {
 public:
   void static ConstructData(grid *_grid,
-			    ActiveParticleFormationDataFlags &flags,
-			    ActiveParticleFormationData &data);
+      ActiveParticleFormationDataFlags &flags,
+      ActiveParticleFormationData &data);
   void static DestroyData(grid *_grid,
-			  ActiveParticleFormationData &data);
-  int static WriteDataset(int ndims, hsize_t *dims, const char *name, hid_t group,
-			  hid_t data_type, void *data);
+      ActiveParticleFormationData &data);
+  int static WriteDataset(
+      int ndims, hsize_t *dims, const char *name, hid_t group,
+      hid_t data_type, void *data);
   int static ReadDataset(int ndims, hsize_t *dims, const char *name, hid_t group,
-			 hid_t data_type, void *read_to);
+      hid_t data_type, void *read_to);
   void static SetupBaseParticleAttributes(
     std::vector<ParticleAttributeHandler*> &handlers);
 
   void OutputPositionInformation(void);
-
-  /* Several pure virtual functions */
 
   /* This should return the number of new star particles created, and should
    * create them. */
