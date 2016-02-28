@@ -156,6 +156,185 @@ struct cmp_ap_number {
   }
 };
 
+template <class ap_type> class ActiveParticleList
+{
+private:
+  std::vector<ap_type*> internalBuffer;
+
+public:
+  ActiveParticleList(void) {};
+  ActiveParticleList(const int inputParticleCount);
+  ActiveParticleList(const ActiveParticleList &OtherList);
+  ~ActiveParticleList(void);
+  ap_type*& operator[] (const int nIndex);
+  ActiveParticleList& operator=(const ActiveParticleList& OtherList);
+  void copy_and_insert(ap_type& input_particle);
+  void insert(ap_type& input_particle);
+  void clear(void);
+  void erase(int index);
+  void reserve(int size);
+  void move_to_end(int index);
+  void mark_for_deletion(int index);
+  void delete_marked_particles(void);
+  int size(void);
+  void sort_grid(const int first, const int last);
+  void sort_number(const int first, const int last);
+
+};
+
+template <class ap_class>
+ActiveParticleList<ap_class>::ActiveParticleList(const int inputParticleCount)
+{
+  this->internalBuffer.reserve(inputParticleCount);
+}
+
+template <class ap_class>
+ActiveParticleList<ap_class>::ActiveParticleList(
+    const ActiveParticleList<ap_class> &OtherList)
+{
+  this->internalBuffer = OtherList.internalBuffer;
+}
+
+template <class ap_class>
+ActiveParticleList<ap_class>::~ActiveParticleList(void)
+{
+  for (typename std::vector<ap_class*>::iterator 
+         it=this->internalBuffer.begin(); 
+       it != this->internalBuffer.end(); ++it)
+  {
+    delete *it;
+  }
+  
+}
+
+template <class ap_class>
+ap_class*& ActiveParticleList<ap_class>::operator[](const int nIndex)
+{
+  return this->internalBuffer.at(nIndex);
+}
+
+template <class ap_class>
+void ActiveParticleList<ap_class>::copy_and_insert(ap_class& input_particle)
+{
+  this->internalBuffer.push_back(static_cast<ap_class*>(input_particle.clone()));
+}
+
+template <class ap_class>
+void ActiveParticleList<ap_class>::insert(ap_class& input_particle)
+{
+  this->internalBuffer.push_back(static_cast<ap_class*>(&input_particle));
+}
+
+template <class ap_class>
+void ActiveParticleList<ap_class>::clear(void)
+{
+
+  if (this->size() > 0) {
+    for (typename std::vector<ap_class*>::iterator it=
+           this->internalBuffer.begin(); it != this->internalBuffer.end(); ++it)
+      {
+        delete *it;
+      }
+
+    this->internalBuffer.clear();
+  }
+}
+
+template <class ap_class>
+void ActiveParticleList<ap_class>::erase(int index)
+{
+  delete this->internalBuffer[index];
+  this->internalBuffer.erase(this->internalBuffer.begin() + index);
+}
+
+template <class ap_class>
+void ActiveParticleList<ap_class>::reserve(int size)
+{
+  this->internalBuffer.reserve(size);
+}
+
+template <class ap_class>
+void ActiveParticleList<ap_class>::move_to_end(int index)
+{
+  typename std::vector<ap_class*>::iterator it = 
+    this->internalBuffer.begin() + index;
+  std::rotate(it, it+1, this->internalBuffer.end());
+}
+
+template <class ap_class>
+void ActiveParticleList<ap_class>::mark_for_deletion(int index)
+{
+  (*this)[index]->WillDelete = 1;
+}
+
+template <class ap_class>
+bool should_delete(ap_class* item)
+{
+  bool will_delete = item->ShouldDelete();
+  if (will_delete) {
+    delete item;
+  }
+  return will_delete;
+} 
+
+template <class ap_class>
+void ActiveParticleList<ap_class>::delete_marked_particles(void)
+{
+  this->internalBuffer.erase(
+      std::remove_if(
+          this->internalBuffer.begin(),
+          this->internalBuffer.end(),
+          should_delete<ap_class>), 
+      this->internalBuffer.end());
+}
+
+template <class ap_class>
+int ActiveParticleList<ap_class>::size(void)
+{
+  return this->internalBuffer.size();
+}
+
+template <class ap_class>
+ActiveParticleList<ap_class>& ActiveParticleList<ap_class>::operator=(
+    const ActiveParticleList<ap_class>& OtherList)
+{
+  for (typename std::vector<ap_class*>::const_iterator it = 
+         OtherList.internalBuffer.begin(); 
+       it != OtherList.internalBuffer.end(); ++it)
+  {
+    this->internalBuffer.push_back((*it)->clone());
+  }
+
+  return *this;
+
+}
+
+template <class ap_class>
+void ActiveParticleList<ap_class>::sort_grid(
+    int first, int last)
+{
+  struct cmp_ap_grid comparator = cmp_ap_grid();
+  if (this->size() > 0) {
+    std::sort(
+        this->internalBuffer.begin() + first, 
+        this->internalBuffer.begin() + last,
+        comparator);
+  }
+}
+
+template <class ap_class>
+void ActiveParticleList<ap_class>::sort_number(
+    int first, int last)
+{
+  struct cmp_ap_number comparator = cmp_ap_number();
+  if (this->size() > 0) {
+    std::sort(
+        this->internalBuffer.begin() + first, 
+        this->internalBuffer.begin() + last,
+        comparator);
+  }
+}
+
 struct ActiveParticleFormationData {
   int NumberOfNewParticles;
   int MaxNumberOfNewParticles;
