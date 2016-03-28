@@ -908,11 +908,108 @@ gradient force to gravitational force for one-zone collapse test. */
    int FlagCellsToBeRefinedByCoolingTime();
 
 /* Flag particles within the MustRefineParticles region as MustRefine Particles */
-   int MustRefineParticlesFlagInRegion();
+   int MustRefineParticlesFlagInRegion() {
+     /* Local variable declarations. */
 
+     int n, dim, INSIDE_REGION, NumberOfParticlesConverted = 0;
+
+     /* Exit if grid is not on this processor, but not before recording increase
+        in the number of particles, both in this grid and in the metadata. */
+
+     if (MyProcessorNumber != ProcessorNumber)
+       return SUCCESS;
+
+     /* Go through all the particles, and if they are inside the MustRefineRegion,
+        convert from DARK_MATTER_PARTICLE to MUST_REFINE_PARTICLE. */
+
+     for (n = 0; n < NumberOfParticles; n++) {
+       if (ParticleType[n] == PARTICLE_TYPE_DARK_MATTER) {
+         INSIDE_REGION = TRUE;
+         for (dim = 0; dim < GridRank; dim++) {
+           if (ParticlePosition[dim][n] < MustRefineParticlesLeftEdge[dim] ||
+               ParticlePosition[dim][n] > MustRefineParticlesRightEdge[dim]) {
+             INSIDE_REGION = FALSE;
+             break;
+           }
+         }
+         if (INSIDE_REGION == TRUE) {
+           ParticleType[n] = PARTICLE_TYPE_MUST_REFINE;	  
+           NumberOfParticlesConverted++;
+         }
+       }
+     }
+     if (NumberOfParticlesConverted > 0)
+       printf("MustRefineParticlesFlagInRegion:ParticlesFlagged = %d\n", NumberOfParticlesConverted);
+     
+     return SUCCESS;
+     
+   };
+  
 /* Flag MustRefine Particles from list */
 
-   int MustRefineParticlesFlagFromList();
+   int MustRefineParticlesFlagFromList() {
+     int i, dim, LowerIndex, UpperIndex, MidPoint, ParticlesFound, ParticlesFlagged, *ParticleNumberList;
+     int NumberOfParticles;
+     FILE *fptr;
+     float tempf;
+
+     if (MyProcessorNumber != ProcessorNumber)
+       return SUCCESS;
+
+     /*Read in particle indicies*/
+
+     fptr=fopen("MustRefineParticlesFlaggingList.in","r");
+ 
+     char line[MAX_LINE_LENGTH];
+     ParticlesFound = 0;
+     while (fgets(line, MAX_LINE_LENGTH, fptr) != NULL)
+       if (line[0] != '#') ParticlesFound++;
+   
+     if (debug) printf("P(%d): ParticlesFound = %d\n",MyProcessorNumber,ParticlesFound);
+  
+     ParticleNumberList=new int[ParticlesFound]; //to allocate array space
+
+     rewind(fptr);
+     i = 0;
+     while (fgets(line, MAX_LINE_LENGTH, fptr) != NULL)
+       if (line[0] != '#')
+         if (sscanf(line, "%"ISYM, &ParticleNumberList[i]) == 1)
+           i++;
+
+     fclose(fptr);
+
+     /* Loop over particles. A bisection search is employed to speed things up.
+        For this to work, the ParticleNumberList must be sorted before it is 
+        read in. */
+     ParticlesFlagged=0.;
+     for (i = 0; i < NumberOfParticles; i++) {
+       /* Find place in sorted ParticleNumberList by bisection. */
+
+       LowerIndex = -1;
+       UpperIndex = ParticlesFound;
+
+       while (UpperIndex-LowerIndex > 1) {
+         MidPoint = (LowerIndex + UpperIndex)/2;
+         if (ParticleNumber[i] > ParticleNumberList[MidPoint])
+           LowerIndex = MidPoint;
+         else
+           UpperIndex = MidPoint;
+       }
+    
+       /* If found, set left/right edge and output */
+       if (ParticleNumber[i] == ParticleNumberList[LowerIndex] ||
+           ParticleNumber[i] == ParticleNumberList[UpperIndex]  ) {
+         ParticleType[i] = PARTICLE_TYPE_MUST_REFINE;
+         ParticlesFlagged=ParticlesFlagged+1.;
+       } // end: if (index != -1)
+
+     } // end: loop over particles
+     if (ParticlesFlagged > 0)
+       printf("P(%d): MustRefineParticlesFlagFromList:ParticlesFlagged=%d\n",MyProcessorNumber,ParticlesFlagged);
+     delete [] ParticleNumberList;
+     return SUCCESS;
+     
+   };
 
 /* Flag all cells which are within a user-specified refinement region. */
 
