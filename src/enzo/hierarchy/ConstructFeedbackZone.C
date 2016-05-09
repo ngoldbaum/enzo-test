@@ -49,7 +49,7 @@ grid* ConstructFeedbackZone(ActiveParticleType* ThisParticle,int FeedbackRadius,
 			       ThisParticle->ReturnPosition()[2]};
 
   /* Build array of AP grids and check for errors */
-  grid* APGrid = new grid;
+  grid* APGrid;
 
   APGrid = ThisParticle->ReturnCurrentGrid();
   FBRdx = dx * FLOAT(FeedbackRadius);
