@@ -13,7 +13,7 @@ center = [0.5]*3
 # Radial profiles for some outputs
 ########################################################################
 YFields = []
-Fields = ["Density", "Temperature", "H_fraction", "H_p1_fraction", "He_p1_fraction", 
+Fields = ["Density", "Temperature", "H_fraction", "H_p1_fraction", "He_p1_fraction",
           "He_p2_fraction", "HI_kph", "HeI_kph", "HeII_kph"]
 FieldsFigure = {}
 FieldsAxes = {}
@@ -25,7 +25,7 @@ for elem in Fields:
     YFields.append(elem)
 
 print "Yfields = ", YFields
-outputs = [1,2,3,4]
+outputs = [1,2,3]
 
 for outp in outputs:
     amrfile = "RD%4.4d/RD%4.4d" % (outp, outp)

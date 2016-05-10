@@ -25,8 +25,11 @@
 #include "Grid.h"
  
 /* function prototypes */
- 
- 
+
+static void ResetMasslessAcceleration(FLOAT *ActiveParticleAcceleration[],
+				      float *ActiveParticleMass,
+				      int GridRank);
+
 int grid::InterpolateParticlePositions(grid *FromGrid, int DifferenceType)
 {
  
@@ -55,20 +58,28 @@ int grid::InterpolateParticlePositions(grid *FromGrid, int DifferenceType)
  
     if (NumberOfActiveParticles > 0) {
 
+      float *ActiveParticleMass = new float[NumberOfActiveParticles];
+      
+      //if the mass is zero leave position alone...
+      this->GetActiveParticleMass(ActiveParticleMass);
       FLOAT **ActiveParticlePosition = new FLOAT*[GridRank];
       for (dim1 = 0; dim1 < GridRank; dim1++)
 	ActiveParticlePosition[dim1] = new FLOAT[NumberOfActiveParticles];
       this->GetActiveParticlePosition(ActiveParticlePosition);
-      
+    
       if (FromGrid->InterpolatePositions(ActiveParticlePosition, dim,
 					 ActiveParticleAcceleration[dim],
 					 NumberOfActiveParticles) == FAIL) {
 	ENZO_FAIL("Error in grid->InterpolatePositions.\n");
       }
 
+      /* Massless active particles should not accelerate */
+      ResetMasslessAcceleration(ActiveParticleAcceleration,ActiveParticleMass, GridRank);
+     
       for (dim1 = 0; dim1 < GridRank; dim1++)
 	delete [] ActiveParticlePosition[dim1];
       delete [] ActiveParticlePosition;
+      delete [] ActiveParticleMass;
     }
     
     if(ProblemType==29){
@@ -89,4 +100,26 @@ int grid::InterpolateParticlePositions(grid *FromGrid, int DifferenceType)
   }
   
   return SUCCESS;
+}
+
+
+
+/*
+ * Reset the massless particles acceleration to 0.0
+ */
+static void ResetMasslessAcceleration(FLOAT *ActiveParticleAcceleration[],
+				      float *ActiveParticleMass, int GridRank)
+{
+  int i, dim;
+
+  for (i = 0; i < NumberOfActiveParticles; i++) {
+    if(!ActiveParticleMass[i])
+      {
+	for (dim = 0; dim < GridRank; dim++) {
+	  ActiveParticleAcceleration[dim][i] = 0.0;
+	}
+      }
+  }
+  return;
+
 }
