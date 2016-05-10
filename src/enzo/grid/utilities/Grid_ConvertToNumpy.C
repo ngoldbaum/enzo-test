@@ -107,8 +107,7 @@ void grid::ConvertToNumpy(int GridID, PyArrayObject *container[], int ParentID, 
 	}
 	dataset = (PyArrayObject *) PyArray_SimpleNewFromData(
 	        3, dims, ENPY_BFLOAT, YT_TemperatureField);
-	/*PyArray_ENABLEFLAGS(dataset, NPY_OWNDATA);*/
-    dataset->flags &= ~NPY_OWNDATA;
+  PyArray_ENABLEFLAGS(dataset, NPY_OWNDATA);
 	PyDict_SetItemString(grid_data, "Temperature", (PyObject*) dataset);
 	Py_DECREF(dataset);
 
@@ -120,8 +119,7 @@ void grid::ConvertToNumpy(int GridID, PyArrayObject *container[], int ParentID, 
       }
       dataset = (PyArrayObject *) PyArray_SimpleNewFromData(
         3, dims, ENPY_BFLOAT, YT_Dark_Matter_DensityField);
-      /*PyArray_ENABLEFLAGS(dataset, NPY_OWNDATA);*/
-      dataset->flags &= ~NPY_OWNDATA;
+      PyArray_ENABLEFLAGS(dataset, NPY_OWNDATA);
       PyDict_SetItemString(grid_data, "Dark_Matter_Density", (PyObject*) dataset);
       Py_DECREF(dataset);
     }

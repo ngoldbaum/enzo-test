@@ -88,9 +88,6 @@ int ReadParameterFile(FILE *fptr, TopGridData &MetaData, float *Initialdt)
   while ((fgets(line, MAX_LINE_LENGTH, fptr) != NULL) 
       && (comment_count < 2)) {
 
-    char *dummy = new char[MAX_LINE_LENGTH];
-    dummy[0] = 0;
-
     ret = 0;
  
     /* read MetaData parameters */
@@ -379,8 +376,6 @@ int ReadParameterFile(FILE *fptr, TopGridData &MetaData, float *Initialdt)
       {
 	if (dim > MAX_STATIC_REGIONS-1) 
 	  ENZO_VFAIL("MultiRefineRegion number %"ISYM" (MAX_STATIC_REGIONS) > MAX allowed\n", dim);
-	if (int_dummy > MaximumRefinementLevel)
-	  ENZO_VFAIL("MultiRefineRegionMaximumLevel %"ISYM"  > MaximumRefinementLevel\n", int_dummy);
 	ret++;
 	MultiRefineRegionMaximumLevel[dim] = int_dummy;
       }
@@ -507,20 +502,20 @@ int ReadParameterFile(FILE *fptr, TopGridData &MetaData, float *Initialdt)
                   &RandomForcingMachNumber);
 #ifdef USE_GRACKLE
     /* Grackle chemistry parameters */
-    ret += sscanf(line, "use_grackle = %"ISYM, &grackle_chemistry.use_grackle);
-    ret += sscanf(line, "with_radiative_cooling = %"ISYM,
-                  &grackle_chemistry.with_radiative_cooling);
+    ret += sscanf(line, "use_grackle = %d", &grackle_data.use_grackle);
+    ret += sscanf(line, "with_radiative_cooling = %d",
+                  &grackle_data.with_radiative_cooling);
     if (sscanf(line, "grackle_data_file = %s", dummy) == 1) {
-      grackle_chemistry.grackle_data_file = dummy;
+      grackle_data.grackle_data_file = dummy;
       ret++;
     }
-    ret += sscanf(line, "UVbackground = %"ISYM, &grackle_chemistry.UVbackground);
-    ret += sscanf(line, "Compton_xray_heating = %"ISYM, 
-                  &grackle_chemistry.Compton_xray_heating);
-    ret += sscanf(line, "LWbackground_intensity = %"FSYM, 
-                  &grackle_chemistry.LWbackground_intensity);
-    ret += sscanf(line, "LWbackground_sawtooth_suppression = %"ISYM,
-                  &grackle_chemistry.LWbackground_sawtooth_suppression);
+    ret += sscanf(line, "UVbackground = %d", &grackle_data.UVbackground);
+    ret += sscanf(line, "Compton_xray_heating = %d", 
+                  &grackle_data.Compton_xray_heating);
+    ret += sscanf(line, "LWbackground_intensity = %lf", 
+                  &grackle_data.LWbackground_intensity);
+    ret += sscanf(line, "LWbackground_sawtooth_suppression = %d",
+                  &grackle_data.LWbackground_sawtooth_suppression);
     /********************************/
 #endif
     ret += sscanf(line, "RadiativeCooling = %"ISYM, &RadiativeCooling);
@@ -664,7 +659,9 @@ int ReadParameterFile(FILE *fptr, TopGridData &MetaData, float *Initialdt)
     ret += sscanf(line, "Unigrid = %"ISYM, &Unigrid);
     ret += sscanf(line, "UnigridTranspose = %"ISYM, &UnigridTranspose);
     ret += sscanf(line, "NumberOfRootGridTilesPerDimensionPerProcessor = %"ISYM, &NumberOfRootGridTilesPerDimensionPerProcessor);
- 
+    ret += sscanf(line, "UserDefinedRootGridLayout = %"ISYM" %"ISYM" %"ISYM, &UserDefinedRootGridLayout[0],
+                  &UserDefinedRootGridLayout[1], &UserDefinedRootGridLayout[2]);
+
     ret += sscanf(line, "PartitionNestedGrids = %"ISYM, &PartitionNestedGrids);
  
     ret += sscanf(line, "ExtractFieldsOnly = %"ISYM, &ExtractFieldsOnly);
@@ -1183,8 +1180,6 @@ int ReadParameterFile(FILE *fptr, TopGridData &MetaData, float *Initialdt)
     ret += sscanf(line, "WriteBoundary          = %"ISYM, &WriteBoundary);
     ret += sscanf(line,"TracerParticlesAddToRestart = %"ISYM,&TracerParticlesAddToRestart);
     ret += sscanf(line,"RefineByJeansLengthUnits = %"ISYM,&RefineByJeansLengthUnits);
-    ret += sscanf(line, "ProcessorTopology      = %"ISYM" %"ISYM" %"ISYM,
-		  ProcessorTopology,ProcessorTopology+1,ProcessorTopology+2);
 
     ret += sscanf(line,"CT_AthenaDissipation = %"FSYM,&CT_AthenaDissipation);
     ret += sscanf(line,"MHD_WriteElectric = %"ISYM,&MHD_WriteElectric);
@@ -1232,8 +1227,7 @@ int ReadParameterFile(FILE *fptr, TopGridData &MetaData, float *Initialdt)
 		  ResetMagneticFieldAmplitude+2);
 
     if (sscanf(line, "AppendActiveParticleType = %s", dummy) == 1) {
-      active_particle_types[active_particles] = new char[MAX_LINE_LENGTH];
-      strcpy(active_particle_types[active_particles], dummy);
+      active_particle_types[active_particles] = dummy;
       active_particles++;
     }
 
@@ -1244,6 +1238,7 @@ int ReadParameterFile(FILE *fptr, TopGridData &MetaData, float *Initialdt)
  
     if (*dummy != 0) {
       dummy = new char[MAX_LINE_LENGTH];
+      dummy[0] = 0;
       ret++;
     }
  
@@ -1313,8 +1308,9 @@ int ReadParameterFile(FILE *fptr, TopGridData &MetaData, float *Initialdt)
       if (MyProcessorNumber == ROOT_PROCESSOR)
 	fprintf(stderr, "warning: the following parameter line was not interpreted:\n%s", line);
 
-    delete [] dummy;
   }
+
+  delete [] dummy;
 
   // Enable the active particles that were selected.
   for (i = 0;i < active_particles;i++) {
@@ -1322,6 +1318,7 @@ int ReadParameterFile(FILE *fptr, TopGridData &MetaData, float *Initialdt)
       fprintf(stdout, "Enabling particle type %s\n", active_particle_types[i]);
     }
     EnableActiveParticleType(active_particle_types[i]);
+    delete [] active_particle_types[i];
   }
   delete [] active_particle_types;
 
@@ -1336,6 +1333,13 @@ int ReadParameterFile(FILE *fptr, TopGridData &MetaData, float *Initialdt)
   if ((HierarchyFileOutputFormat < 0) || (HierarchyFileOutputFormat > 2))
     ENZO_FAIL("Invalid HierarchyFileOutputFormat. Must be 0 (HDF5), 1 (ASCII), or 2 (both).")
   
+  // While we're examining the hierarchy, check that the MultiRefinedRegion doesn't demand more refinement that we've got                                                                                     
+  for (int ireg = 0; ireg < MAX_STATIC_REGIONS; ireg++)
+    if (MultiRefineRegionGeometry[ireg] >= 0)
+      if (MultiRefineRegionMaximumLevel[ireg] > MaximumRefinementLevel)
+	ENZO_VFAIL("MultiRefineRegionMaximumLevel[%"ISYM"] = %"ISYM"  > MaximumRefinementLevel\n", ireg, MultiRefineRegionMaximumLevel[ireg]);
+
+
 
   /* clean up */
  
@@ -1520,38 +1524,39 @@ int ReadParameterFile(FILE *fptr, TopGridData &MetaData, float *Initialdt)
 #ifdef USE_GRACKLE
   /* If using Grackle chemistry and cooling library, override all other 
      cooling machinery and do a translation of some of the parameters. */
-  if (grackle_chemistry.use_grackle == TRUE) {
-    // grackle_chemistry.use_grackle already set
-    // grackle_chemistry.with_radiative_cooling already set
-    // grackle_chemistry.grackle_data_file already set
-    // grackle_chemistry.UVbackground already set
-    // grackle_chemistry.Compton_xray_heating already set
-    // grackle_chemistry.LWbackground_intensity already set
-    // grackle_chemistry.LWbackground_sawtooth_suppression already set
-    grackle_chemistry.Gamma                          = Gamma;
-    grackle_chemistry.primordial_chemistry           = MultiSpecies;
-    grackle_chemistry.metal_cooling                  = MetalCooling;
-    grackle_chemistry.h2_on_dust                     = H2FormationOnDust;
-    grackle_chemistry.cmb_temperature_floor          = CloudyCoolingData.CMBTemperatureFloor;
-    grackle_chemistry.three_body_rate                = ThreeBodyRate;
-    grackle_chemistry.cie_cooling                    = CIECooling;
-    grackle_chemistry.h2_optical_depth_approximation = H2OpticalDepthApproximation;
-    grackle_chemistry.photoelectric_heating          = PhotoelectricHeating;
-    grackle_chemistry.photoelectric_heating_rate     = PhotoelectricHeatingRate;
-    grackle_chemistry.NumberOfTemperatureBins        = CoolData.NumberOfTemperatureBins;
-    grackle_chemistry.CaseBRecombination             = RateData.CaseBRecombination;
-    grackle_chemistry.TemperatureStart               = CoolData.TemperatureStart;
-    grackle_chemistry.TemperatureEnd                 = CoolData.TemperatureEnd;
-    grackle_chemistry.NumberOfDustTemperatureBins    = RateData.NumberOfDustTemperatureBins;
-    grackle_chemistry.DustTemperatureStart           = RateData.DustTemperatureStart;
-    grackle_chemistry.DustTemperatureEnd             = RateData.DustTemperatureEnd;
-    grackle_chemistry.HydrogenFractionByMass         = CoolData.HydrogenFractionByMass;
-    grackle_chemistry.DeuteriumToHydrogenRatio       = CoolData.DeuteriumToHydrogenRatio;
-    grackle_chemistry.SolarMetalFractionByMass       = CoolData.SolarMetalFractionByMass;
+  if (grackle_data.use_grackle == TRUE) {
+    // grackle_data.use_grackle already set
+    // grackle_data.with_radiative_cooling already set
+    // grackle_data.grackle_data_file already set
+    // grackle_data.UVbackground already set
+    // grackle_data.Compton_xray_heating already set
+    // grackle_data.LWbackground_intensity already set
+    // grackle_data.LWbackground_sawtooth_suppression already set
+    grackle_data.Gamma                          = (double) Gamma;
+    grackle_data.primordial_chemistry           = (Eint32) MultiSpecies;
+    grackle_data.metal_cooling                  = (Eint32) MetalCooling;
+    grackle_data.h2_on_dust                     = (Eint32) H2FormationOnDust;
+    grackle_data.cmb_temperature_floor          = (Eint32) CloudyCoolingData.CMBTemperatureFloor;
+    grackle_data.three_body_rate                = (Eint32) ThreeBodyRate;
+    grackle_data.cie_cooling                    = (Eint32) CIECooling;
+    grackle_data.h2_optical_depth_approximation = (Eint32) H2OpticalDepthApproximation;
+    grackle_data.photoelectric_heating          = (Eint32) PhotoelectricHeating;
+    grackle_data.photoelectric_heating_rate     = (double) PhotoelectricHeatingRate;
+    grackle_data.NumberOfTemperatureBins        = (Eint32) CoolData.NumberOfTemperatureBins;
+    grackle_data.CaseBRecombination             = (Eint32) RateData.CaseBRecombination;
+    grackle_data.TemperatureStart               = (double) CoolData.TemperatureStart;
+    grackle_data.TemperatureEnd                 = (double) CoolData.TemperatureEnd;
+    grackle_data.NumberOfDustTemperatureBins    = (Eint32) RateData.NumberOfDustTemperatureBins;
+    grackle_data.DustTemperatureStart           = (double) RateData.DustTemperatureStart;
+    grackle_data.DustTemperatureEnd             = (double) RateData.DustTemperatureEnd;
+    grackle_data.HydrogenFractionByMass         = (double) CoolData.HydrogenFractionByMass;
+    grackle_data.DeuteriumToHydrogenRatio       = (double) CoolData.DeuteriumToHydrogenRatio;
+    grackle_data.SolarMetalFractionByMass       = (double) CoolData.SolarMetalFractionByMass;
 
     // Initialize units structure.
-    float a_value, dadt;
+    FLOAT a_value, dadt;
     a_value = 1.0;
+    code_units grackle_units;
     grackle_units.a_units = 1.0;
     if (GetUnits(&DensityUnits, &LengthUnits, &TemperatureUnits,
                  &TimeUnits, &VelocityUnits, MetaData.Time) == FAIL) {
@@ -1562,23 +1567,23 @@ int ReadParameterFile(FILE *fptr, TopGridData &MetaData, float *Initialdt)
                                           &dadt) == FAIL) {
         ENZO_FAIL("Error in CosmologyComputeExpansionFactors.\n");
       }
-      grackle_units.a_units            = 1.0 / (1.0 + InitialRedshift);
+      grackle_units.a_units            = (double) (1.0 / (1.0 + InitialRedshift));
     }
-    grackle_units.comoving_coordinates = ComovingCoordinates;
-    grackle_units.density_units        = DensityUnits;
-    grackle_units.length_units         = LengthUnits;
-    grackle_units.time_units           = TimeUnits;
-    grackle_units.velocity_units       = VelocityUnits;
+    grackle_units.comoving_coordinates = (Eint32) ComovingCoordinates;
+    grackle_units.density_units        = (double) DensityUnits;
+    grackle_units.length_units         = (double) LengthUnits;
+    grackle_units.time_units           = (double) TimeUnits;
+    grackle_units.velocity_units       = (double) VelocityUnits;
 
     // Initialize chemistry structure.
-    if (initialize_chemistry_data(grackle_chemistry, grackle_units,
-                                  a_value) == FAIL) {
+    if (initialize_chemistry_data(&grackle_units,
+                                  (double) a_value) == FAIL) {
       ENZO_FAIL("Error in Grackle initialize_chemistry_data.\n");
     }
-  }  // if (grackle_chemistry.use_grackle == TRUE)
+  }  // if (grackle_data.use_grackle == TRUE)
 
   else {
-#endif // USE_GRACKE
+#endif // USE_GRACKLE
 
     /* If GadgetEquilibriumCooling == TRUE, we don't want MultiSpecies
        or RadiationFieldType to be on - both are taken care of in
@@ -1899,11 +1904,11 @@ int ReadParameterFile(FILE *fptr, TopGridData &MetaData, float *Initialdt)
   if ( (MetaData.GlobalDir != NULL) && (MetaData.LocalDir != NULL) ) {
     ENZO_FAIL("Cannot select GlobalDir AND LocalDir!\n");
   }
- 
-  char *cwd_buffer = new char[MAX_LINE_LENGTH];
-  size_t cwd_buffer_len = MAX_LINE_LENGTH;
- 
+  
   if ( (MetaData.GlobalDir == NULL) && (MetaData.LocalDir == NULL) ) {
+    char *cwd_buffer = new char[MAX_LINE_LENGTH];
+    size_t cwd_buffer_len = MAX_LINE_LENGTH;
+
     /*if(getcwd(cwd_buffer, cwd_buffer_len) == NULL) {
       fprintf(stderr, "GETCWD call FAILED\n");
     }

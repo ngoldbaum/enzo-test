@@ -138,7 +138,7 @@ int SetDefaultGlobalValues(TopGridData &MetaData)
 
   // Default Hierarchy File IO settings (1 = ASCII; 2 = HDF5+ASCII)
   HierarchyFileInputFormat = 1;
-  HierarchyFileOutputFormat = 2;
+  HierarchyFileOutputFormat = 1;
 
   ConductionDynamicRebuildHierarchy = FALSE;
   ConductionDynamicRebuildMinLevel = 0;
@@ -192,7 +192,7 @@ int SetDefaultGlobalValues(TopGridData &MetaData)
   HydroMethod               = PPM_DirectEuler;   //
   Gamma                     = 5.0/3.0;           // 5/3
   PressureFree              = FALSE;             // use pressure (duh)
-  RefineBy                  = 4;                 // Refinement factor
+  RefineBy                  = 2;                 // Refinement factor
   MaximumRefinementLevel    = 2;                 // three levels (w/ topgrid)
   MaximumGravityRefinementLevel = INT_UNDEFINED;
   MaximumParticleRefinementLevel = -1;            // unused if negative
@@ -285,6 +285,9 @@ int SetDefaultGlobalValues(TopGridData &MetaData)
   NumberOfRootGridTilesPerDimensionPerProcessor = 1;
   PartitionNestedGrids        = FALSE;
   ExtractFieldsOnly           = TRUE;
+  for (i = 0; i < MAX_DIMENSION; i++) {
+    UserDefinedRootGridLayout[i] = INT_UNDEFINED;
+  }
 
   ExternalBoundaryIO          = FALSE;
   ExternalBoundaryTypeIO      = FALSE;
@@ -357,7 +360,7 @@ int SetDefaultGlobalValues(TopGridData &MetaData)
   RadiativeTransferFLD        = 0;                 // off
   ImplicitProblem             = 0;                 // off
   StarMakerEmissivityField    = 0;                 // off
-  uv_param                    = 1.0e-5;            // mid-range value from Razoumov Norman 2002
+  uv_param                    = 1.1e-5;            // consistent with Razoumov Norman 2002
 
   MultiSpecies                = FALSE;             // off
   NoMultiSpeciesButColors     = FALSE;             // off
@@ -418,28 +421,30 @@ int SetDefaultGlobalValues(TopGridData &MetaData)
 
 #ifdef USE_GRACKLE
   // Grackle chemistry data structure.
-  grackle_chemistry                     = set_default_chemistry_parameters();
+  if (set_default_chemistry_parameters() == FAIL) {
+    ENZO_FAIL("Error in grackle: set_default_chemistry_parameters\n");
+  }
   // Map Grackle defaults to corresponding Enzo parameters
-  Gamma                                 = grackle_chemistry.Gamma;
-  MultiSpecies                          = grackle_chemistry.primordial_chemistry;
-  MetalCooling                          = grackle_chemistry.metal_cooling;
-  H2FormationOnDust                     = grackle_chemistry.h2_on_dust;
-  CloudyCoolingData.CMBTemperatureFloor = grackle_chemistry.cmb_temperature_floor;
-  ThreeBodyRate                         = grackle_chemistry.three_body_rate;
-  CIECooling                            = grackle_chemistry.cie_cooling;
-  H2OpticalDepthApproximation           = grackle_chemistry.h2_optical_depth_approximation;
-  PhotoelectricHeating                  = grackle_chemistry.photoelectric_heating;
-  PhotoelectricHeatingRate              = grackle_chemistry.photoelectric_heating_rate;
-  CoolData.NumberOfTemperatureBins      = grackle_chemistry.NumberOfTemperatureBins;
-  RateData.CaseBRecombination           = grackle_chemistry.CaseBRecombination;
-  CoolData.TemperatureStart             = grackle_chemistry.TemperatureStart;
-  CoolData.TemperatureEnd               = grackle_chemistry.TemperatureEnd;
-  RateData.NumberOfDustTemperatureBins  = grackle_chemistry.NumberOfDustTemperatureBins;
-  RateData.DustTemperatureStart         = grackle_chemistry.DustTemperatureStart;
-  RateData.DustTemperatureEnd           = grackle_chemistry.DustTemperatureEnd;
-  CoolData.HydrogenFractionByMass       = grackle_chemistry.HydrogenFractionByMass;
-  CoolData.DeuteriumToHydrogenRatio     = grackle_chemistry.DeuteriumToHydrogenRatio;
-  CoolData.SolarMetalFractionByMass     = grackle_chemistry.SolarMetalFractionByMass;
+  Gamma                                 = (float) grackle_data.Gamma;
+  MultiSpecies                          = (int) grackle_data.primordial_chemistry;
+  MetalCooling                          = (int) grackle_data.metal_cooling;
+  H2FormationOnDust                     = (int) grackle_data.h2_on_dust;
+  CloudyCoolingData.CMBTemperatureFloor = (int) grackle_data.cmb_temperature_floor;
+  ThreeBodyRate                         = (int) grackle_data.three_body_rate;
+  CIECooling                            = (int) grackle_data.cie_cooling;
+  H2OpticalDepthApproximation           = (int) grackle_data.h2_optical_depth_approximation;
+  PhotoelectricHeating                  = (int) grackle_data.photoelectric_heating;
+  PhotoelectricHeatingRate              = (float) grackle_data.photoelectric_heating_rate;
+  CoolData.NumberOfTemperatureBins      = (int) grackle_data.NumberOfTemperatureBins;
+  RateData.CaseBRecombination           = (int) grackle_data.CaseBRecombination;
+  CoolData.TemperatureStart             = (float) grackle_data.TemperatureStart;
+  CoolData.TemperatureEnd               = (float) grackle_data.TemperatureEnd;
+  RateData.NumberOfDustTemperatureBins  = (int) grackle_data.NumberOfDustTemperatureBins;
+  RateData.DustTemperatureStart         = (float) grackle_data.DustTemperatureStart;
+  RateData.DustTemperatureEnd           = (float) grackle_data.DustTemperatureEnd;
+  CoolData.HydrogenFractionByMass       = (float) grackle_data.HydrogenFractionByMass;
+  CoolData.DeuteriumToHydrogenRatio     = (float) grackle_data.DeuteriumToHydrogenRatio;
+  CoolData.SolarMetalFractionByMass     = (float) grackle_data.SolarMetalFractionByMass;
 #endif
 
   OutputCoolingTime = FALSE;
@@ -632,9 +637,6 @@ int SetDefaultGlobalValues(TopGridData &MetaData)
   AccretingParticleRadiation = FALSE;
   AccretingParticleLuminosity = 1e47;
   
-  GMCParticleRNGSeed               = INT_UNDEFINED;
-  GMCParticleRNGCalls              = 0;
-
   NumberOfParticleAttributes       = INT_UNDEFINED;
   AddParticleAttributes            = FALSE;
   LastSupernovaTime                = FLOAT_UNDEFINED;
@@ -864,9 +866,6 @@ int SetDefaultGlobalValues(TopGridData &MetaData)
   MHDCTDualEnergyMethod = INT_UNDEFINED;
   MHDCTPowellSource = 0;
   MHDCTUseSpecificEnergy = TRUE;
-  ProcessorTopology[0]      = INT_UNDEFINED;
-  ProcessorTopology[1]      = INT_UNDEFINED;
-  ProcessorTopology[2]      = INT_UNDEFINED;
   FixedTimestep = -1.0;
   WriteBoundary             = FALSE;
   CT_AthenaDissipation = 0.1;

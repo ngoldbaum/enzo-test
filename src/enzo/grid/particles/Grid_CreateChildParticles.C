@@ -18,6 +18,8 @@
 ************************************************************************/
 
 #include "preincludes.h"
+#include "ErrorExceptions.h"
+#include "performance.h"
 #include "macros_and_parameters.h"
 #include "typedefs.h"
 #include "global_data.h"
@@ -27,6 +29,8 @@
 #include "Grid.h"
 
 #define DEBUG_PS
+#include "fortran.def"
+#include "CosmologyParameters.h"
 
 void mt_init(unsigned_int seed);
 
@@ -38,7 +42,6 @@ int grid::CreateChildParticles(float dx, int NumberOfParticles, float *ParticleM
 			       FLOAT *CellLeftEdge[], int *GridDimension, 
 			       int MaximumNumberOfNewParticles, int iter, 
 			       int *NumberOfNewParticles)
-			 
 {
   int partnum = 0, i = 0, child = 0, m = 0, numpart = 0, innerchild = 0;
   int xindex=0, yindex=0, zindex=0;
@@ -116,6 +119,7 @@ int grid::CreateChildParticles(float dx, int NumberOfParticles, float *ParticleM
    * particles - which usually become Star class particles - doesn't 
    * seem to have any reason to be splitted.  (as of Oct.2009)
    */
+
 #ifdef DEBUG_PS
   fprintf(stdout, "%s: Iteration %d: midpoint = (%lf, %lf, %lf)\n", 
 	  __FUNCTION__, iter, midpoint[0], midpoint[1], midpoint[2]);
@@ -125,6 +129,7 @@ int grid::CreateChildParticles(float dx, int NumberOfParticles, float *ParticleM
 	  __FUNCTION__, iter, LeftEdge[0], LeftEdge[1], LeftEdge[2],
 	  RightEdge[0], RightEdge[1], RightEdge[2]);
 #endif
+
   for(partnum = 0; partnum < NumberOfParticles; partnum++)
     {
       if(ParticleMass[partnum] > 0.0 && ParticleType[partnum] < PARTICLE_TYPE_STAR)
@@ -165,7 +170,9 @@ int grid::CreateChildParticles(float dx, int NumberOfParticles, float *ParticleM
 	  /*
 	   * CREATE CHILDREN PARTICLES 
 	   */
+
 	  ParentParticles++;
+
 	  /* First reduce the mass of the parent down to 1/(children+parent) = 1/13 */
 	  ParticleMass[partnum] = ParticleMass[partnum] / (float)(ChildrenPerParent + 1.0);
 	  /*
@@ -354,6 +361,7 @@ int grid::CreateChildParticles(float dx, int NumberOfParticles, float *ParticleM
 	}
     }
 #ifdef DEBUG_PS
+
   if(total_children > 0)
     fprintf(stdout,"Iteration %d: %d new child particles created in this grid from %d parents\n", 
 	    iter, total_children, ParentParticles);

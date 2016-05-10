@@ -379,13 +379,13 @@ int WriteParameterFile(FILE *fptr, TopGridData &MetaData, char *name = NULL)
     if (DataLabel[dim]) {
       if ((strstr(DataLabel[dim], "Density") != NULL) ||
 	  (strstr(DataLabel[dim], "Colour") != NULL))
-	fprintf(fptr, "#DataCGSConversionFactor[%"ISYM"] = %"GSYM"\n", dim, DensityUnits);
+	fprintf(fptr, "#DataCGSConversionFactor[%"ISYM"] = %"GOUTSYM"\n", dim, DensityUnits);
       if (strstr(DataLabel[dim], "velocity") != NULL)
-	fprintf(fptr, "#DataCGSConversionFactor[%"ISYM"] = %"GSYM"\n", dim, VelocityUnits);
+	fprintf(fptr, "#DataCGSConversionFactor[%"ISYM"] = %"GOUTSYM"\n", dim, VelocityUnits);
     }
   }
-  fprintf(fptr, "#TimeUnits                 = %"GSYM"\n", TimeUnits);
-  fprintf(fptr, "#TemperatureUnits          = %"GSYM"\n", TemperatureUnits);
+  fprintf(fptr, "#TimeUnits                 = %"GOUTSYM"\n", TimeUnits);
+  fprintf(fptr, "#TemperatureUnits          = %"GOUTSYM"\n", TemperatureUnits);
   fprintf(fptr, "\n");
  
   fprintf(fptr, "UniformGravity             = %"ISYM"\n", UniformGravity);
@@ -452,13 +452,13 @@ int WriteParameterFile(FILE *fptr, TopGridData &MetaData, char *name = NULL)
   fprintf(fptr, "RandomForcingEdot              = %"GSYM"\n", RandomForcingEdot);
 #ifdef USE_GRACKLE
   /* Grackle chemistry parameters */
-  fprintf(fptr, "use_grackle                 = %"ISYM"\n", grackle_chemistry.use_grackle);
-  fprintf(fptr, "with_radiative_cooling      = %"ISYM"\n", grackle_chemistry.with_radiative_cooling);
-  fprintf(fptr, "grackle_data_file           = %s\n", grackle_chemistry.grackle_data_file);
-  fprintf(fptr, "UVbackground                = %"ISYM"\n", grackle_chemistry.UVbackground);
-  fprintf(fptr, "Compton_xray_heating        = %"ISYM"\n", grackle_chemistry.Compton_xray_heating);
-  fprintf(fptr, "LWbackground_intensity      = %"FSYM"\n", grackle_chemistry.LWbackground_intensity);
-  fprintf(fptr, "LWbackground_sawtooth_suppression = %"ISYM"\n", grackle_chemistry.LWbackground_sawtooth_suppression);
+  fprintf(fptr, "use_grackle                 = %d\n", grackle_data.use_grackle);
+  fprintf(fptr, "with_radiative_cooling      = %d\n", grackle_data.with_radiative_cooling);
+  fprintf(fptr, "grackle_data_file           = %s\n", grackle_data.grackle_data_file);
+  fprintf(fptr, "UVbackground                = %d\n", grackle_data.UVbackground);
+  fprintf(fptr, "Compton_xray_heating        = %d\n", grackle_data.Compton_xray_heating);
+  fprintf(fptr, "LWbackground_intensity      = %lf\n", grackle_data.LWbackground_intensity);
+  fprintf(fptr, "LWbackground_sawtooth_suppression = %d\n", grackle_data.LWbackground_sawtooth_suppression);
   /********************************/
 #endif
   fprintf(fptr, "RadiativeCooling               = %"ISYM"\n", RadiativeCooling);
@@ -659,7 +659,11 @@ int WriteParameterFile(FILE *fptr, TopGridData &MetaData, char *name = NULL)
   fprintf(fptr, "PartitionNestedGrids            = %"ISYM"\n", PartitionNestedGrids);
   fprintf(fptr, "ExtractFieldsOnly               = %"ISYM"\n", ExtractFieldsOnly);
   fprintf(fptr, "CubeDumpEnabled                 = %"ISYM"\n", CubeDumpEnabled);
- 
+  fprintf(fptr, "UserDefinedRootGridLayout       = %"ISYM" %"ISYM" %"ISYM"\n",
+          UserDefinedRootGridLayout[0],
+          UserDefinedRootGridLayout[1],
+          UserDefinedRootGridLayout[2]);
+
   fprintf(fptr, "Debug1                          = %"ISYM"\n", debug1);
   fprintf(fptr, "Debug2                          = %"ISYM"\n", debug2);
 
@@ -1137,8 +1141,6 @@ int WriteParameterFile(FILE *fptr, TopGridData &MetaData, char *name = NULL)
   fprintf(fptr,"FixedTimestep          =%"GSYM"\n",FixedTimestep);
   fprintf(fptr,"MHD_ProjectB                  =%"ISYM"\n",MHD_ProjectB);
   fprintf(fptr,"MHD_ProjectE                  =%"ISYM"\n",MHD_ProjectE);
-  fprintf(fptr,"ProcessorTopology             =%"ISYM" %"ISYM" %"ISYM"\n",
-          ProcessorTopology[0],ProcessorTopology[1],ProcessorTopology[2]);
   fprintf(fptr,"EquationOfState               =%"ISYM"\n",EquationOfState);
 
   fprintf(fptr, "CorrectParentBoundaryFlux          = %d\n", CorrectParentBoundaryFlux);

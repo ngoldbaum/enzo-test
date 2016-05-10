@@ -259,6 +259,11 @@ Eint32 MAIN_NAME(Eint32 argc, char *argv[])
   }
 #endif
 
+#ifdef USE_GRACKLE
+  if (MyProcessorNumber == ROOT_PROCESSOR) {
+    grackle_verbose = 1;
+  }
+#endif
 
   int int_argc;
   int_argc = argc;
@@ -447,7 +452,7 @@ Eint32 MAIN_NAME(Eint32 argc, char *argv[])
 
   // If we need to read the parameter file as a restart file, do it now
  
-  if (restart || OutputAsParticleDataFlag || extract || InformationOutput || project  ||  velanyl || WritePotentialOnly) {
+  if (restart || OutputAsParticleDataFlag || extract || InformationOutput || project  ||  velanyl || WritePotentialOnly || WriteCoolingTimeOnly || SmoothedDarkMatterOnly) {
  
     SetDefaultGlobalValues(MetaData);
 
