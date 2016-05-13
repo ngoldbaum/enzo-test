@@ -26,7 +26,7 @@
 
 int grid::CollectActiveParticles(int GridNum, int* &NumberToMove, 
 				 int &StartIndex, int &EndIndex, 
-				 ActiveParticleType** &List, int CopyDirection)
+				 ActiveParticleList<ActiveParticleType> &List, int CopyDirection)
 {
  
   /* Declarations. */
@@ -56,20 +56,13 @@ int grid::CollectActiveParticles(int GridNum, int* &NumberToMove,
  
     /* Move and delete stars */
 
-    if (ActiveParticles == NULL)
-      ENZO_FAIL("ActiveParticles pointer cannot be NULL here.  "
-		"NumberOfActiveParticles and pointer are mismatched.");
-
     for (i = 0, n1 = StartIndex; i < NumberOfActiveParticles; i++, n1++) {
-      List[n1] = ActiveParticles[i];
+      List.copy_and_insert(*ActiveParticles[i]);
       List[n1]->SetGridID(GridNum);
-      List[n1]->SetDestProcessor(ProcessorNumber);
     } // ENDFOR stars
 
     StartIndex = n1;
-    NumberOfActiveParticles = 0;
-    delete [] ActiveParticles;
-    ActiveParticles = NULL;
+    this->DeleteActiveParticles();
 
   } // end: if (COPY_OUT)
  
@@ -82,7 +75,7 @@ int grid::CollectActiveParticles(int GridNum, int* &NumberToMove,
       return SUCCESS;
 
     int NumberOfNewActiveParticles = EndIndex - StartIndex;
-    this->AddActiveParticles(List, NumberOfNewActiveParticles, StartIndex);
+    this->AddActiveParticles(List, StartIndex, EndIndex);
  
   } // end: if (COPY_IN)
  

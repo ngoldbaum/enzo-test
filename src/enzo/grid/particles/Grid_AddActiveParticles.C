@@ -26,27 +26,18 @@
 
 #include "ActiveParticle.h"
 
-int grid::AddActiveParticles(ActiveParticleType **NewParticles,
-			     int NumberOfNewParticles, int start)
+int grid::AddActiveParticles(ActiveParticleList<ActiveParticleType> &NewParticles, int start, int end)
 {
 
-  if (NumberOfNewParticles == 0)
+  if (NewParticles.size() == 0)
     return SUCCESS;
 
-  int i, index;
-  int OldNumberOfActiveParticles = this->NumberOfActiveParticles;
-  ActiveParticleType **OldActiveParticles = this->ActiveParticles;
-
-  this->NumberOfActiveParticles += NumberOfNewParticles;
-  this->ActiveParticles = new ActiveParticleType*[this->NumberOfActiveParticles]();
-  for (i = 0; i < OldNumberOfActiveParticles; i++) {
-    this->ActiveParticles[i] = OldActiveParticles[i];
-  }
-  for (i = start, index = OldNumberOfActiveParticles; 
-       index < this->NumberOfActiveParticles; i++, index++) {
-    this->ActiveParticles[index] = NewParticles[i];
-    this->ActiveParticles[index]->SetGridID(this->ID);
-    this->ActiveParticles[index]->AssignCurrentGrid(this);
+  this->NumberOfActiveParticles += (end - start);
+  for (int i=start; i < end; i++)
+  {
+    NewParticles[i]->SetGridID(this->ID);
+    NewParticles[i]->AssignCurrentGrid(this);
+    this->ActiveParticles.copy_and_insert(*NewParticles[i]);
   }
 
 #define NO_DEBUG
@@ -54,22 +45,30 @@ int grid::AddActiveParticles(ActiveParticleType **NewParticles,
   int dim, inside;
   FLOAT *pos;
   float TotalMass = 0;
-  for (i = 0; i < this->NumberOfActiveParticles; i++) {
-    pos = this->ActiveParticles[i]->ReturnPosition();
-    TotalMass += this->ActiveParticles[i]->ReturnMass();
+
+  if (NumberOfActiveParticles != this->ActiveParticles.size()) {
+    printf("Active particle count mismatch!\n");
+    printf("NumberOfActiveParticles = %"ISYM"\n", NumberOfActiveParticles);
+    printf("ActiveParticles.size() = %"ISYM"\n", ActiveParticles.size());
+    ENZO_FAIL("")
+  }
+
+  for (int i = start; i < end; i++) {
+    pos = NewParticles[i]->ReturnPosition();
+    TotalMass += NewParticles[i]->ReturnMass();
     inside = this->PointInGrid(pos);
     if (inside == FALSE) {
-      fprintf(stdout,"pos[0]: %"PSYM", pos[1]: %"PSYM", pos[2]: %"PSYM"\n",pos[0],pos[1],pos[2]);
-      fprintf(stdout,"mass: %"FSYM"\n");
-      fprintf(stdout,"GridLeftEdge[0]: %"PSYM", GridLeftEdge[1]: %"PSYM", GridLeftEdge[2]: %"PSYM"\n",
-	      GridLeftEdge[0], GridRightEdge[1], GridRightEdge[2]);
+      fprintf(stderr,"pos[0]: %"PSYM", pos[1]: %"PSYM", pos[2]: %"PSYM"\n",pos[0],pos[1],pos[2]);
+      fprintf(stderr,"mass: %"FSYM"\n");
+      fprintf(stderr,"GridLeftEdge[0]: %"PSYM", GridLeftEdge[1]: %"PSYM", GridLeftEdge[2]: %"PSYM"\n",
+	      GridLeftEdge[0], GridLeftEdge[1], GridLeftEdge[2]);
+      fprintf(stderr,"GridRightEdge[0]: %"PSYM", GridRightEdge[1]: %"PSYM", GridRightEdge[2]: %"PSYM"\n",
+	      GridRightEdge[0], GridRightEdge[1], GridRightEdge[2]);      
       ENZO_FAIL("ActiveParticle outside!\n");
     }
   }
   fprintf(stdout,"AddActiveParticles: Total Mass added to grid = %"FSYM"\n",TotalMass);
 #endif /* DEBUG */  
-
-  delete [] OldActiveParticles;
 
   return SUCCESS;
 

@@ -30,7 +30,7 @@
 float bondi_alpha(float x);
 
 int grid::AccreteOntoAccretingParticle(
-  ActiveParticleType** ThisParticle,FLOAT AccretionRadius,
+  ActiveParticleType* ThisParticle,FLOAT AccretionRadius,
   float* AccretionRate)
 {
 
@@ -41,9 +41,9 @@ int grid::AccreteOntoAccretingParticle(
   /* Check whether the cube that circumscribes the accretion zone intersects
    * with this grid */
 
-  FLOAT xsink = (*ThisParticle)->ReturnPosition()[0];
-  FLOAT ysink = (*ThisParticle)->ReturnPosition()[1];
-  FLOAT zsink = (*ThisParticle)->ReturnPosition()[2];
+  FLOAT xsink = ThisParticle->ReturnPosition()[0];
+  FLOAT ysink = ThisParticle->ReturnPosition()[1];
+  FLOAT zsink = ThisParticle->ReturnPosition()[2];
 
   if ((GridLeftEdge[0] > xsink+AccretionRadius) ||
       (GridLeftEdge[1] > ysink+AccretionRadius) ||
@@ -127,13 +127,13 @@ int grid::AccreteOntoAccretingParticle(
 
   /* Find sink properties */
 
-  float msink = (*ThisParticle)->ReturnMass()*CellVolume;
+  float msink = ThisParticle->ReturnMass()*CellVolume;
 
   float vsink[3] =
     {
-      (*ThisParticle)->ReturnVelocity()[0],
-      (*ThisParticle)->ReturnVelocity()[1],
-      (*ThisParticle)->ReturnVelocity()[2]
+      ThisParticle->ReturnVelocity()[0],
+      ThisParticle->ReturnVelocity()[1],
+      ThisParticle->ReturnVelocity()[2]
     };
 
   /* Find the Bondi-Hoyle radius */
@@ -442,8 +442,8 @@ int grid::AccreteOntoAccretingParticle(
     }
   }
 
-  float Mass = (*ThisParticle)->Mass*CellVolume;
-  float *Vel = (*ThisParticle)->vel;
+  float Mass = ThisParticle->Mass*CellVolume;
+  float *Vel = ThisParticle->vel;
 
   float NewVelocity[3] =
     {
@@ -452,8 +452,8 @@ int grid::AccreteOntoAccretingParticle(
     (Mass*Vel[2]+AccretedMomentum[2])/(Mass+AccretedMass*CellVolume)
     };
 
-  (*ThisParticle)->SetVelocity(NewVelocity);
-  (*ThisParticle)->AddMass(AccretedMass);
+  ThisParticle->SetVelocity(NewVelocity);
+  ThisParticle->AddMass(AccretedMass);
 
   /* Clean up */
 

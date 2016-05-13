@@ -578,25 +578,23 @@ int grid::ReadGrid(FILE *fptr, int GridID, HDF5_hid_t file_id,
 
     /* Loop over enabled active particle types */
 
-    this->ActiveParticles = new ActiveParticleType*[NumberOfActiveParticles]();
-
     int offset = 0;
-
-    for (i = 0; i < EnabledActiveParticlesCount; i++)
-      {
     
-	/* Instantiate an active particle helper of this type
-	   This class contains the function that allows us to read from disk */
-
-	ActiveParticleType_info *ActiveParticleTypeToEvaluate = EnabledActiveParticles[i];
-	
-        ActiveParticleTypeToEvaluate->ReadParticles(
-            this->ActiveParticles, offset,
-            ActiveParticleTypeToEvaluate->particle_name,
-            ActiveParticleGroupID);
-	
-      } // end: for EnabledActiveParticlesCount
-
+    for (i = 0; i < EnabledActiveParticlesCount; i++)
+    {
+      
+      /* Instantiate an active particle helper of this type
+         This class contains the function that allows us to read from disk */
+      
+      ActiveParticleType_info *ActiveParticleTypeToEvaluate = EnabledActiveParticles[i];
+      
+      ActiveParticleTypeToEvaluate->ReadParticles(
+          this->ActiveParticles, offset,
+          ActiveParticleTypeToEvaluate->particle_name,
+          ActiveParticleGroupID);
+      
+    } // end: for EnabledActiveParticlesCount
+    
     /* Assign the active particle buffer to this grid. */
 
     float dx = (GridRightEdge[0] - GridLeftEdge[0]) / 

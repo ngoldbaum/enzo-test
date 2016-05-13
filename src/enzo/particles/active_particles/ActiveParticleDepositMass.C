@@ -33,8 +33,9 @@
 
 /* prototypes */
 
-ActiveParticleType** ActiveParticleFindAll(LevelHierarchyEntry *LevelArray[], int *GlobalNumberOfActiveParticles, 
-					   int ActiveParticleIDToFind);
+ActiveParticleList<ActiveParticleType> &ActiveParticleFindAll(
+    LevelHierarchyEntry *LevelArray[], int *GlobalNumberOfActiveParticles, 
+    int ActiveParticleIDToFind);
 
 int ActiveParticleDepositMass(HierarchyEntry *Grids[], TopGridData *MetaData,
 			   int NumberOfGrids, LevelHierarchyEntry *LevelArray[], 
@@ -49,9 +50,8 @@ int ActiveParticleDepositMass(HierarchyEntry *Grids[], TopGridData *MetaData,
 #ifdef DEBUG
   
   int nParticles;
-  ActiveParticleType** ParticleList = NULL;
-
-  ParticleList = ActiveParticleFindAll(LevelArray, &nParticles, 0);
+  ActiveParticleList<ActiveParticleType> ParticleList = 
+    ActiveParticleFindAll(LevelArray, &nParticles, 0);
 
   if (nParticles > 0) {
     PINT IDList[nParticles];
@@ -66,8 +66,6 @@ int ActiveParticleDepositMass(HierarchyEntry *Grids[], TopGridData *MetaData,
   if (NumberOfProcessors > 1)
     for (i = 0; i < nParticles; i++)
       delete ParticleList[i];
-
-  delete [] ParticleList;
 
 #endif
 

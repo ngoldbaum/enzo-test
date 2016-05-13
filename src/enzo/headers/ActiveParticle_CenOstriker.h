@@ -23,7 +23,13 @@ class ActiveParticleType_CenOstriker : public ActiveParticleType
 public:
   // Constructors
   ActiveParticleType_CenOstriker(void) : ActiveParticleType() {};
-
+  ActiveParticleType_CenOstriker(ActiveParticleType* part) : 
+    ActiveParticleType(static_cast<ActiveParticleType*>(part)) {};
+  ActiveParticleType* clone() {
+    return static_cast<ActiveParticleType*>(
+        new ActiveParticleType_CenOstriker(this)
+      );
+  }
   static int EvaluateFormation(grid *thisgrid_orig, ActiveParticleFormationData &data);
   static int EvaluateFeedback(grid *thisgrid_orig, ActiveParticleFormationData &data);
   static void DescribeSupplementalData(ActiveParticleFormationDataFlags &flags);

@@ -156,28 +156,22 @@ int grid::MoveAllParticles(int NumberOfGrids, grid* FromGrid[])
 
   /******************** ACTIVE PARTICLES ********************/
 
-  ActiveParticleType **MoveParticles = 
-    new ActiveParticleType*[NumberOfSubgridActiveParticles]();
+  ActiveParticleList<ActiveParticleType> MoveParticles(NumberOfSubgridActiveParticles);
 
   int dlevel = logf(RefinementFactors[0]) / logf(RefineBy);
 
-  Index = 0;
   for (grid = 0; grid < NumberOfGrids; grid++) {
     for (i = 0; i < FromGrid[grid]->NumberOfActiveParticles; i++) {
       FromGrid[grid]->ActiveParticles[i]->AdjustMassByFactor(MassDecrease);
       FromGrid[grid]->ActiveParticles[i]->ReduceLevel(dlevel);
       FromGrid[grid]->ActiveParticles[i]->AssignCurrentGrid(this);
       FromGrid[grid]->ActiveParticles[i]->SetGridID(this->ID);
-      MoveParticles[Index++] = FromGrid[grid]->ActiveParticles[i];
+      MoveParticles.copy_and_insert(*(FromGrid[grid]->ActiveParticles[i]));
     }
-    FromGrid[grid]->NumberOfActiveParticles = 0;
-    delete [] FromGrid[grid]->ActiveParticles;
-    FromGrid[grid]->ActiveParticles = NULL;
+    FromGrid[grid]->DeleteActiveParticles();
   }
 
-  this->AddActiveParticles(MoveParticles, NumberOfSubgridActiveParticles);
-
-  delete [] MoveParticles;
+  this->AddActiveParticles(MoveParticles, 0, NumberOfSubgridActiveParticles);
 
   return SUCCESS;
 }

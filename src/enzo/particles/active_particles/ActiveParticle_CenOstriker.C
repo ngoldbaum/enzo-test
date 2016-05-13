@@ -232,7 +232,8 @@ int ActiveParticleType_CenOstriker::EvaluateFormation(grid *thisgrid_orig, Activ
 	 */
 
 	ActiveParticleType_CenOstriker *np = new ActiveParticleType_CenOstriker();
-	data.NewParticles[data.NumberOfNewParticles++] = np;
+    data.NumberOfNewParticles++;
+    data.NewParticles.insert(*np);
 
 	np->level = data.level;
 	np->GridID = data.GridID;
@@ -436,11 +437,11 @@ int ActiveParticleType_CenOstriker::EvaluateFeedback
 
     // Add energy to the energy field
     for (kc = k - FeedbackDistRadius; kc <= k + FeedbackDistRadius; kc++){
-      stepk = fabs(kc - k);
+      stepk = ABS(kc - k);
       for (jc = j - FeedbackDistRadius; jc <= j + FeedbackDistRadius; jc++){
-	stepj = stepk + fabs(jc - j);
+	stepj = stepk + ABS(jc - j);
 	for (ic = i - FeedbackDistRadius; ic <= i + FeedbackDistRadius; ic++){
-	  cellstep = stepj + fabs(ic - i);
+	  cellstep = stepj + ABS(ic - i);
 	  DistIndex = GRIDINDEX_NOGHOST(ic,jc,kc);
 	  if (cellstep <= FeedbackDistCellStep) {
 	    DensityRatio = 1.0/(density[DistIndex] + DensityToAddToEachCell);

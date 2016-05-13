@@ -153,7 +153,8 @@ int ActiveParticleType_Kravtsov::EvaluateFormation
 	 */
 	
 	ActiveParticleType_Kravtsov *np = new ActiveParticleType_Kravtsov();
-	supp_data.NewParticles[supp_data.NumberOfNewParticles++] = np;
+	supp_data.NewParticles.insert(*np);
+    supp_data.NumberOfNewParticles++;
 
 	// Make sure that we never give put than 90% of the cell's mass into a star particle
 	gasfrac = min( 0.9, tg->dtFixed / timeconstant );

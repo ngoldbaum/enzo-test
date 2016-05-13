@@ -141,7 +141,8 @@ int ActiveParticleType_Skeleton::EvaluateFormation(grid *thisgrid_orig, ActivePa
         if (false)
         {
           ActiveParticleType_Skeleton *np = new ActiveParticleType_Skeleton();
-          data.NewParticles[data.NumberOfNewParticles++] = np;
+          data.NumberOfNewParticles++;
+          data.NewParticles.insert(*np);
 
           np->level = data.level;
           np->GridID = data.GridID;

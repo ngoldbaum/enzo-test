@@ -55,8 +55,9 @@ int ActiveParticleType_SpringelHernquist::InitializeParticleType() {
   for(AttributeVector::iterator it = ah.begin(); it != ah.end(); ++it) {
     if((*it)->name == "metallicity") (*it)->name = "metallicity_fraction";
   }
-
-
+  
+  return SUCCESS;
+  
 }
 
 int ActiveParticleType_SpringelHernquist::EvaluateFormation
@@ -155,8 +156,10 @@ int ActiveParticleType_SpringelHernquist::EvaluateFormation
 
 	starfraction = min(MinimumMass / bmass, 0.5);
 
-	ActiveParticleType_SpringelHernquist *np = new ActiveParticleType_SpringelHernquist();
-	supp_data.NewParticles[supp_data.NumberOfNewParticles++] = np;
+	ActiveParticleType_SpringelHernquist *np = 
+      new ActiveParticleType_SpringelHernquist();
+    supp_data.NumberOfNewParticles++;
+    supp_data.NewParticles.insert(*np);
 	//fprintf(stderr, "G_APH: Creating !\n");
 
 	// Give the star mass and then remove the same from the grid.

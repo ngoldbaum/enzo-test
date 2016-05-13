@@ -42,7 +42,8 @@ int CommunicationBufferedSend(void *buffer, int size, MPI_Datatype Type,
    ToProcessor, using FromNumber particles counting from FromStart.
 */
 
-int grid::CommunicationSendActiveParticles(grid *ToGrid, int ToProcessor, bool DeleteParticles)
+int grid::CommunicationSendActiveParticles(
+        grid *ToGrid, int ToProcessor, bool DeleteParticles)
 {
 #ifdef USE_MPI
 
@@ -60,8 +61,8 @@ int grid::CommunicationSendActiveParticles(grid *ToGrid, int ToProcessor, bool D
   int type_count_index;
   int SendNumberOfActiveParticles;
   ActiveParticleType_info *ap_info;
-  ActiveParticleType **NewParticles;
-  ActiveParticleType **SendParticles = NULL;
+  ActiveParticleList<ActiveParticleType> NewParticles;
+  ActiveParticleList<ActiveParticleType> SendParticles;
 
   MPI_Status status;
   MPI_Arg Count, Source, Dest;
@@ -69,11 +70,11 @@ int grid::CommunicationSendActiveParticles(grid *ToGrid, int ToProcessor, bool D
   /* Serial case */
 
   if (NumberOfProcessors == 1) {
-    ToGrid->AddActiveParticles(this->ActiveParticles, 
-			       this->NumberOfActiveParticles);
+    ToGrid->AddActiveParticles(this->ActiveParticles, 0, this->ActiveParticles.size());
     if (ToGrid != this && DeleteParticles == true)
-      this->NumberOfActiveParticles = 0;
-    delete[] this->ActiveParticles;
+    {
+      this->DeleteActiveParticles();
+    }
     return SUCCESS;
   } // ENDIF serial case
 
@@ -168,13 +169,12 @@ int grid::CommunicationSendActiveParticles(grid *ToGrid, int ToProcessor, bool D
   if ((CommunicationDirection == COMMUNICATION_SEND) || 
       (CommunicationDirection == COMMUNICATION_SEND_RECEIVE)) {
     if (MyProcessorNumber == ProcessorNumber) {
-      SendParticles = new ActiveParticleType*[type_count[type]]();
+      ActiveParticleList<ActiveParticleType> SendParticles(type_count[type]);
       position = 0;
       ap_id = ap_info->GetEnabledParticleID();
         for (i = 0; i < NumberOfActiveParticles; i++) {
           if (ActiveParticles[i]->ReturnType() == type) {
-	        SendParticles[position] = ActiveParticles[i];
-	        SendParticles[position]->SetDestProcessor(ToProcessor);
+	        SendParticles.copy_and_insert(*ActiveParticles[i]);
 	        SendParticles[position]->SetGridID(ToGrid->GetGridID());
 	        position++;
 	  } // for type
@@ -183,9 +183,7 @@ int grid::CommunicationSendActiveParticles(grid *ToGrid, int ToProcessor, bool D
       ap_info->FillBuffer(SendParticles, position, buffer);
       // We can clean up immediately.
       if (DeleteParticles == true)
-	for (i = NumberOfActiveParticles-1; i > -1; i--)
-	  this->RemoveActiveParticle(ActiveParticles[i]->ReturnID(),ToProcessor);
-      delete[] SendParticles;
+        this->DeleteActiveParticles();
     } // myproc == proc
   } // if sending
     
@@ -260,14 +258,16 @@ int grid::CommunicationSendActiveParticles(grid *ToGrid, int ToProcessor, bool D
     
     // Extract the number of particles in the buffer
     // type_count should have been received by now...
-    NewParticles = new ActiveParticleType*[type_count[type]]();
     ap_info->UnpackBuffer(buffer, 0,
 			  NewParticles, type_count[type]);
+
     for (i = 0; i < type_count[type]; i++)
+    {
       NewParticles[i]->AssignCurrentGrid(ToGrid);
-    ToGrid->AddActiveParticles(NewParticles, type_count[type]);
+    }
+
+    ToGrid->AddActiveParticles(NewParticles, 0, type_count[type]);
     
-    delete[] NewParticles;
     delete[] buffer;
     
   } // end: if (MyProcessorNumber == ToProcessor && ...)

@@ -131,11 +131,9 @@ class grid
 //
 //  Active particle data
 //
-  int NumberOfActiveParticles;
   float* ActiveParticleAcceleration[MAX_DIMENSION+1];
-  ActiveParticleType **ActiveParticles;
-  class ParticleBufferHandler **GetParticleBuffers();
-  class ParticleBufferHandler **GetParticleBuffers(bool *mask);
+  int NumberOfActiveParticles;
+  ActiveParticleList<ActiveParticleType> ActiveParticles;
   // At present this is synched up in CommunicationSyncNumberOfParticles.
   // Therefore below should be accurate as often as NumberOfParticles and
   // NumberOfActiveParticles are.
@@ -1437,7 +1435,7 @@ gradient force to gravitational force for one-zone collapse test. */
    int ReturnNumberOfParticles() {return NumberOfParticles;};
    int ReturnNumberOfActiveParticles() {return NumberOfActiveParticles;};
    int ReturnNumberOfActiveParticlesOfThisType(int ActiveParticleIDToFind);
-   ActiveParticleType** ReturnActiveParticles() {return ActiveParticles;};
+   ActiveParticleList<ActiveParticleType>& ReturnActiveParticles() {return ActiveParticles;};
 
    int ReturnNumberOfStarParticles(void);
 
@@ -1471,13 +1469,11 @@ gradient force to gravitational force for one-zone collapse test. */
 
   void DeleteActiveParticles() {
     NumberOfActiveParticles = 0;
-    if (ActiveParticles != NULL) delete [] ActiveParticles;
-    ActiveParticles = NULL;
+    this->ActiveParticles.clear();
   }
 
   void CorrectActiveParticleCounts() {
-    if (NumberOfActiveParticles > 0 && ActiveParticles == NULL)
-      NumberOfActiveParticles = 0;
+    NumberOfActiveParticles = ActiveParticles.size();
   }
 
 /* Particles: allocate new particle fields. */
@@ -1646,7 +1642,7 @@ gradient force to gravitational force for one-zone collapse test. */
 				 int CopyDirection);
   int CommunicationTransferActiveParticles(grid* Grids[], int NumberOfGrids, 
 	   int ThisGridNum, int TopGridDims[], int *&NumberToMove, 
-	   int StartIndex, int EndIndex, ActiveParticleType** &List, 
+	   int StartIndex, int EndIndex, ActiveParticleList<ActiveParticleType> &List, 
 	   int *Layout, int *GStartIndex[], int *GridMap, int CopyDirection);
 
   int CollectParticles(int GridNum, int* &NumberToMove, 
@@ -1655,7 +1651,7 @@ gradient force to gravitational force for one-zone collapse test. */
 
   int CollectActiveParticles(int GridNum, int* &NumberToMove, 
 			     int &StartIndex, int &EndIndex, 
-			     ActiveParticleType** &List, int CopyDirection);
+			     ActiveParticleList<ActiveParticleType> &List, int CopyDirection);
 
   int CollectStars(int GridNum, int* &NumberToMove, 
 		   int &StartIndex, int &EndIndex, 
@@ -1683,7 +1679,7 @@ gradient force to gravitational force for one-zone collapse test. */
   
   int TransferSubgridActiveParticles(grid* Subgrids[], int NumberOfSubgrids, 
 				     int* &NumberToMove, int StartIndex, 
-				     int EndIndex, ActiveParticleType** &List, 
+				     int EndIndex, ActiveParticleList<ActiveParticleType> &List, 
 				     bool KeepLocal, bool ParticlesAreLocal, 
 				     int CopyDirection, 
 				     int IncludeGhostZones = FALSE, 
@@ -2415,11 +2411,11 @@ int zEulerSweep(int j, int NumberOfSubgrids, fluxes *SubgridFluxes[],
   /* Append and detach active particles data to 'normal' particle
      arrays */
   
-  int AddActiveParticles(ActiveParticleType **NewParticles,
-			 int NumberOfNewParticles, int start=0);
+  int AddActiveParticles(ActiveParticleList<ActiveParticleType> &NewParticles, 
+      int start, int end);
   int AddActiveParticle(ActiveParticleType* ThisParticle);
-  int AppendActiveParticlesToList(ActiveParticleType** APArray, 
-				  int offset, int search_id);
+  int AppendActiveParticlesToList(ActiveParticleList<ActiveParticleType> &APArray,
+      int search_id);
   int DebugActiveParticles(int level);
   
   /* Create flat arrays of active particle data */
@@ -2629,14 +2625,13 @@ int zEulerSweep(int j, int NumberOfSubgrids, fluxes *SubgridFluxes[],
 
   int UpdateStarParticles(int level);
 
-  int UpdateParticleWithActiveParticle(PINT ID);
-
   int AddH2Dissociation(Star *AllStars);
 
   int ReturnStarStatistics(int &Number, float &minLife);
 
-  int AccreteOntoAccretingParticle(ActiveParticleType** ThisParticle, FLOAT AccretionRadius,
-				   float* AccretionRate);
+  int AccreteOntoAccretingParticle(ActiveParticleType* ThisParticle, 
+      FLOAT AccretionRadius,
+      float* AccretionRate);
 
   int AddMassAndMomentumToAccretingParticle(float GlobalSubtractedMass, float GlobalSubtractedMomentum[], 
 					    ActiveParticleType* ThisParticle, LevelHierarchyEntry *LevelArray[]);
