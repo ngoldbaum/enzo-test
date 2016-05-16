@@ -23,7 +23,7 @@ def parse_file(fn):
     if not os.path.exists(fn):
         fn = os.path.join("headers", fn)
     if not os.path.exists(fn):
-        print "SKIPPING", fn
+        print ("SKIPPING", fn)
         return
     all_vars = []
     for line in open(fn):
