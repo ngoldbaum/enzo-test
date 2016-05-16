@@ -208,7 +208,8 @@ int ActiveParticleType_AccretingParticle::EvaluateFormation
 	// Passed creation tests, create sink particle
 
 	ActiveParticleType_AccretingParticle *np = new ActiveParticleType_AccretingParticle();
-	data.NewParticles[data.NumberOfNewParticles++] = np;
+    data.NumberOfNewParticles++;
+    data.NewParticles.insert(*np);
 
 	ExtraDensity = density[index] - DensityThreshold;
 	np->Mass = ExtraDensity;   // Particle 'masses' are actually densities
@@ -263,7 +264,8 @@ int ActiveParticleType_AccretingParticle::EvaluateFeedback(grid *thisgrid_orig, 
 
   for (int n = 0; n < npart; n++) {
     ActiveParticleType_AccretingParticle *ThisParticle =
-      static_cast<ActiveParticleType_AccretingParticle*>(thisGrid->ActiveParticles[n]);
+      static_cast<ActiveParticleType_AccretingParticle*>(
+              thisGrid->ActiveParticles[n]);
 
     ThisParticle->level = data.level;
   }
@@ -295,9 +297,10 @@ int ActiveParticleType_AccretingParticle::BeforeEvolveLevel
 	   &TimeUnits, &VelocityUnits, Time);
 
   int j, dim, ipart, nParticles;
-  ActiveParticleType **AccretingParticleList = NULL;
+  ActiveParticleList<ActiveParticleType> AccretingParticleList;
   if (CallEvolvePhotons)
-    AccretingParticleList = ActiveParticleFindAll(LevelArray, &nParticles, AccretingParticleID);
+    ActiveParticleFindAll(LevelArray, &nParticles, AccretingParticleID, 
+        AccretingParticleList);
 
   /* Create radiation sources from particles */
   
@@ -311,13 +314,15 @@ int ActiveParticleType_AccretingParticle::BeforeEvolveLevel
     const double LConv = (double) TimeUnits / pow(LengthUnits,3);
     const double mfactor = double(DensityUnits) / SolarMass;
 
-    ActiveParticleType_AccretingParticle *ThisParticle;
+    ActiveParticleType_AccretingParticle *ThisParticle = NULL;
     for (ipart = 0; ipart < nParticles; ipart++) {
       if (AccretingParticleList[ipart]->IsARadiationSource(Time)) {
 	ThisParticle =
-	  static_cast<ActiveParticleType_AccretingParticle*>(AccretingParticleList[ipart]);
+	  static_cast<ActiveParticleType_AccretingParticle*>(
+          AccretingParticleList[ipart]);
 	source = ThisParticle->RadiationSourceInitialize();
-	dx = LengthUnits * LevelArray[ThisParticle->level]->GridData->GetCellWidth(0,0);
+	dx = LengthUnits * 
+      LevelArray[ThisParticle->level]->GridData->GetCellWidth(0,0);
 	MassConversion = (float) (dx*dx*dx * mfactor);
 	source->LifeTime       = RadiationLifetime;
 	source->Luminosity = (LuminosityPerSolarMass * LConv) *
@@ -352,9 +357,10 @@ grid* ConstructFeedbackZone(ActiveParticleType* ThisParticle, int FeedbackRadius
 int DistributeFeedbackZone(grid* FeedbackZone, HierarchyEntry** Grids,
 			   int NumberOfGrids, int SendField);
 
-int ActiveParticleType_AccretingParticle::Accrete(int nParticles, ActiveParticleType** ParticleList,
-						  int AccretionRadius, FLOAT dx,
-						  LevelHierarchyEntry *LevelArray[], int ThisLevel)
+int ActiveParticleType_AccretingParticle::Accrete(int nParticles, 
+    ActiveParticleList<ActiveParticleType>& ParticleList,
+    int AccretionRadius, FLOAT dx,
+    LevelHierarchyEntry *LevelArray[], int ThisLevel)
 {
 
   /* Skip accretion if we're not on the maximum refinement level.
@@ -387,8 +393,8 @@ int ActiveParticleType_AccretingParticle::Accrete(int nParticles, ActiveParticle
 
       float AccretionRate = 0;
 
-      if (FeedbackZone->AccreteOntoAccretingParticle(&ParticleList[i],
-			      AccretionRadius*dx,&AccretionRate) == FAIL)
+      if (FeedbackZone->AccreteOntoAccretingParticle(ParticleList[i],
+			      AccretionRadius*dx, &AccretionRate) == FAIL)
 	return FAIL;
 
       // No need to communicate the accretion rate to the other CPUs since this particle is already local.
@@ -407,16 +413,18 @@ int ActiveParticleType_AccretingParticle::Accrete(int nParticles, ActiveParticle
   return SUCCESS;
 }
 
-int ActiveParticleType_AccretingParticle::SetFlaggingField(LevelHierarchyEntry *LevelArray[], int level,
-							   int TopGridDims[], int AccretingParticleID)
+int ActiveParticleType_AccretingParticle::SetFlaggingField(
+    LevelHierarchyEntry *LevelArray[], int level,
+    int TopGridDims[], int AccretingParticleID)
 {
   /* Generate a list of all sink particles in the simulation box */
   int i, nParticles;
   FLOAT *pos = NULL, dx=0;
-  ActiveParticleType **AccretingParticleList = NULL ;
+  ActiveParticleList<ActiveParticleType> AccretingParticleList;
   LevelHierarchyEntry *Temp = NULL;
 
-  AccretingParticleList = ActiveParticleFindAll(LevelArray, &nParticles, AccretingParticleID);
+  ActiveParticleFindAll(LevelArray, &nParticles, AccretingParticleID, 
+      AccretingParticleList);
 
   /* Calculate CellWidth on maximum refinement level */
 
@@ -430,14 +438,6 @@ int ActiveParticleType_AccretingParticle::SetFlaggingField(LevelHierarchyEntry *
 	ENZO_FAIL("Error in grid->DepositRefinementZone.\n")
 	  }
   }
-
-  if (NumberOfProcessors > 1)
-    for (i = 0; i < nParticles; i++) {
-      delete AccretingParticleList[i];
-      AccretingParticleList[i] = NULL;
-    }
-
-  delete [] AccretingParticleList;
 
   return SUCCESS;
 }

@@ -59,7 +59,7 @@ ENZO_OBJS +=\
 	Grid_AddMassAndMomentumToAccretingParticle.o \
 	Grid_AddOneParticleFromList.o \
 	Grid_AddParticlesFromList.o \
-	Grid_AppendActiveParticlesToList.o \
+    Grid_AppendActiveParticlesToList.o \
 	Grid_ApplyGalaxyParticleFeedback.o \
 	Grid_ApplyGalaxyParticleGravity.o \
 	Grid_ChangeParticleTypeBeforeSN.o \
@@ -101,7 +101,6 @@ ENZO_OBJS +=\
 	Grid_TracerParticleSetVelocity.o \
 	Grid_UpdateParticlePosition.o \
 	Grid_UpdateParticleVelocity.o \
-	Grid_UpdateParticleWithActiveParticle.o \
 	Grid_UpdateStarParticles.o \
 
 # ENZO BUILD SYSTEM DIRECTORY MODULE

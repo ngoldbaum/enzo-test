@@ -134,15 +134,13 @@ int ActiveParticleType_RadiationParticle::BeforeEvolveLevel
   float creation_redshift = 0.0;
   float current_redshift = 0.0 , a = 0.0, dadt = 0.0;
   InitData *node = Root;
-  ActiveParticleType **RadiationParticleList = NULL;
+  ActiveParticleList<ActiveParticleType> RadiationParticleList;
   int nParticles = 0, ipart = 0, j = 0;
   CosmologyComputeExpansionFactor(Time, &a, &dadt);
   current_redshift = (1 + InitialRedshift)/a - 1;
   CR = current_redshift;
   
-  RadiationParticleList = 
-	 ActiveParticleFindAll(LevelArray, &nParticles, RadiationParticleID);
-
+  ActiveParticleFindAll(LevelArray, &nParticles, RadiationParticleID, RadiationParticleList);
   /* 
    * First lets see if its time to create this particle yet 
    * If a particle is ready mark it as alive
@@ -168,8 +166,7 @@ int ActiveParticleType_RadiationParticle::BeforeEvolveLevel
 	  if (CallEvolvePhotons)
 	    {
 	      const double LConv = (double) TimeUnits / pow(LengthUnits,3);
-	      RadiationParticleList = 
-		ActiveParticleFindAll(LevelArray, &nParticles, RadiationParticleID);
+	      ActiveParticleFindAll(LevelArray, &nParticles, RadiationParticleID, RadiationParticleList);
 	      RadiationSourceEntry* source;
 	      ActiveParticleType_RadiationParticle *ThisParticle;
 	      for (ipart = 0; ipart < nParticles; ipart++) {
@@ -203,18 +200,16 @@ int ActiveParticleType_RadiationParticle::BeforeEvolveLevel
 
   if(APDEBUG)
     {
-       RadiationParticleList = 
-	 ActiveParticleFindAll(LevelArray, &nParticles, RadiationParticleID);
-       
-       ActiveParticleType_RadiationParticle *ThisParticle;
-       for (ipart = 0; ipart < nParticles; ipart++) {
-	 if (RadiationParticleList[ipart]->IsARadiationSource(Time)) {
-	   ThisParticle =
-	     static_cast<ActiveParticleType_RadiationParticle*>(RadiationParticleList[ipart]);
-		  
-	   ThisParticle->PrintInfo();
-	 }
-       }
+      ActiveParticleFindAll(LevelArray, &nParticles, RadiationParticleID, RadiationParticleList);
+      ActiveParticleType_RadiationParticle *ThisParticle;
+      for (ipart = 0; ipart < nParticles; ipart++) {
+	if (RadiationParticleList[ipart]->IsARadiationSource(Time)) {
+	  ThisParticle =
+	    static_cast<ActiveParticleType_RadiationParticle*>(RadiationParticleList[ipart]);
+	  
+	  ThisParticle->PrintInfo();
+	}
+      }
     }
 
   return SUCCESS;
@@ -281,7 +276,8 @@ int ActiveParticleType_RadiationParticle::EvaluateFormation(grid *thisgrid_orig,
 	       */
 	      ActiveParticleType_RadiationParticle *np = 
 		new ActiveParticleType_RadiationParticle();
-	      data.NewParticles[data.NumberOfNewParticles++] = np;
+	      data.NumberOfNewParticles++;
+	      data.NewParticles.insert(*np);
 	      np->BirthTime = thisGrid->Time;
 	      
 	      //Mass

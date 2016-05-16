@@ -99,8 +99,8 @@ grid::~grid()
   delete [] MassFlaggingField;
   delete [] ParticleMassFlaggingField;
 
-  delete [] ActiveParticles;
- 
+  this->DeleteActiveParticles();
+
   for (i = 0; i < MAX_NUMBER_OF_PARTICLE_ATTRIBUTES; i++)
     delete [] ParticleAttribute[i];
 

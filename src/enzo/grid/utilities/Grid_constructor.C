@@ -168,7 +168,6 @@ grid::grid()
   Stars = NULL;
 
   NumberOfActiveParticles = 0;
-  ActiveParticles = NULL;
   for (i=0; i<MAX_ACTIVE_PARTICLE_TYPES; i++) {
     ActiveParticleTypeCount[i] = 0;
   }

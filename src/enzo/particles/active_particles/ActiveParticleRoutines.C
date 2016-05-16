@@ -44,7 +44,7 @@ ActiveParticleType::ActiveParticleType(void)
     pos[dim] = vel[dim] = 0.0;
   Mass = BirthTime = DynamicalTime = 0.0;
   level = GridID = type = 0;
-
+  WillDelete = false;
 
   /* The correct indices are assigned in CommunicationUpdateActiveParticleCount 
      in ActiveParticleFinalize.*/
@@ -67,7 +67,7 @@ ActiveParticleType::ActiveParticleType(ActiveParticleType* part)
   GridID = part->GridID;
   type = part->type;
   CurrentGrid = part->CurrentGrid;
-  dest_processor = part->dest_processor;
+  WillDelete = part->WillDelete;
 }
 
 ActiveParticleType::ActiveParticleType(grid *_grid, ActiveParticleFormationData &data)
@@ -84,38 +84,11 @@ ActiveParticleType::ActiveParticleType(grid *_grid, ActiveParticleFormationData 
   /* The correct indices are assigned in CommunicationUpdateActiveParticleCount 
      in ActiveParticleFinalize.*/
   Identifier = INT_UNDEFINED;
-  dest_processor = -1;
+
+  // Assume newly created particles will not be immediately deleted
+  WillDelete = false;
 }
 
-
-ActiveParticleType::ActiveParticleType(grid *_grid, int _id, int _level)
-{
-
-  assert(_id < _grid->NumberOfParticles);
-
-  int dim;
-  for (dim = 0; dim < MAX_DIMENSION; dim++) {
-    pos[dim] = _grid->ParticlePosition[dim][_id];
-    vel[dim] = _grid->ParticleVelocity[dim][_id];
-  }
-  CurrentGrid = _grid;
-  level = _level;
-
-  GridID = _grid->ID;
-  type = _grid->ParticleType[_id];
-  Identifier = _grid->ParticleNumber[_id];
-  Mass = (double)(_grid->ParticleMass[_id]);
-
-
-  // No more attributes.  Everything stored in active particles.
-//  BirthTime = _grid->ParticleAttribute[0][_id];
-//  DynamicalTime = _grid->ParticleAttribute[1][_id];
-//  Metallicity = _grid->ParticleAttribute[2][_id];
-  this->ConvertMassToSolar();
-}
-
-/* No need to delete the accretion arrays because the pointers are
-   stored in the copies located in the grid class. */
 
 ActiveParticleType::~ActiveParticleType(void)
 {
@@ -143,7 +116,6 @@ void ActiveParticleType::operator=(ActiveParticleType *a)
   level = a->level;
   GridID = a->GridID;
   type = a->type;
-  dest_processor = -1;
   return;
 }
 
@@ -171,7 +143,6 @@ active_particle_class *ActiveParticleType::copy(void)
   a->level = level;
   a->GridID = GridID;
   a->type = type;
-  a->dest_processor = -1;
   return a;
 }
 
@@ -351,6 +322,11 @@ void ActiveParticleType::PrintInfo(void)
   printf("\t mass = %"GSYM", type = %"ISYM", grid %"ISYM", lvl %"ISYM"\n", 
 	 Mass, type, GridID, level);
   return;
+}
+
+bool ActiveParticleType::ShouldDelete(void)
+{
+  return this->WillDelete != 0;
 }
 
 

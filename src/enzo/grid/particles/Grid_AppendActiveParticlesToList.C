@@ -26,17 +26,18 @@
 
 #include "ActiveParticle.h"
 
-int grid::AppendActiveParticlesToList(ActiveParticleType** APArray, int offset, int search_id) {
+int grid::AppendActiveParticlesToList(
+    ActiveParticleList<ActiveParticleType>& APArray, int search_id) {
   
   // Return if this does not concern us
   if (MyProcessorNumber != ProcessorNumber)
     return SUCCESS;
 
-  int PNum, count=0;
+  int PNum;
 
   for (PNum = 0; PNum < NumberOfActiveParticles; PNum++) 
     if (search_id == ActiveParticles[PNum]->ReturnType()) 
-      APArray[offset+count++] = ActiveParticles[PNum];
+      APArray.copy_and_insert(*ActiveParticles[PNum]);
       
   return SUCCESS;
 } 

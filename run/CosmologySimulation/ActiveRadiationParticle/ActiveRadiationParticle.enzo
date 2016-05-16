@@ -80,6 +80,11 @@ RadiativeCooling   = 1
 MultiSpecies       = 2 
 RadiationFieldType = 0 
 
+
+#Grackle
+#Grackle-2 currently does not support RT
+use_grackle = 0
+
 #Radiation Parameters
 AppendActiveParticleType = RadiationParticle
 NumberOfRadiationParticles     = 1

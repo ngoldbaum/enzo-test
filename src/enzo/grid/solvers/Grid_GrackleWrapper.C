@@ -140,7 +140,7 @@ int grid::GrackleWrapper()
   /* If both metal fields (Pop I/II and III) exist, create a field
      that contains their sum */
 
-  float *MetalPointer;
+  float *MetalPointer = NULL;
   float *TotalMetals = NULL;
 
   if (MetalNum != -1 && SNColourNum != -1) {
@@ -157,7 +157,7 @@ int grid::GrackleWrapper()
   } // ENDELSE both metal types
  
   int temp_thermal = FALSE;
-  float *thermal_energy;
+  float *thermal_energy = NULL;
   if (HydroMethod == MHD_RK){
     iBx = FindField(Bfield1, FieldType, NumberOfBaryonFields);
     iBy = FindField(Bfield2, FieldType, NumberOfBaryonFields);

@@ -41,8 +41,10 @@ int GenerateGridArray(LevelHierarchyEntry *LevelArray[], int level,
 		      HierarchyEntry **Grids[]);
 int CommunicationSyncNumberOfParticles(HierarchyEntry *GridHierarchyPointer[],int NumberOfGrids);
 
-int AssignActiveParticlesToGrids(ActiveParticleType** ParticleList, int nParticles, 
-				 LevelHierarchyEntry *LevelArray[]) 
+int AssignActiveParticlesToGrids(
+    ActiveParticleList<ActiveParticleType>& ParticleList, 
+    int nParticles, 
+    LevelHierarchyEntry *LevelArray[]) 
 {
   int LevelMax, SavedGrid, NumberOfGrids, i, level, NumberOfLevelGrids, gridnum;
   int dim, SavedGridOffProc;
@@ -89,17 +91,14 @@ int AssignActiveParticlesToGrids(ActiveParticleType** ParticleList, int nParticl
       int ID = ParticleList[i]->ReturnID();
       int foundAP = FALSE;
       NumberOfGrids = GenerateGridArray(LevelArray, LevelMax, &LevelGrids); 
-      
-      // If the particle moved we need to add it to the new grid and remove
-      // it from the old grid.
-      if (OldGrid != LevelGrids[SavedGrid]->GridData) {
-	    if (LevelGrids[SavedGrid]->GridData->AddActiveParticle(static_cast<ActiveParticleType*>(ParticleList[i])) == FAIL)
-	      ENZO_FAIL("Active particle grid assignment failed!\n");
-	    if (SavedGrid != -1) {
-	      foundAP = OldGrid->RemoveActiveParticle(ID,LevelGrids[SavedGrid]->
-						      GridData->ReturnProcessorNumber());
-	    }
+
+      if (SavedGrid != -1) {
+        foundAP = OldGrid->RemoveActiveParticle(ID,LevelGrids[SavedGrid]->
+            GridData->ReturnProcessorNumber());
       }
+      if (LevelGrids[SavedGrid]->GridData->AddActiveParticle(
+              static_cast<ActiveParticleType*>(ParticleList[i])) == FAIL)
+        ENZO_FAIL("Active particle grid assignment failed!\n");
     }
     else {
 #ifdef USE_MPI
@@ -119,7 +118,8 @@ int AssignActiveParticlesToGrids(ActiveParticleType** ParticleList, int nParticl
       OldGrid->RemoveActiveParticle(ID,LevelGrids[SavedGridOffProc]->GridData->ReturnProcessorNumber());
       // if this is the receiving proc, add it.
       if (LevelMax == recvbuf.value) {
-	    if (LevelGrids[SavedGrid]->GridData->AddActiveParticle(static_cast<ActiveParticleType*>(ParticleList[i])) == FAIL) {
+	    if (LevelGrids[SavedGrid]->GridData->AddActiveParticle(
+                static_cast<ActiveParticleType*>(ParticleList[i])) == FAIL) {
 	      ENZO_FAIL("Active particle grid assignment failed"); 
 	    } 
       }

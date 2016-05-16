@@ -37,8 +37,15 @@ int grid::DebugActiveParticles(int level)
 
   /* Check if the active particles are within the grid */
 
-  for (i = 0; i < NumberOfActiveParticles; i++) {
-    pos = this->ActiveParticles[i]->ReturnPosition();
+  if (ActiveParticles.size() != NumberOfActiveParticles) {
+    printf("Active particle count mismatch!");
+    printf("NumberOfActiveParticles = %"GOUTSYM"\n", NumberOfActiveParticles);
+    printf("ActiveParticles.size() = %"GOUTSYM"\n", ActiveParticles.size());
+    ENZO_FAIL("")
+  }
+
+  for (i = 0; i < ActiveParticles.size(); i++) {
+    pos = ActiveParticles[i]->ReturnPosition();
     inside = this->PointInGrid(pos);
     if (inside == FALSE) {
       printf("Active particle outside grid!  level %d, grid %d\n", level, this->ID);

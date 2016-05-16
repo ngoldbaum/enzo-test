@@ -37,9 +37,6 @@ int CommunicationUpdateActiveParticleCount(HierarchyEntry *Grids[],
 					 int NumberOfGrids,
 					 int TotalActiveParticleCountPrevious[]);
 
-ActiveParticleType** ActiveParticleFindAll(LevelHierarchyEntry *LevelArray[], int *GlobalNumberOfActiveParticles, 
-					   int ActiveParticleIDToFind);
-
 int ActiveParticleFinalize(HierarchyEntry *Grids[], TopGridData *MetaData,
 			   int NumberOfGrids, LevelHierarchyEntry *LevelArray[], 
 			   int level, int NumberOfNewActiveParticles[])
@@ -60,9 +57,9 @@ int ActiveParticleFinalize(HierarchyEntry *Grids[], TopGridData *MetaData,
 #ifdef DEBUG
   
   int nParticles;
-  ActiveParticleType** ParticleList = NULL;
+  ActiveParticleList ParticleList;
 
-  ParticleList = ActiveParticleFindAll(LevelArray, &nParticles, 0);
+  ActiveParticleFindAll(LevelArray, &nParticles, 0, ParticleList);
 
   if (nParticles > 0) {
     PINT IDList[nParticles];
@@ -73,12 +70,6 @@ int ActiveParticleFinalize(HierarchyEntry *Grids[], TopGridData *MetaData,
       if (IDList[i] == IDList[i+1]) {
 	ENZO_FAIL("Two active particles have identical IDs"); }
   }
-
-  if (NumberOfProcessors > 1)
-    for (i = 0; i < nParticles; i++)
-      delete ParticleList[i];
-
-  delete [] ParticleList;
 
 #endif
 

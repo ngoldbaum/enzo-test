@@ -32,15 +32,16 @@
 
 int GenerateGridArray(LevelHierarchyEntry *LevelArray[], int level,
 		      HierarchyEntry **Grids[]);
-
-ActiveParticleType** ActiveParticleFindAll(LevelHierarchyEntry *LevelArray[], 
-	        int *GlobalNumberOfActiveParticles, int ActiveParticleIDToFind)
+void ActiveParticleFindAll(
+    LevelHierarchyEntry *LevelArray[], int *GlobalNumberOfActiveParticles, 
+    int ActiveParticleIDToFind, 
+    ActiveParticleList<ActiveParticleType>& GlobalList)
 {
-  int i, level, type, ap_id, GridNum, LocalNumberOfActiveParticles, proc, buffer_size, 
-    LocalNumberOfActiveParticlesOnThisLevel, element_size, count, offset;
-  ActiveParticleType **LocalActiveParticlesOfThisType= NULL, **LocalActiveParticlesOnThisLevel = NULL;
-  ActiveParticleType **ParticlesOnThisProc = NULL;
-  ActiveParticleType **GlobalList = NULL;
+  int i, level, type, ap_id, GridNum, LocalNumberOfActiveParticles, proc, 
+    buffer_size, LocalNumberOfActiveParticlesOnThisLevel, element_size, count, 
+    offset;
+  ActiveParticleList<ActiveParticleType> LocalActiveParticlesOfThisType, 
+    LocalActiveParticlesOnThisLevel, ParticlesOnThisProc;
 
   HierarchyEntry **Grids = NULL;
   int NumberOfGrids, *NumberOfActiveParticlesInGrids = NULL;
@@ -81,38 +82,39 @@ ActiveParticleType** ActiveParticleFindAll(LevelHierarchyEntry *LevelArray[],
 	  if (LocalNumberOfActiveParticles != 0) 
 	    {
 	      ParticlesOnThisProc = LocalActiveParticlesOfThisType;
-	      LocalActiveParticlesOfThisType = NULL;
+	      LocalActiveParticlesOfThisType.clear();
 	    }
-
-	  LocalActiveParticlesOnThisLevel = new ActiveParticleType*[LocalNumberOfActiveParticlesOnThisLevel]();
-	  
-	  /* In a second pass, fill up the active particle list for this level*/
+      
+      /* In a second pass, fill up the active particle list for this level*/
 	  for(GridNum = 0; GridNum < NumberOfGrids; GridNum++) {
+        // I've removed this function from the grid class, do this another way.
 	    Grids[GridNum]->GridData->
-	      AppendActiveParticlesToList(LocalActiveParticlesOnThisLevel,offset,ActiveParticleIDToFind);
+	      AppendActiveParticlesToList(LocalActiveParticlesOnThisLevel,
+              ActiveParticleIDToFind);
 	    offset += NumberOfActiveParticlesInGrids[GridNum];
 	  } 
 
-	  LocalActiveParticlesOfThisType = new ActiveParticleType*[offset + LocalNumberOfActiveParticles]();
+	  LocalActiveParticlesOfThisType.reserve(
+          offset + LocalNumberOfActiveParticles);
 	  
 	  /* If we've already found active particles, copy the cached
 	     list to the new one and delete the old list */
 	  if (LocalNumberOfActiveParticles != 0) {
 	    for (i = 0; i < LocalNumberOfActiveParticles; i++)
-	      LocalActiveParticlesOfThisType[i] = ParticlesOnThisProc[i];
-	    delete [] ParticlesOnThisProc;
-	    ParticlesOnThisProc = NULL;
+	      LocalActiveParticlesOfThisType.copy_and_insert(
+              *ParticlesOnThisProc[i]);
+	    ParticlesOnThisProc.clear();
 	  }
 
 	  /* Finally, append the new active particles to the list */
 	  for(i = LocalNumberOfActiveParticles; i < offset + LocalNumberOfActiveParticles; i++) 
-	    LocalActiveParticlesOfThisType[i] = LocalActiveParticlesOnThisLevel[i - LocalNumberOfActiveParticles];
+	    LocalActiveParticlesOfThisType.copy_and_insert(
+            *LocalActiveParticlesOnThisLevel[i - LocalNumberOfActiveParticles]);
 
 	  LocalNumberOfActiveParticles += LocalNumberOfActiveParticlesOnThisLevel;
 	    
 	  /* Delete the list for this level */
-	  delete [] LocalActiveParticlesOnThisLevel;
-	  LocalActiveParticlesOnThisLevel = NULL;
+      LocalActiveParticlesOnThisLevel.clear();
 
 	} 
 	
@@ -163,7 +165,7 @@ ActiveParticleType** ActiveParticleFindAll(LevelHierarchyEntry *LevelArray[],
       Eint32 *displace = new Eint32[NumberOfProcessors];
       Eint32 *all_buffer_sizes = new Eint32[NumberOfProcessors];
 
-      GlobalList = new ActiveParticleType*[*GlobalNumberOfActiveParticles]();
+      GlobalList.reserve(*GlobalNumberOfActiveParticles);
 
       if (NumberOfProcessors > 1) {
 	
@@ -227,29 +229,31 @@ ActiveParticleType** ActiveParticleFindAll(LevelHierarchyEntry *LevelArray[],
 
 	/* Set grid pointers */
 	for (i = 0; i < *GlobalNumberOfActiveParticles; i++) {
-	  NumberOfGrids = GenerateGridArray(LevelArray, GlobalList[i]->ReturnLevel(), &Grids);
+	  NumberOfGrids = GenerateGridArray(LevelArray, 
+          GlobalList[i]->ReturnLevel(), &Grids);
 	  for (GridNum = 0; GridNum < NumberOfGrids; GridNum++) {
-	    if (Grids[GridNum]->GridData->GetGridID() == GlobalList[i]->ReturnGridID())
+	    if (Grids[GridNum]->GridData->GetGridID() == 
+            GlobalList[i]->ReturnGridID())
 	      GlobalList[i]->AssignCurrentGrid(Grids[GridNum]->GridData);
 	  }
 	  delete [] Grids;
 	}
 
-	delete [] LocalActiveParticlesOfThisType;
+	LocalActiveParticlesOfThisType.clear();
 
 #endif /* USE_MPI */
        
       } /* ENDIF multi-processor */
       else {
-	GlobalList = LocalActiveParticlesOfThisType;
+        GlobalList = LocalActiveParticlesOfThisType;
+        LocalActiveParticlesOfThisType.clear();
       } // ENDIF serial
       
     }  /* ENDIF number of active particles > 0 */
     else 
       delete [] nCount;
-
+    
   } /* ENFOR Active particle types */
 
-  return GlobalList;
 }
   

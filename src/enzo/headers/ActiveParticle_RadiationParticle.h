@@ -84,7 +84,14 @@ public:
       // that is passed as an argument to this function
     }
 
-
+  // Needed to Create a copy of a particle when only a pointer to the base
+  // class is available.
+  ActiveParticleType* clone() 
+  {
+    return static_cast<ActiveParticleType*>(
+	   new ActiveParticleType_RadiationParticle(this)
+					   );
+  }
   /*
    * Run an algorithm to determine whether a particle forms in a grid.
    *
@@ -158,9 +165,8 @@ public:
 	   GetUnits(&DensityUnits, &LengthUnits, &TemperatureUnits,
 		    &TimeUnits, &VelocityUnits, Time);
 	   int nParticles = 0, ipart = 0;
-	   ActiveParticleType **RadiationParticleList = NULL;
-	   RadiationParticleList = 
-	     ActiveParticleFindAll(LevelArray, &nParticles, RadiationParticleID);
+           ActiveParticleList<ActiveParticleType> RadiationParticleList;
+	   ActiveParticleFindAll(LevelArray, &nParticles, RadiationParticleID, RadiationParticleList);
 	   
 	   ActiveParticleType_RadiationParticle *ThisParticle;
 	   for (ipart = 0; ipart < nParticles; ipart++) {

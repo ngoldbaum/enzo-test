@@ -66,7 +66,7 @@ int CommunicationTransferActiveParticles(grid *GridPointer[], int NumberOfGrids,
 int CommunicationCollectParticles(LevelHierarchyEntry *LevelArray[], int level,
 				  bool ParticlesAreLocal,
 				  bool SyncNumberOfParticles, 
-				  bool MoveActiveParticles, int CollectMode);
+				  int CollectMode);
 int CommunicationSyncNumberOfParticles(HierarchyEntry *GridHierarchyPointer[],
 				       int NumberOfGrids);
 int FastSiblingLocatorInitialize(ChainingMeshStructure *Mesh, int Rank,
@@ -124,7 +124,6 @@ int RebuildHierarchy(TopGridData *MetaData,
   ReportMemoryUsage("Rebuild pos 1");
  
   bool ParticlesAreLocal, SyncNumberOfParticles = true;
-  bool MoveActiveParticles = true;
   int i, j, k, grids, grids2, subgrids, MoveParticles, ncells;
   int TotalFlaggedCells, FlaggedGrids;
   FLOAT ZeroVector[MAX_DIMENSION];
@@ -244,8 +243,7 @@ int RebuildHierarchy(TopGridData *MetaData,
     ParticlesAreLocal = false;
     SyncNumberOfParticles = false;
     CommunicationCollectParticles(LevelArray, level, ParticlesAreLocal, 
-				  SyncNumberOfParticles, MoveActiveParticles,
-				  SIBLINGS_ONLY);
+				  SyncNumberOfParticles, SIBLINGS_ONLY);
     ParticlesAreLocal = true;
     SyncNumberOfParticles = true;
   }
@@ -277,8 +275,7 @@ int RebuildHierarchy(TopGridData *MetaData,
       ParticlesAreLocal = false;
       SyncNumberOfParticles = true;
       CommunicationCollectParticles(LevelArray, level, ParticlesAreLocal, 
-				    SyncNumberOfParticles, MoveActiveParticles,
-				    SIBLINGS_ONLY);
+				    SyncNumberOfParticles, SIBLINGS_ONLY);
       ParticlesAreLocal = true;
       SyncNumberOfParticles = true;
     }
@@ -474,8 +471,7 @@ int RebuildHierarchy(TopGridData *MetaData,
 
       tt0 = ReturnWallTime();
       CommunicationCollectParticles(LevelArray, i, ParticlesAreLocal,
-				    SyncNumberOfParticles, MoveActiveParticles,
-				    SUBGRIDS_LOCAL);
+				    SyncNumberOfParticles, SUBGRIDS_LOCAL);
       tt1 = ReturnWallTime();
       RHperf[7] += tt1-tt0;
 
@@ -600,7 +596,6 @@ int RebuildHierarchy(TopGridData *MetaData,
 	  if (LevelArray[j] != NULL)
 	    CommunicationCollectParticles(LevelArray, j, ParticlesAreLocal,
 					  SyncNumberOfParticles, 
-					  MoveActiveParticles,
 					  SIBLINGS_ONLY);
       tt1 = ReturnWallTime();
       RHperf[14] += tt1-tt0;

@@ -131,7 +131,7 @@ int CommunicationTransferActiveParticles
   } // ENDFOR grids
  
   int *NumberToMove = new int[NumberOfProcessors];
-  ActiveParticleType **SendList = NULL;
+  ActiveParticleList<ActiveParticleType> SendList;
  
   for (i = 0; i < NumberOfProcessors; i++)
     NumberToMove[i] = 0;
@@ -162,7 +162,7 @@ int CommunicationTransferActiveParticles
      CommunicationCollectParticles(SIBLINGS_ONLY). */
 
   NumberOfReceives = TotalNumberToMove;
-  std::sort(SendList, SendList+NumberOfReceives, cmp_ap_grid());
+  SendList.sort_grid(0, NumberOfReceives);
 
   /* Copy stars back to grids */
 
@@ -187,7 +187,6 @@ int CommunicationTransferActiveParticles
 
   /* Cleanup. */
 
-  delete [] SendList;
   delete [] NumberToMove;
   delete [] GridMap;
   for (dim = 0; dim < Rank; dim++)

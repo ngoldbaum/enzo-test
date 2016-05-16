@@ -169,7 +169,8 @@ int ActiveParticleType_PopIII::EvaluateFormation
 	   sampling. */
 
 	ActiveParticleType_PopIII *np = new ActiveParticleType_PopIII();
-	supp_data.NewParticles[supp_data.NumberOfNewParticles++] = np;
+    supp_data.NumberOfNewParticles++;
+    supp_data.NewParticles.insert(*np);
 	//fprintf(stderr, "G_APH: Creating !\n");
 
 	LifetimeInYears = CalculatePopIIILifetime(StarMass);

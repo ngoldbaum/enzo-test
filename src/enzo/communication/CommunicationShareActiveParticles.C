@@ -33,9 +33,9 @@
 void my_exit(int status);
 
 int CommunicationShareActiveParticles(int *NumberToMove, 
-				      ActiveParticleType** &SendList,
+				      ActiveParticleList<ActiveParticleType> &SendList,
 				      int &NumberOfReceives, 
-				      ActiveParticleType** &SharedList)
+				      ActiveParticleList<ActiveParticleType> &SharedList)
 {
 
   int i, type, proc, ap_id;
@@ -50,9 +50,6 @@ int CommunicationShareActiveParticles(int *NumberToMove,
   CommunicationAllReduceValues(&GlobalNumberToMove, 1, MPI_SUM);
 #endif
   if (GlobalNumberToMove == 0) return SUCCESS;
-  //std::sort(SendList, SendList+TotalNumberToMove, cmp_ap_proc());
-
-  SharedList = NULL;
 
 #ifdef USE_MPI
   MPI_Arg Count;
@@ -80,7 +77,7 @@ int CommunicationShareActiveParticles(int *NumberToMove,
 
       NumberToSend = 0;
       for (i = 0; i < TotalNumberToMove; i++)
-	if (SendList[i]->ReturnType() == type) NumberToSend++;
+        if (SendList[i]->ReturnType() == type) NumberToSend++;
 
       int *nCount = new int[NumberOfProcessors];
 
@@ -137,15 +134,13 @@ int CommunicationShareActiveParticles(int *NumberToMove,
 
       /* Unpack the particle buffers, generate global shared active particle list */
       
-      SharedList = new ActiveParticleType*[NumberOfNewParticles]();
-
       int count = 0;
       for (proc = 0; proc < NumberOfProcessors; proc++) {
-	if (nCount[proc] > 0) {
-	  ap_info->UnpackBuffer(recv_buffer+displace[proc], count, 
-				SharedList, nCount[proc]);
-	  count += nCount[proc];
-	}
+        if (nCount[proc] > 0) {
+          ap_info->UnpackBuffer(recv_buffer+displace[proc], count, 
+              SharedList, nCount[proc]);
+          count += nCount[proc];
+        }
       }
 
       /* clean up */
@@ -183,8 +178,8 @@ int CommunicationShareActiveParticles(int *NumberToMove,
 
   // First sort the list by destination grid, so the searching for
   // grids is more efficient.
-  //qsort(SharedList, NumberOfReceives, star_data_size, compare_star_grid);
-  std::sort(SharedList, SharedList+NumberOfReceives, cmp_ap_grid());
+
+  SharedList.sort_grid(0, NumberOfReceives);
 
   return SUCCESS;
 

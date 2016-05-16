@@ -26,7 +26,5 @@
 
 void grid::SortActiveParticlesByNumber()
 {
-
-  std::sort(ActiveParticles, ActiveParticles+NumberOfActiveParticles, cmp_ap_number());
-
+  ActiveParticles.sort_number(0, NumberOfActiveParticles);
 }

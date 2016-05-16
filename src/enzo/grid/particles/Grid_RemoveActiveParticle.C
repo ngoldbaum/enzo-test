@@ -44,36 +44,8 @@ int grid::RemoveActiveParticle(PINT ID, int NewProcessorNumber)
   if (found == FALSE)
     return found;
 
-  if (NumberOfActiveParticles > 1) {
-    ActiveParticleType** temp = new ActiveParticleType*[NumberOfActiveParticles-1]();
-    
-    for (j=0; j < i; j++)
-      temp[j] = this->ActiveParticles[j];
-    
-    for (j=i+1; j < NumberOfActiveParticles; j++)
-      temp[j-1] = this->ActiveParticles[j];
-    
-    // Only free memory if the particle was communicated to another
-    // processor, otherwise we will create a dangling pointer in the
-    // reference to this active particle in the new grid
-    if (ProcessorNumber != NewProcessorNumber) {
-      delete this->ActiveParticles[i];
-      this->ActiveParticles[i] = NULL;
-    }
-
-    delete [] ActiveParticles;
-    
-    ActiveParticles = temp;
-  }  else { // Removing the only AP on the list
-    if (ProcessorNumber != NewProcessorNumber) {
-      delete this->ActiveParticles[0];
-      this->ActiveParticles[0] = NULL;
-    }
-    delete [] this->ActiveParticles;
-    this->ActiveParticles = NULL;
-  }
-
   this->NumberOfActiveParticles--;
+  this->ActiveParticles.erase(i);
 
   return found;
 
