@@ -2425,6 +2425,7 @@ int zEulerSweep(int j, int NumberOfSubgrids, fluxes *SubgridFluxes[],
   /* Get the active particle mass as a flat array (1D) */
   
   void GetActiveParticleMass(float * ActiveParticleMass);
+  void GetActiveParticleFixedInSpace(int * ActiveParticleFixedInSpace);
 
   /* Returns averaged velocity from the 6 neighbor cells and itself */
 

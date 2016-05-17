@@ -23,12 +23,12 @@
 #include "GridList.h"
 #include "ExternalBoundary.h"
 #include "Grid.h"
- 
+#define APDEBUG 1
 /* function prototypes */
 
-static void ResetMasslessAcceleration(FLOAT *ActiveParticleAcceleration[],
-				      float *ActiveParticleMass,
-				      int GridRank);
+static void ResetAcceleration(FLOAT *ActiveParticleAcceleration[],
+				      int *ActiveParticleFixedInSpace,
+				      int GridRank, int NumAPs);
 
 int grid::InterpolateParticlePositions(grid *FromGrid, int DifferenceType)
 {
@@ -57,11 +57,11 @@ int grid::InterpolateParticlePositions(grid *FromGrid, int DifferenceType)
       }
  
     if (NumberOfActiveParticles > 0) {
-
-      float *ActiveParticleMass = new float[NumberOfActiveParticles];
+      int *ActiveParticleFixedInSpace = new int[NumberOfActiveParticles];
       
       //if the mass is zero leave position alone...
-      this->GetActiveParticleMass(ActiveParticleMass);
+      this->GetActiveParticleFixedInSpace(ActiveParticleFixedInSpace);
+      
       FLOAT **ActiveParticlePosition = new FLOAT*[GridRank];
       for (dim1 = 0; dim1 < GridRank; dim1++)
 	ActiveParticlePosition[dim1] = new FLOAT[NumberOfActiveParticles];
@@ -72,14 +72,15 @@ int grid::InterpolateParticlePositions(grid *FromGrid, int DifferenceType)
 					 NumberOfActiveParticles) == FAIL) {
 	ENZO_FAIL("Error in grid->InterpolatePositions.\n");
       }
-
+     
       /* Massless active particles should not accelerate */
-      ResetMasslessAcceleration(ActiveParticleAcceleration,ActiveParticleMass, GridRank);
+      ResetAcceleration(ActiveParticleAcceleration, ActiveParticleFixedInSpace, 
+				GridRank, NumberOfActiveParticles);
      
       for (dim1 = 0; dim1 < GridRank; dim1++)
 	delete [] ActiveParticlePosition[dim1];
       delete [] ActiveParticlePosition;
-      delete [] ActiveParticleMass;
+      delete [] ActiveParticleFixedInSpace;
     }
     
     if(ProblemType==29){
@@ -105,19 +106,26 @@ int grid::InterpolateParticlePositions(grid *FromGrid, int DifferenceType)
 
 
 /*
- * Reset the massless particles acceleration to 0.0
+ * Reset the "fixed in space" particles acceleration to 0.0
  */
-static void ResetMasslessAcceleration(FLOAT *ActiveParticleAcceleration[],
-				      float *ActiveParticleMass, int GridRank)
+static void ResetAcceleration(FLOAT *ActiveParticleAcceleration[],
+			      int *ActiveParticleFixedInSpace, 
+			      int GridRank, int NumAPs)
 {
-  int i, dim;
-
-  for (i = 0; i < NumberOfActiveParticles; i++) {
-    if(!ActiveParticleMass[i])
+  int i = 0, dim = 0;
+#if APDEBUG
+  printf("%s: NumberOfActiveParticles = %d\t GridRank = %d\n", __FUNCTION__, NumberOfActiveParticles, GridRank);
+  printf("%s: NumberOfActiveParticles = %d\t GridRank = %d\n", __FUNCTION__, NumAPs, GridRank);
+#endif
+  fflush(stdout);
+  for (i = 0; i < NumAPs; i++) {
+    if(ActiveParticleFixedInSpace[i] == 1)
       {
-	for (dim = 0; dim < GridRank; dim++) {
+#if APDEBUG
+	printf("%s: Resetting Acceleration to zero for this particle", __FUNCTION__); fflush(stdout);
+#endif
+	for (dim = 0; dim < GridRank; dim++)
 	  ActiveParticleAcceleration[dim][i] = 0.0;
-	}
       }
   }
   return;

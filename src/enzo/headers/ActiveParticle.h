@@ -64,6 +64,7 @@ public:
   int   ReturnType(void) { return type; };
   int   ReturnLevel(void) { return level; };
   int   ReturnGridID(void) { return GridID; };
+  int   ReturnFixedInSpace(void) { return FixedInSpace; };
   grid *ReturnCurrentGrid(void) { return CurrentGrid; };
 
   void  ReduceLevel(void) { level--; };
@@ -125,6 +126,7 @@ protected:
   int GridID;
   int type;
   int WillDelete;
+  int FixedInSpace;
 
 private: /* Cannot be accessed by subclasses! */
 

@@ -297,6 +297,7 @@ int ActiveParticleType_RadiationParticle::EvaluateFormation(grid *thisgrid_orig,
 	      np->level = data.level;
 	      np->GridID = data.GridID;
 	      np->CurrentGrid = thisGrid;
+	      np->FixedInSpace = 1;  //Particle remains fixed in comoving space
 	      fprintf(stderr, "%s: A radiation particle inserted at (%"PSYM",%"PSYM",%"PSYM") " \
 		      "with v=(%f,%f,%f), m=%f, type=%ld, redshift = %f\n", __FUNCTION__,
 		      np->pos[0], 

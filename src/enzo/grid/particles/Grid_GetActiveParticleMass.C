@@ -27,10 +27,19 @@
 
 void grid::GetActiveParticleMass(float * ActiveParticleMass) 
 {
-  int i, dim;
-
+  int i = 0;
   for (i = 0; i < NumberOfActiveParticles; i++) {
     ActiveParticleMass[i] = ActiveParticles[i]->ReturnMass();
+  }
+
+  return;
+}
+
+void grid::GetActiveParticleFixedInSpace(int * ActiveParticleFixedInSpace) 
+{
+  int i = 0;
+  for (i = 0; i < NumberOfActiveParticles; i++) {
+    ActiveParticleFixedInSpace[i] = ActiveParticles[i]->ReturnFixedInSpace();
   }
 
   return;
