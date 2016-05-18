@@ -96,6 +96,12 @@ int grid::UpdateParticlePosition(float TimeStep, int OffProcessorUpdate)
         appos[dim] += Coefficient*apvel[dim];
 
       ActiveParticles[i]->SetPosition(appos);
+      
+      FLOAT period[3];
+      for (dim = 0; dim < 3; dim++) {
+        period[dim] = DomainRightEdge[dim] - DomainLeftEdge[dim];
+      }
+      ActiveParticles[i]->SetPositionPeriod(period);
     }
 
   return SUCCESS;
