@@ -95,10 +95,8 @@ int ActiveParticleType_RadiationParticle::InitializeParticleType() {
 
   if (RadiativeTransfer == FALSE)
     ENZO_FAIL("RadiativeTransfer must be turned on with RadiationParticle.");
-  if (MultiSpecies < 2)
-    ENZO_FAIL("Multispecies with H2 must be turned on with RadiationParticle.");
 
-  fprintf(stderr, "%s: Initialize RadiationParticle\n", __FUNCTION__);
+  fprintf(stdout, "%s: Initialize RadiationParticle\n", __FUNCTION__);
   if(SUCCESS != ReadRadiationParameterFile())
     {
       fprintf(stderr, "ERROR: Failure to read Radiation Source File.\n");
@@ -298,7 +296,7 @@ int ActiveParticleType_RadiationParticle::EvaluateFormation(grid *thisgrid_orig,
 	      np->GridID = data.GridID;
 	      np->CurrentGrid = thisGrid;
 	      np->FixedInSpace = 1;  //Particle remains fixed in comoving space
-	      fprintf(stderr, "%s: A radiation particle inserted at (%"PSYM",%"PSYM",%"PSYM") " \
+	      fprintf(stdout, "%s: A radiation particle inserted at (%"PSYM",%"PSYM",%"PSYM") " \
 		      "with v=(%f,%f,%f), m=%f, type=%ld, redshift = %f\n", __FUNCTION__,
 		      np->pos[0], 
 		      np->pos[1],
@@ -348,7 +346,7 @@ int ActiveParticleType_RadiationParticle::EvaluateFormation(grid *thisgrid_orig,
   SetRadiationDefaults();
 
   if (APDEBUG && data.NumberOfNewParticles > 0) {
-    fprintf(stderr, "AP_RadiationParticle: Have created %"ISYM" new particles\n",
+    fprintf(stdout, "AP_RadiationParticle: Have created %"ISYM" new particles\n",
 	    data.NumberOfNewParticles);
   }
 

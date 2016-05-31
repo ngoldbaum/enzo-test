@@ -23,12 +23,12 @@
 #include "GridList.h"
 #include "ExternalBoundary.h"
 #include "Grid.h"
-#define APDEBUG 1
+#define APDEBUG 0
 /* function prototypes */
 
 static void ResetAcceleration(FLOAT *ActiveParticleAcceleration[],
-				      int *ActiveParticleFixedInSpace,
-				      int GridRank, int NumAPs);
+			      int *ActiveParticleFixedInSpace,
+			      int GridRank, int NumAPs);
 
 int grid::InterpolateParticlePositions(grid *FromGrid, int DifferenceType)
 {
@@ -94,9 +94,7 @@ int grid::InterpolateParticlePositions(grid *FromGrid, int DifferenceType)
   
     /* Adjust back. */
     
-    if ( DifferenceType == DIFFERENCE_TYPE_STAGGERED &&
-	 
-	 dim != GridRank)
+    if ( DifferenceType == DIFFERENCE_TYPE_STAGGERED &&	 dim != GridRank)
       FromGrid->CellLeftEdge[dim][0] = HoldLeftEdge[dim];
   }
   

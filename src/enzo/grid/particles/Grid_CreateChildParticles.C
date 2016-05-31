@@ -28,7 +28,7 @@
 #include "ExternalBoundary.h"
 #include "Grid.h"
 
-#define DEBUG_PS
+#define DEBUG_PS 0
 #include "fortran.def"
 #include "CosmologyParameters.h"
 
@@ -120,7 +120,7 @@ int grid::CreateChildParticles(float dx, int NumberOfParticles, float *ParticleM
    * seem to have any reason to be splitted.  (as of Oct.2009)
    */
 
-#ifdef DEBUG_PS
+#if DEBUG_PS
   fprintf(stdout, "%s: Iteration %d: midpoint = (%lf, %lf, %lf)\n", 
 	  __FUNCTION__, iter, midpoint[0], midpoint[1], midpoint[2]);
   fprintf(stdout, "%s: Iteration %d: newsep = (%lf, %lf, %lf)\n", 
@@ -360,7 +360,7 @@ int grid::CreateChildParticles(float dx, int NumberOfParticles, float *ParticleM
 
 	}
     }
-#ifdef DEBUG_PS
+#if DEBUG_PS
 
   if(total_children > 0)
     fprintf(stdout,"Iteration %d: %d new child particles created in this grid from %d parents\n", 
