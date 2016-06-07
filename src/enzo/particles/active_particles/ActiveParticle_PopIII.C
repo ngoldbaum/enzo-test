@@ -248,6 +248,14 @@ bool ActiveParticleType_PopIII::IsARadiationSource(FLOAT Time)
   return true;
 }
 
+/* 
+ * Insert stub function here 
+ */
+int ActiveParticleType_PopIII::ResetAcceleration(FLOAT *ActiveParticleAcceleration)
+{
+  return SUCCESS;
+}
+
 namespace {
   ActiveParticleType_info *PopIIIInfo = 
     register_ptype <ActiveParticleType_PopIII> ("PopIII");

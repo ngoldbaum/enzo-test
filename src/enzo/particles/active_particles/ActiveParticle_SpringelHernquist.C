@@ -221,6 +221,14 @@ int ActiveParticleType_SpringelHernquist::SetFlaggingField(LevelHierarchyEntry *
   return SUCCESS;
 }
 
+/* 
+ * Insert stub function here 
+ */
+int ActiveParticleType_SpringelHernquist::ResetAcceleration(FLOAT *ActiveParticleAcceleration)
+{
+  return SUCCESS;
+}
+
 namespace {
   ActiveParticleType_info *SpringelHernquistInfo = 
     register_ptype <ActiveParticleType_SpringelHernquist> ("SpringelHernquist");

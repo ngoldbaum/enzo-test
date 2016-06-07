@@ -413,6 +413,13 @@ int ActiveParticleType_GalaxyParticle::GalaxyParticleGravity(int nParticles,
   return SUCCESS;
 }
 
+/* 
+ * Insert stub function here 
+ */
+int ActiveParticleType_GalaxyParticle::ResetAcceleration(FLOAT *ActiveParticleAcceleration)
+{
+  return SUCCESS;
+}
 
 namespace {
   ActiveParticleType_info *GalaxyParticleInfo = 

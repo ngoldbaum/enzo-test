@@ -225,6 +225,15 @@ int ActiveParticleType_Kravtsov::SetFlaggingField(LevelHierarchyEntry *LevelArra
   return SUCCESS;
 }
 
+
+/* 
+ * Insert stub function here 
+ */
+int ActiveParticleType_Kravtsov::ResetAcceleration(FLOAT *ActiveParticleAcceleration)
+{
+  return SUCCESS;
+}
+
 namespace {
   ActiveParticleType_info *KravtsovInfo = 
     register_ptype <ActiveParticleType_Kravtsov> ("Kravtsov");

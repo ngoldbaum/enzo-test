@@ -442,6 +442,15 @@ int ActiveParticleType_AccretingParticle::SetFlaggingField(
   return SUCCESS;
 }
 
+/* 
+ * Insert stub function here 
+ */
+int ActiveParticleType_AccretingParticle::ResetAcceleration(FLOAT *ActiveParticleAcceleration)
+{
+  return SUCCESS;
+}
+
+
 bool ActiveParticleType_AccretingParticle::IsARadiationSource(FLOAT Time)
 {
   return (RadiationParticle == TRUE) ? true : false;

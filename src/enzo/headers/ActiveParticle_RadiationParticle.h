@@ -22,7 +22,7 @@
 #include "EventHooks.h"
 #include "ActiveParticle.h"
 
-#define DEBUG 1
+#define DEBUG 0
 #ifdef NEW_CONFIG
 
 #include "ParameterControl/ParameterControl.h"
@@ -173,9 +173,7 @@ public:
 	     if (RadiationParticleList[ipart]->IsARadiationSource(Time)) {
 	       ThisParticle =
 		 static_cast<ActiveParticleType_RadiationParticle*>(RadiationParticleList[ipart]);
-	       fprintf(stdout, "In %s\n", __FUNCTION__);
 	       ThisParticle->PrintInfo();
-	       fprintf(stdout, "Done In %s\n", __FUNCTION__);
 	     }
 	   }
 	 }
@@ -225,7 +223,8 @@ public:
   static void SetRadiationDefaults();
   static int* GetGridIndices(double *position, FLOAT *GridLeftEdge, float CellWidth);
   static int ReadRadiationParameterFile();
- 
+
+  static int ResetAcceleration(FLOAT *ActiveParticleAcceleration); 
   /*
    * This must appear unchanged in all particle types.  It is a macro that
    * returns a unique ID for the particle type.  The ID may be different from
@@ -242,13 +241,12 @@ public:
   static float *RadiationEnergyBins, *RadiationSED, RadiationLifetime; 
   static double RadiationPhotonsPerSecond;
   static InitData *Root;
-
+  static bool FixedInSpace;
   /*
    * Instance variables should be defined here. Each instance of the particle
    * class will have its own version of these variables.
    */
-  float RadiationLifeTime; 
-
+  
   /*
    * The AttributeHandler is used to save active particles to output files and
    * communitcate active particles over MPI.  Instance variables need to be

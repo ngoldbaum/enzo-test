@@ -45,7 +45,6 @@ ActiveParticleType::ActiveParticleType(void)
   Mass = BirthTime = DynamicalTime = 0.0;
   level = GridID = type = 0;
   WillDelete = false;
-  FixedInSpace  = 0;
 
   /* The correct indices are assigned in CommunicationUpdateActiveParticleCount 
      in ActiveParticleFinalize.*/
@@ -69,7 +68,6 @@ ActiveParticleType::ActiveParticleType(ActiveParticleType* part)
   type = part->type;
   CurrentGrid = part->CurrentGrid;
   WillDelete = part->WillDelete;
-  FixedInSpace  = part->FixedInSpace;
 }
 
 ActiveParticleType::ActiveParticleType(grid *_grid, ActiveParticleFormationData &data)
@@ -82,7 +80,6 @@ ActiveParticleType::ActiveParticleType(grid *_grid, ActiveParticleFormationData 
   type = 0;
   level = data.level;
   GridID = data.GridID;
-  FixedInSpace  = 0;
   /* The correct indices are assigned in CommunicationUpdateActiveParticleCount 
      in ActiveParticleFinalize.*/
   Identifier = INT_UNDEFINED;
@@ -118,7 +115,6 @@ void ActiveParticleType::operator=(ActiveParticleType *a)
   level = a->level;
   GridID = a->GridID;
   type = a->type;
-  FixedInSpace  = a->FixedInSpace;
   return;
 }
 
@@ -146,7 +142,6 @@ active_particle_class *ActiveParticleType::copy(void)
   a->level = level;
   a->GridID = GridID;
   a->type = type;
-  FixedInSpace  = a->FixedInSpace;
   return a;
 }
 

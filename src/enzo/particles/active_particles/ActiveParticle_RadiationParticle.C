@@ -41,7 +41,7 @@ float* ActiveParticleType_RadiationParticle::RadiationEnergyBins       = NULL;
 float* ActiveParticleType_RadiationParticle::RadiationSED              = NULL;
 float ActiveParticleType_RadiationParticle::RadiationLifetime          = FLOAT_UNDEFINED;
 float ActiveParticleType_RadiationParticle::RadiationPhotonsPerSecond  = FLOAT_UNDEFINED;
-
+bool ActiveParticleType_RadiationParticle::FixedInSpace                = TRUE;
 //Redshift
 float CR = 0.0;
 
@@ -89,7 +89,7 @@ int ActiveParticleType_RadiationParticle::InitializeParticleType() {
   // RadiationSED[5] = 100.0/RadiationSEDNumberOfBins;
   RadiationLifetime = RadiationSourceLifeTime;
   RadiationPhotonsPerSecond = PhotonsPerSecond;
-
+  FixedInSpace = TRUE; //Hardcoded for the moment but could potentially be a parameter
 #endif
   /* Error check parameters */
 
@@ -110,7 +110,7 @@ int ActiveParticleType_RadiationParticle::InitializeParticleType() {
   /* Create the vector ah and populate with the basic members*/
   ActiveParticleType::SetupBaseParticleAttributes(ah);
   /* Add RadiationLifeTime to the vector ah via the push_back library call*/
-  ah.push_back(new Handler<ap, float, &ap::RadiationLifeTime>("RadiationLifeTime"));
+  //ah.push_back(new Handler<ap, float, &ap::RadiationLifetime>("RadiationLifeTime"));
   return SUCCESS;
 }
 
@@ -290,12 +290,12 @@ int ActiveParticleType_RadiationParticle::EvaluateFormation(grid *thisgrid_orig,
 	      np->vel[0] = 0.0;
 	      np->vel[1] = 0.0;
 	      np->vel[2] = 0.0;
-	      np->RadiationLifeTime = RadiationSourceLifeTime;
+	      np->RadiationLifetime = RadiationSourceLifeTime;
 	      np->type =  np->GetEnabledParticleID(); //PARTICLE_TYPE_RAD;
 	      np->level = data.level;
 	      np->GridID = data.GridID;
 	      np->CurrentGrid = thisGrid;
-	      np->FixedInSpace = 1;  //Particle remains fixed in comoving space
+
 	      fprintf(stdout, "%s: A radiation particle inserted at (%"PSYM",%"PSYM",%"PSYM") " \
 		      "with v=(%f,%f,%f), m=%f, type=%ld, redshift = %f\n", __FUNCTION__,
 		      np->pos[0], 
@@ -368,6 +368,16 @@ int ActiveParticleType_RadiationParticle::SetFlaggingField(LevelHierarchyEntry *
   return SUCCESS;
 }
 
+/* 
+ * Reset the acceleration here if the particle is going to be fixed in space
+ */
+int ActiveParticleType_RadiationParticle::ResetAcceleration(FLOAT *ActiveParticleAcceleration)
+{
+  if(FixedInSpace == TRUE) {
+    *ActiveParticleAcceleration = 0.0;
+  }
+  return SUCCESS;
+}
 
 void ActiveParticleType_RadiationParticle::DescribeSupplementalData(ActiveParticleFormationDataFlags &flags)
 {

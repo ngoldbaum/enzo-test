@@ -155,6 +155,12 @@ public:
       int TopGridDims[], int ActiveParticleID);
 
   /*
+   * This function allows for the particle acceleration to be set to zero.
+   * Useful for fixing the position of an active particle.
+   */
+  static int ResetAcceleration(FLOAT *ActiveParticleAcceleration); 
+
+  /*
    * Register class-level metadata about your particle type.  This includes
    * reading in parameter values, any class-level activities that only happen
    * once at the beginning of the simulation, and registering instance members

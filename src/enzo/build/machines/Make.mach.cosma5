@@ -76,7 +76,7 @@ MACH_LDFLAGS  =
 #-----------------------------------------------------------------------
 
 MACH_OPT_WARN        = -Wall -g
-MACH_OPT_DEBUG       = -O0 -g -fsanitize=address -fno-omit-frame-pointer
+MACH_OPT_DEBUG       = -O0 -g ##-fsanitize=address -fno-omit-frame-pointer
 MACH_OPT_HIGH        = -O2 -ffast-math
 MACH_OPT_AGGRESSIVE  = -O3 
 

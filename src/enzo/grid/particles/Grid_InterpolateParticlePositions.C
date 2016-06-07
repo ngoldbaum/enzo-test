@@ -25,10 +25,7 @@
 #include "Grid.h"
 #define APDEBUG 0
 /* function prototypes */
-
-static void ResetAcceleration(FLOAT *ActiveParticleAcceleration[],
-			      int *ActiveParticleFixedInSpace,
-			      int GridRank, int NumAPs);
+void ActiveParticleResetAccelerations(FLOAT *ActiveParticleAcceleration);
 
 int grid::InterpolateParticlePositions(grid *FromGrid, int DifferenceType)
 {
@@ -57,10 +54,6 @@ int grid::InterpolateParticlePositions(grid *FromGrid, int DifferenceType)
       }
  
     if (NumberOfActiveParticles > 0) {
-      int *ActiveParticleFixedInSpace = new int[NumberOfActiveParticles];
-      
-      //if the mass is zero leave position alone...
-      this->GetActiveParticleFixedInSpace(ActiveParticleFixedInSpace);
       
       FLOAT **ActiveParticlePosition = new FLOAT*[GridRank];
       for (dim1 = 0; dim1 < GridRank; dim1++)
@@ -72,15 +65,12 @@ int grid::InterpolateParticlePositions(grid *FromGrid, int DifferenceType)
 					 NumberOfActiveParticles) == FAIL) {
 	ENZO_FAIL("Error in grid->InterpolatePositions.\n");
       }
-     
-      /* Massless active particles should not accelerate */
-      ResetAcceleration(ActiveParticleAcceleration, ActiveParticleFixedInSpace, 
-				GridRank, NumberOfActiveParticles);
-     
+      /* Reset Active Particle positions if required */
+      ActiveParticleResetAccelerations(ActiveParticleAcceleration[dim]);
+
       for (dim1 = 0; dim1 < GridRank; dim1++)
 	delete [] ActiveParticlePosition[dim1];
       delete [] ActiveParticlePosition;
-      delete [] ActiveParticleFixedInSpace;
     }
     
     if(ProblemType==29){
@@ -102,30 +92,3 @@ int grid::InterpolateParticlePositions(grid *FromGrid, int DifferenceType)
 }
 
 
-
-/*
- * Reset the "fixed in space" particles acceleration to 0.0
- */
-static void ResetAcceleration(FLOAT *ActiveParticleAcceleration[],
-			      int *ActiveParticleFixedInSpace, 
-			      int GridRank, int NumAPs)
-{
-  int i = 0, dim = 0;
-#if APDEBUG
-  printf("%s: NumberOfActiveParticles = %d\t GridRank = %d\n", __FUNCTION__, NumberOfActiveParticles, GridRank);
-  printf("%s: NumberOfActiveParticles = %d\t GridRank = %d\n", __FUNCTION__, NumAPs, GridRank);
-#endif
-  fflush(stdout);
-  for (i = 0; i < NumAPs; i++) {
-    if(ActiveParticleFixedInSpace[i] == 1)
-      {
-#if APDEBUG
-	printf("%s: Resetting Acceleration to zero for this particle", __FUNCTION__); fflush(stdout);
-#endif
-	for (dim = 0; dim < GridRank; dim++)
-	  ActiveParticleAcceleration[dim][i] = 0.0;
-      }
-  }
-  return;
-
-}

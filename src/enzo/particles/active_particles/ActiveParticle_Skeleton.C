@@ -301,6 +301,15 @@ int ActiveParticleType_Skeleton::SetFlaggingField(LevelHierarchyEntry *LevelArra
   return SUCCESS;
 }
 
+
+/* 
+ * Insert stub function here 
+ */
+int ActiveParticleType_Skeleton::ResetAcceleration(FLOAT *ActiveParticleAcceleration)
+{
+  return SUCCESS;
+}
+
 namespace
 {
 

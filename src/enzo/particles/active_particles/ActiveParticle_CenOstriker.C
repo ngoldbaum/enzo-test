@@ -505,6 +505,13 @@ void ActiveParticleType_CenOstriker::DescribeSupplementalData(ActiveParticleForm
   flags.MetalField = true;
 }
 
+/* 
+ * Insert stub function here 
+ */
+int ActiveParticleType_CenOstriker::ResetAcceleration(FLOAT *ActiveParticleAcceleration)
+{
+  return SUCCESS;
+}
 
 int ActiveParticleType_CenOstriker::SetFlaggingField(LevelHierarchyEntry *LevelArray[],int level, int TopGridDims[], int ActiveParticleID)
 {
