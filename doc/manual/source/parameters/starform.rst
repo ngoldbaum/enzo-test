@@ -293,7 +293,7 @@ The parameters below are considered in ``StarParticleCreation`` method 9.
 
 
 RadiationParticle
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^
 
 The parameters below refer to the "RadiationParticle". This is an active
 particle implementation only. Only a single parameter is required to create
@@ -314,7 +314,7 @@ the particle:
 ``NumberOfEnergyBins`` (external)
     The number of radiation bins that the SED will be sampled over. More bins
     is more accurate but also more computationally expensive. Maximum = 255.
-``RadiationEnergyInBin`` (external)
+``RadiationInEvPerBin`` (external)
     The energy in Ev at the centre of each bin as a list of floats. E.g. 1.0
     8.0 12.8 13.6
 ``RadiationBinSED`` (external)

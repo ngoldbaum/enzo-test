@@ -109,8 +109,6 @@ int ActiveParticleType_RadiationParticle::InitializeParticleType() {
   AttributeVector &ah = ap::AttributeHandlers;
   /* Create the vector ah and populate with the basic members*/
   ActiveParticleType::SetupBaseParticleAttributes(ah);
-  /* Add RadiationLifeTime to the vector ah via the push_back library call*/
-  //ah.push_back(new Handler<ap, float, &ap::RadiationLifetime>("RadiationLifeTime"));
   return SUCCESS;
 }
 

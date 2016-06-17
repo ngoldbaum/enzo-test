@@ -443,7 +443,9 @@ int ActiveParticleType_AccretingParticle::SetFlaggingField(
 }
 
 /* 
- * Insert stub function here 
+ * This function can be used to reset the particle acceleration if required.
+ * For example if a massless particle needs to be fixed in space. 
+ * See ActiveParticle_RadiationParticle.C for details. 
  */
 int ActiveParticleType_AccretingParticle::ResetAcceleration(FLOAT *ActiveParticleAcceleration)
 {
