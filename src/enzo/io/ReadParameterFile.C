@@ -21,7 +21,8 @@
 //   based on it.
  
 #include "preincludes.h"
-
+#include <string>
+#include <sstream>
 #ifdef CONFIG_USE_LIBCONFIG
 #include <libconfig.h++>
 #endif
@@ -973,6 +974,44 @@ int ReadParameterFile(FILE *fptr, TopGridData &MetaData, float *Initialdt)
     ret += sscanf(line, "AccretingParticleLuminosity = %lg",
 		  &AccretingParticleLuminosity);
 
+    /* Radiation Particle - set Energy Bins, Luminosity and info filename*/
+    ret += sscanf(line, "NumberOfRadiationParticles = %"ISYM, &NumberOfRadiationParticles);
+    if (sscanf(line, "RadiationSourcesFileName = %s", dummy) == 1)
+      RadiationSourcesFileName = dummy;
+    ret += sscanf(line, "PhotonsPerSecond = %"FSYM, &PhotonsPerSecond);
+    ret += sscanf(line, "NumberOfEnergyBins = %"ISYM, &NumberOfEnergyBins);
+    if(strncmp(line, "RadiationInEvPerBin", 15) == 0)
+      {
+	char *numbers;
+	char *value;
+	int count;
+	char *delims = (char*) " ";
+	numbers = strstr(line, "=")+2;
+	value = strtok(numbers, delims);
+	count = 0;
+	while (value != NULL) {
+	  RadiationEnergyInBin[count++] = atof(value);
+	  value = strtok(NULL, delims);
+	  ret++;
+	}
+
+      }
+    if(strncmp(line, "RadiationSEDPerBin", 18) == 0)
+      {
+	char *numbers;
+	char *value;
+	int count;
+	char *delims = (char*) " ";
+	numbers = strstr(line, "=")+2;
+	value = strtok(numbers, delims);
+	count = 0;
+	while (value != NULL) {
+	  RadiationBinSED[count++] = atof(value);
+	  value = strtok(NULL, delims);
+	  ret++;
+	}
+      }
+   
     /* Read Movie Dump parameters */
 
     ret += sscanf(line, "MovieSkipTimestep = %"ISYM, &MovieSkipTimestep);
@@ -1169,9 +1208,17 @@ int ReadParameterFile(FILE *fptr, TopGridData &MetaData, float *Initialdt)
     ret += sscanf(line, "ParticleSplitterIterations = %"ISYM,
 		  &ParticleSplitterIterations);
     ret += sscanf(line, "ParticleSplitterRandomSeed = %"ISYM,
-		  &ParticleSplitterRandomSeed);
+                  &ParticleSplitterRandomSeed);
     ret += sscanf(line, "ParticleSplitterChildrenParticleSeparation = %"FSYM,
 		  &ParticleSplitterChildrenParticleSeparation);
+    ret += sscanf(line, "ParticleSplitterFraction    = %"FSYM" %"FSYM" %"FSYM" %"FSYM"",
+                  ParticleSplitterFraction+0, ParticleSplitterFraction+1, ParticleSplitterFraction+2,
+                  ParticleSplitterFraction+3);
+    ret += sscanf(line, "ParticleSplitterCenter    = %"FSYM" %"FSYM" %"FSYM"",
+                  ParticleSplitterCenter+0, ParticleSplitterCenter+1, ParticleSplitterCenter+2);
+    ret += sscanf(line, "ParticleSplitterCenterRegion  = %"FSYM" %"FSYM" %"FSYM" %"FSYM"",
+                  ParticleSplitterCenterRegion+0, ParticleSplitterCenterRegion+1, ParticleSplitterCenterRegion+2,
+                  ParticleSplitterCenterRegion+3);
     ret += sscanf(line, "ResetMagneticField = %"ISYM,
 		  &ResetMagneticField);
     ret += sscanf(line, "ResetMagneticFieldAmplitude  =  %"GSYM" %"GSYM" %"GSYM, 

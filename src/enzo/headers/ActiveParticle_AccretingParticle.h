@@ -74,6 +74,8 @@ public:
       int level, 
       int TopGridDims[], 
       int ActiveParticleID);
+
+  static int ResetAcceleration(FLOAT *ActiveParticleAcceleration); 
   static int InitializeParticleType();
   ENABLED_PARTICLE_ID_ACCESSOR
   bool IsARadiationSource(FLOAT Time);

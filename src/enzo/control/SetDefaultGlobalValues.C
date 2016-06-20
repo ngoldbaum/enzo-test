@@ -613,6 +613,15 @@ int SetDefaultGlobalValues(TopGridData &MetaData)
   MBHInsertLocationFilename        = (char*) "mbh_insert_location.in";
   OutputWhenJetsHaveNotEjected     = FALSE;
 
+  /* Star Class Radiation Source Particle */
+  NumberOfRadiationParticles       = 1;
+  RadiationSourcesFileName         = (char*) "RadiationSourcePositions.txt";
+  PhotonsPerSecond                 = 0.0;        // s^-1
+  NumberOfEnergyBins               = 1;
+  RadiationEnergyInBin[0]          = 13.61;
+  RadiationBinSED[0]               = 1.0;
+
+
   H2StarMakerEfficiency = 0.01;
   H2StarMakerNumberDensityThreshold = 0.0;
   H2StarMakerMinimumMass = 0.0;
@@ -882,6 +891,12 @@ int SetDefaultGlobalValues(TopGridData &MetaData)
   ParticleSplitterIterations = FALSE;
   ParticleSplitterChildrenParticleSeparation = 1.0;
   ParticleSplitterRandomSeed = 131180;
+  for(int i = 0; i < MAX_SPLIT_ITERATIONS; i++)
+    ParticleSplitterFraction[i] = 1.0;
+  for(int i = 0; i < MAX_DIMENSION; i++)
+    ParticleSplitterCenter[i] = -1.0;
+  for(int i = 0; i < MAX_SPLIT_ITERATIONS; i++)
+    ParticleSplitterCenterRegion[i] = -1.0;
 
   /* Magnetic Field Resetter */
 

@@ -196,7 +196,6 @@ int EvolvePhotons(TopGridData *MetaData, LevelHierarchyEntry *LevelArray[],
     } // ENDIF undefined grid
 
     /* Now we know which grid, we can add to the GridList */
-
     NewNode = new ThinGridList;
     if (RS->GridLevel != INT_UNDEFINED)
       NewNode->ThisGrid = Grids[RS->GridLevel][RS->GridID]->GridData;
@@ -241,6 +240,7 @@ int EvolvePhotons(TopGridData *MetaData, LevelHierarchyEntry *LevelArray[],
        list as well. */
 
     RS = GlobalRadiationSources->NextSource;
+  
     LastNode = RS_GridList;
     TempGridList = RS_GridList->NextGrid;
     int NumberOfSources = 0;

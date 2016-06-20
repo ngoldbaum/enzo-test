@@ -60,6 +60,7 @@ public:
 				int NumberOfGrids, LevelHierarchyEntry *LevelArray[], 
 				int ThisLevel, int GalaxyParticleID) { return SUCCESS; };
   static int SetFlaggingField(LevelHierarchyEntry *LevelArray[], int level, int TopGridDims[], int ActiveParticleID);
+  static int ResetAcceleration(FLOAT *ActiveParticleAcceleration); 
   static int InitializeParticleType(void);
   static std::vector<ParticleAttributeHandler *> AttributeHandlers;
   ENABLED_PARTICLE_ID_ACCESSOR

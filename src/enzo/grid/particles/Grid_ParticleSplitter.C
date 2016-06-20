@@ -39,31 +39,13 @@ int GetUnits(float *DensityUnits, float *LengthUnits,
 	     float *VelocityUnits, FLOAT Time);
 int FindField(int field, int farray[], int numfields);
  
-extern "C" void FORTRAN_NAME(particle_splitter)(int *nx, int *ny, int *nz,
-             int *idual, int *imetal, hydro_method *imethod, float *dt, 
-	     float *r, float *dx, FLOAT *t, float *z, 
-             float *d1, float *x1, float *v1, float *t1,
-	     FLOAT *xstart, FLOAT *ystart, FLOAT *zstart, int *ibuff,
-             int *npart,
-             FLOAT *xpold, FLOAT *ypold, FLOAT *zpold, float *upold, float *vpold, float *wpold,
-	     float *mpold, float *tdpold, float *tcpold, float *metalfold, int *typeold,
-	     int *nmax, int *npartnew, int *children, int *level,
-             FLOAT *xp, FLOAT *yp, FLOAT *zp, float *up, float *vp, float *wp,
-	     float *mp, float *tdp, float *tcp, float *metalf, int *type, 
-	     int *iterations, float *separation, int *ran1_init, 
-	     FLOAT *rr_leftedge, FLOAT *rr_rightedge); 
-
-  
-int grid::ParticleSplitter(int level)
+int grid::ParticleSplitter(int level, int iteration)
 {
 
   if (ParticleSplitterIterations == 0)
     return SUCCESS;
 
   if (MyProcessorNumber != ProcessorNumber)
-    return SUCCESS;
-
-  if (NumberOfBaryonFields == 0)
     return SUCCESS;
  
   if (GridRank <=2)
@@ -72,37 +54,37 @@ int grid::ParticleSplitter(int level)
   /* Initialize */
  
   int dim, i, j, k, index, size, field, GhostZones = NumberOfGhostZones;
-  int DensNum, GENum, TENum, Vel1Num, Vel2Num, Vel3Num, B1Num, B2Num, B3Num,H2INum, H2IINum;
-
-  LCAPERF_START("grid_ParticleSplitter");
- 
+  int MetallicityField = FALSE;
   /* Compute size (in floats) of the current grid. */
  
   size = 1;
   for (dim = 0; dim < GridRank; dim++)
     size *= GridDimension[dim];
  
-  /* Find fields: density, total energy, velocity1-3. */
+  LCAPERF_START("grid_ParticleSplitter");
+  if(NumberOfBaryonFields > 0)    {
+    int DensNum, GENum, TENum, Vel1Num, Vel2Num, Vel3Num, B1Num, B2Num, B3Num,H2INum, H2IINum;
+
+    /* Find fields: density, total energy, velocity1-3. */
  
-  this->DebugCheck("ParticleSplitter");
-  if (this->IdentifyPhysicalQuantities(DensNum, GENum, Vel1Num, Vel2Num,
-				       Vel3Num, TENum, B1Num, B2Num, B3Num) == FAIL) {
-        ENZO_FAIL("Error in IdentifyPhysicalQuantities.");
+    this->DebugCheck("ParticleSplitter");
+    if (this->IdentifyPhysicalQuantities(DensNum, GENum, Vel1Num, Vel2Num,
+					 Vel3Num, TENum, B1Num, B2Num, B3Num) == FAIL) {
+      ENZO_FAIL("Error in IdentifyPhysicalQuantities.");
+    }
+ 
+    /* Find metallicity field and set flag. */
+ 
+    int SNColourNum, MetalNum, MBHColourNum, Galaxy1ColourNum, Galaxy2ColourNum,
+      MetalIaNum;
+
+    if (this->IdentifyColourFields(SNColourNum, MetalNum, MetalIaNum, MBHColourNum,
+				   Galaxy1ColourNum, Galaxy2ColourNum) == FAIL)
+      ENZO_FAIL("Error in grid->IdentifyColourFields.\n");
+
+    MetalNum = max(MetalNum, SNColourNum);
+    MetallicityField = (MetalNum > 0) ? TRUE : FALSE;
   }
- 
-  /* Find metallicity field and set flag. */
- 
-  int SNColourNum, MetalNum, MBHColourNum, Galaxy1ColourNum, Galaxy2ColourNum,
-    MetalIaNum;
-  int MetallicityField = FALSE;
-
-  if (this->IdentifyColourFields(SNColourNum, MetalNum, MetalIaNum, MBHColourNum,
-				 Galaxy1ColourNum, Galaxy2ColourNum) == FAIL)
-    ENZO_FAIL("Error in grid->IdentifyColourFields.\n");
-
-  MetalNum = max(MetalNum, SNColourNum);
-  MetallicityField = (MetalNum > 0) ? TRUE : FALSE;
-
   /* Compute the redshift. */
  
   float zred;
@@ -130,7 +112,7 @@ int grid::ParticleSplitter(int level)
   
   /* Allocate space for new particles. */
   
-  int ChildrenPerParent = 12;  //12+1 = 13 will be the final number of particles per parent
+  int ChildrenPerParent = CHILDRENPERPARENT;  //12+1 = 13 will be the final number of particles per parent
   int MaximumNumberOfNewParticles = ChildrenPerParent*NumberOfParticles+1;
   tg->AllocateNewParticles(MaximumNumberOfNewParticles);
 
@@ -165,12 +147,13 @@ int grid::ParticleSplitter(int level)
     }
 #endif
     if(!tg->CreateChildParticles(CellWidthTemp, NumberOfParticles, ParticleMass,
-				 ParticleType, ParticlePosition, ParticleVelocity,
-				 ParticleAttribute, CellLeftEdge, GridDimension, 
-				 MaximumNumberOfNewParticles, &NumberOfNewParticles))
+                                 ParticleType, ParticlePosition, ParticleVelocity,
+                                 ParticleAttribute, CellLeftEdge, GridDimension,
+                                 MaximumNumberOfNewParticles, iteration, 
+				 &NumberOfNewParticles))
       {
 	fprintf(stdout, "Failed to create child particles in grid %d\n", this->GetGridID());
-	return FAIL;
+        return FAIL;
       }
 
   }

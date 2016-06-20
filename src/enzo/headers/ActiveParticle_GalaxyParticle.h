@@ -61,6 +61,8 @@ public:
 				int NumberOfGrids, LevelHierarchyEntry *LevelArray[], 
 				int ThisLevel, int GalaxyParticleID);
   static int SetFlaggingField(LevelHierarchyEntry *LevelArray[], int level, int TopGridDims[], int ActiveParticleID);
+
+  static int ResetAcceleration(FLOAT *ActiveParticleAcceleration); 
   // Galaxy Particle helper routines.
   static int SubtractMassFromGrid(int nParticles,
       ActiveParticleList<ActiveParticleType>& ParticleList, 

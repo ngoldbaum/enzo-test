@@ -669,9 +669,9 @@ public:
                          const std::string name, hid_t node),
    int (*read_particles)(ActiveParticleList<ActiveParticleType> &particles, int &offset, const
                          std::string name, hid_t node),
+   int (*reset_acceleration)(FLOAT *ActiveParticleAcceleration),
    ActiveParticleType *particle)
    {
-
     this->InitializeParticleType = initialize;
     this->EvaluateFormation = evaluate_formation;
     this->EvaluateFeedback = feedback;
@@ -686,6 +686,7 @@ public:
     this->ReturnElementSize = element_size;
     this->WriteParticles = write_particles;
     this->ReadParticles = read_particles;
+    this->ResetAcceleration = reset_acceleration;
     this->particle_instance = particle;
     this->particle_name = this_name;
     get_active_particle_types()[this_name] = this;
@@ -717,6 +718,7 @@ public:
   int (*DepositMass)(HierarchyEntry *Grids[], TopGridData *MetaData,
 		     int NumberOfGrids, LevelHierarchyEntry *LevelArray[],
 		     int ThisLevel, int ActiveParticleID);
+  int (*ResetAcceleration)(FLOAT *ActiveParticleAcceleration);
   int (*SetFlaggingField)(LevelHierarchyEntry *LevelArray[], int level, int TopGridDims[], int ActiveParticleID);
   void (*DescribeSupplementalData)(ActiveParticleFormationDataFlags &flags);
   void (*AllocateBuffer)(int Count, char **buffer);
@@ -765,6 +767,7 @@ ActiveParticleType_info *register_ptype(std::string name)
      (&ActiveParticleHelpers::CalculateElementSize<APClass>),
      (&ActiveParticleHelpers::WriteParticles<APClass>),
      (&ActiveParticleHelpers::ReadParticles<APClass>),
+     (&APClass::ResetAcceleration),
      pp);
   return pinfo;
 }

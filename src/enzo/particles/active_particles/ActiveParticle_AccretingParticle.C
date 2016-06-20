@@ -442,6 +442,17 @@ int ActiveParticleType_AccretingParticle::SetFlaggingField(
   return SUCCESS;
 }
 
+/* 
+ * This function can be used to reset the particle acceleration if required.
+ * For example if a massless particle needs to be fixed in space. 
+ * See ActiveParticle_RadiationParticle.C for details. 
+ */
+int ActiveParticleType_AccretingParticle::ResetAcceleration(FLOAT *ActiveParticleAcceleration)
+{
+  return SUCCESS;
+}
+
+
 bool ActiveParticleType_AccretingParticle::IsARadiationSource(FLOAT Time)
 {
   return (RadiationParticle == TRUE) ? true : false;

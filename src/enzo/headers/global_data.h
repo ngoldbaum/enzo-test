@@ -949,6 +949,9 @@ EXTERN int MoveParticlesBetweenSiblings;
 EXTERN int ParticleSplitterIterations;
 EXTERN float ParticleSplitterChildrenParticleSeparation;
 EXTERN int ParticleSplitterRandomSeed;
+EXTERN float ParticleSplitterFraction[MAX_SPLIT_ITERATIONS];
+EXTERN FLOAT ParticleSplitterCenter[MAX_DIMENSION];
+EXTERN float ParticleSplitterCenterRegion[MAX_SPLIT_ITERATIONS];
 
 /* Magnetic Field Resetter */
 
@@ -962,6 +965,14 @@ EXTERN char *MBHParticleIOFilename;
 EXTERN double MBHParticleIOTemp[30][5+MAX_DIMENSION];
 EXTERN char *MBHInsertLocationFilename;
 EXTERN int OutputWhenJetsHaveNotEjected;
+
+/* Star Class Radiation Particle IO (PARTICLE_TYPE_RAD) */
+EXTERN char *RadiationSourcesFileName;
+EXTERN int   NumberOfRadiationParticles;
+EXTERN double PhotonsPerSecond;
+EXTERN int   NumberOfEnergyBins;
+EXTERN float RadiationEnergyInBin[255];
+EXTERN float RadiationBinSED[255];
 
 /* Vorticity Calculations */
 

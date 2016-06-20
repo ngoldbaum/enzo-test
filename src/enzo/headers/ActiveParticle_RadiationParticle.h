@@ -1,7 +1,11 @@
 /***********************************************************************
 /
-/  A "skeleton" active particle that compiles but doesn't do much.
+/  Header File for the Radiation Particle. 
+/  Based on template provided by Nathan Goldbaum - ActiveParticle_Skeleton.h
 /
+/  Author: John Regan
+/
+/  Date: July 2014
 ************************************************************************/
 
 #include "preincludes.h"
@@ -18,33 +22,76 @@
 #include "EventHooks.h"
 #include "ActiveParticle.h"
 
-class ActiveParticleType_Skeleton : public ActiveParticleType
+#define DEBUG 0
+#ifdef NEW_CONFIG
+
+#include "ParameterControl/ParameterControl.h"
+extern Configuration Param;
+
+/* Set default parameter values. */
+
+const char config_radiation_particle_defaults[] =
+"### RADIATION PARTICLE DEFAULTS ###\n"
+"\n"
+"Physics: {\n"
+"    ActiveParticles: {\n"
+"        RadiationParticle: {\n"
+"            RadiationNumSources      = 1;\n"
+"            RadiationSEDNumberOfBins = 1;\n"
+"            PhotonsPerSecond         = [1e50];\n"
+"            RadiationEnergyBins      = [15.0];\n"
+"            RadiationSED             = [1.0];\n"
+"            RadiationLifetime        = 10000;\n"
+"        };\n"
+"    };\n"
+"};\n";
+
+#endif
+
+
+/* Structures */
+struct InitData {   //LL used to store Particle Positions
+  FLOAT Position[3];
+  float Redshift;
+  bool Alive;
+  bool Create;
+  bool Deleteme;
+  InitData *next;
+};
+/* Function prototypes */
+int CosmologyComputeExpansionFactor(FLOAT time, FLOAT *a, FLOAT *dadt);
+bool CheckForCreateParticle(InitData *Root);
+int GetUnits(float *DensityUnits, float *LengthUnits,
+	     float *TemperatureUnits, float *TimeUnits,
+	     float *VelocityUnits, FLOAT Time);
+
+
+
+class ActiveParticleType_RadiationParticle : public ActiveParticleType
 {
 public:
   // void constructor (no arguments)
-  ActiveParticleType_Skeleton(void) : ActiveParticleType()
+  ActiveParticleType_RadiationParticle(void) : ActiveParticleType()
     {
-      // Initialize any instance (i.e. not static) member variables here
+      
     };
 
   // copy constructor
-  ActiveParticleType_Skeleton(ActiveParticleType_Skeleton* part) :
+  ActiveParticleType_RadiationParticle(ActiveParticleType_RadiationParticle* part) :
     ActiveParticleType(static_cast<ActiveParticleType*>(part))
     {
       // Copy values of instance members using data from the particle instance
       // that is passed as an argument to this function
     }
-  
+
   // Needed to Create a copy of a particle when only a pointer to the base
   // class is available.
   ActiveParticleType* clone() 
-    {
-      return static_cast<ActiveParticleType*>(
-          new ActiveParticleType_Skeleton(this)
-        );
-    }
-  
-
+  {
+    return static_cast<ActiveParticleType*>(
+	   new ActiveParticleType_RadiationParticle(this)
+					   );
+  }
   /*
    * Run an algorithm to determine whether a particle forms in a grid.
    *
@@ -77,12 +124,6 @@ public:
    * access the entire grid hierarchy and can in principle make arbitrary
    * modifications to any grid.
    *
-   * This funcion and the corresponding AfterEvolveLevel function are the best
-   * place to implement any feedback or subgrid physics algorithm that needs
-   * information outside of the grid a particle lives on.  These functions
-   * have access to the full AMR hierarchy and can arbitrarily change the
-   * state of the simulation.
-   *
    * This function is called in the ActiveParticleInitialize function, which is
    * in turn called before the loop that advances the grids by a timestep
    * happens in EvolveLevel.
@@ -91,24 +132,16 @@ public:
    * file.
    */
   template <class active_particle_class>
-  static int BeforeEvolveLevel(HierarchyEntry *Grids[], TopGridData *MetaData,
-      int NumberOfGrids, LevelHierarchyEntry *LevelArray[],
-      int ThisLevel, bool CallEvolvePhotons, int TotalActiveParticleCountPrevious[],
-      int SkeletonID)
-    {
-      return SUCCESS;
-    };
+    static int BeforeEvolveLevel(HierarchyEntry *Grids[], TopGridData *MetaData,
+				 int NumberOfGrids, LevelHierarchyEntry *LevelArray[],
+				 int ThisLevel, bool CallEvolvePhotons,
+				 int TotalActiveParticleCountPrevious[],
+				 int RadiationParticleID);
 
   /*
    * Perform distributed operations on the hierarchy.  This function can
    * access the entire grid hierarchy and can in principle make arbitrary
    * modifications to any grid.
-   *
-   * This funcion and the corresponding AfterEvolveLevel function are the best
-   * place to implement any feedback or subgrid physics algorithm that needs
-   * information outside of the grid a particle lives on.  These functions
-   * have access to the full AMR hierarchy and can arbitrarily change the
-   * state of the simulation.
    *
    * This function is called in the ActiveParticleFinalize function, which is
    * in turn called after the loop that advances the grids by a timestep
@@ -121,9 +154,31 @@ public:
   static int AfterEvolveLevel(HierarchyEntry *Grids[], TopGridData *MetaData,
 				int NumberOfGrids, LevelHierarchyEntry *LevelArray[],
 				int ThisLevel, int TotalActiveParticleCountPrevious[],
-				int SkeletonID)
+				int RadiationParticleID)
     {
-      return SUCCESS;
+
+       if(DEBUG)
+	 {
+	   FLOAT Time = LevelArray[ThisLevel]->GridData->ReturnTime();
+	   float DensityUnits, LengthUnits, TemperatureUnits, TimeUnits,
+	     VelocityUnits;
+	   GetUnits(&DensityUnits, &LengthUnits, &TemperatureUnits,
+		    &TimeUnits, &VelocityUnits, Time);
+	   int nParticles = 0, ipart = 0;
+           ActiveParticleList<ActiveParticleType> RadiationParticleList;
+	   ActiveParticleFindAll(LevelArray, &nParticles, RadiationParticleID, RadiationParticleList);
+	   
+	   ActiveParticleType_RadiationParticle *ThisParticle;
+	   for (ipart = 0; ipart < nParticles; ipart++) {
+	     if (RadiationParticleList[ipart]->IsARadiationSource(Time)) {
+	       ThisParticle =
+		 static_cast<ActiveParticleType_RadiationParticle*>(RadiationParticleList[ipart]);
+	       ThisParticle->PrintInfo();
+	     }
+	   }
+	 }
+       
+       return SUCCESS;
     };
 
   /*
@@ -155,12 +210,6 @@ public:
       int TopGridDims[], int ActiveParticleID);
 
   /*
-   * This function allows for the particle acceleration to be set to zero.
-   * Useful for fixing the position of an active particle.
-   */
-  static int ResetAcceleration(FLOAT *ActiveParticleAcceleration); 
-
-  /*
    * Register class-level metadata about your particle type.  This includes
    * reading in parameter values, any class-level activities that only happen
    * once at the beginning of the simulation, and registering instance members
@@ -170,27 +219,34 @@ public:
    * called inside ReadParameterFile.
    */
   static int InitializeParticleType();
+  bool IsARadiationSource(FLOAT Time);
+  static void SetRadiationDefaults();
+  static int* GetGridIndices(double *position, FLOAT *GridLeftEdge, float CellWidth);
+  static int ReadRadiationParameterFile();
 
+  static int ResetAcceleration(FLOAT *ActiveParticleAcceleration); 
   /*
    * This must appear unchanged in all particle types.  It is a macro that
    * returns a unique ID for the particle type.  The ID may be different from
    * simulation to simulation.
    */
-  ENABLED_PARTICLE_ID_ACCESSOR
+  ENABLED_PARTICLE_ID_ACCESSOR;
 
   /*
    * Static variables should be defined here.  Since they are static, there is
    * only one copy of these variables for all instances of the class.  This is
    * useful for storing the value of a runtime parameter, for example.
    */
-  static float OverdensityThreshold, MassEfficiency;
-
+  static int RadiationNumSources, RadiationSEDNumberOfBins;
+  static float *RadiationEnergyBins, *RadiationSED, RadiationLifetime; 
+  static double RadiationPhotonsPerSecond;
+  static InitData *Root;
+  static bool FixedInSpace;
   /*
    * Instance variables should be defined here. Each instance of the particle
    * class will have its own version of these variables.
    */
-  float AccretionRate;
-
+  
   /*
    * The AttributeHandler is used to save active particles to output files and
    * communitcate active particles over MPI.  Instance variables need to be

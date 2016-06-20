@@ -23,10 +23,10 @@
 #include "GridList.h"
 #include "ExternalBoundary.h"
 #include "Grid.h"
- 
+#define APDEBUG 0
 /* function prototypes */
- 
- 
+void ActiveParticleResetAccelerations(FLOAT *ActiveParticleAcceleration);
+
 int grid::InterpolateParticlePositions(grid *FromGrid, int DifferenceType)
 {
  
@@ -54,17 +54,19 @@ int grid::InterpolateParticlePositions(grid *FromGrid, int DifferenceType)
       }
  
     if (NumberOfActiveParticles > 0) {
-
+      
       FLOAT **ActiveParticlePosition = new FLOAT*[GridRank];
       for (dim1 = 0; dim1 < GridRank; dim1++)
 	ActiveParticlePosition[dim1] = new FLOAT[NumberOfActiveParticles];
       this->GetActiveParticlePosition(ActiveParticlePosition);
-      
+    
       if (FromGrid->InterpolatePositions(ActiveParticlePosition, dim,
 					 ActiveParticleAcceleration[dim],
 					 NumberOfActiveParticles) == FAIL) {
 	ENZO_FAIL("Error in grid->InterpolatePositions.\n");
       }
+      /* Reset Active Particle positions if required */
+      ActiveParticleResetAccelerations(ActiveParticleAcceleration[dim]);
 
       for (dim1 = 0; dim1 < GridRank; dim1++)
 	delete [] ActiveParticlePosition[dim1];
@@ -82,11 +84,11 @@ int grid::InterpolateParticlePositions(grid *FromGrid, int DifferenceType)
   
     /* Adjust back. */
     
-    if ( DifferenceType == DIFFERENCE_TYPE_STAGGERED &&
-	 
-	 dim != GridRank)
+    if ( DifferenceType == DIFFERENCE_TYPE_STAGGERED &&	 dim != GridRank)
       FromGrid->CellLeftEdge[dim][0] = HoldLeftEdge[dim];
   }
   
   return SUCCESS;
 }
+
+

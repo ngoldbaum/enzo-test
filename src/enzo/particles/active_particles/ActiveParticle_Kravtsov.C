@@ -225,6 +225,17 @@ int ActiveParticleType_Kravtsov::SetFlaggingField(LevelHierarchyEntry *LevelArra
   return SUCCESS;
 }
 
+
+/* 
+ * This function can be used to reset the particle acceleration if required.
+ * For example if a massless particle needs to be fixed in space. 
+ * See ActiveParticle_RadiationParticle.C for details. 
+ */
+int ActiveParticleType_Kravtsov::ResetAcceleration(FLOAT *ActiveParticleAcceleration)
+{
+  return SUCCESS;
+}
+
 namespace {
   ActiveParticleType_info *KravtsovInfo = 
     register_ptype <ActiveParticleType_Kravtsov> ("Kravtsov");

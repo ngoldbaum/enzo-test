@@ -1,0 +1,4 @@
+#Positions location [3], Redshift at which to ignite
+
+0.5  0.5  0.5 50.0
+

@@ -506,6 +506,16 @@ void ActiveParticleType_CenOstriker::DescribeSupplementalData(ActiveParticleForm
 }
 
 
+/* 
+ * This function can be used to reset the particle acceleration if required.
+ * For example if a massless particle needs to be fixed in space. 
+ * See ActiveParticle_RadiationParticle.C for details. 
+ */
+int ActiveParticleType_CenOstriker::ResetAcceleration(FLOAT *ActiveParticleAcceleration)
+{
+  return SUCCESS;
+}
+
 int ActiveParticleType_CenOstriker::SetFlaggingField(LevelHierarchyEntry *LevelArray[],int level, int TopGridDims[], int ActiveParticleID)
 {
 

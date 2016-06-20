@@ -221,6 +221,16 @@ int ActiveParticleType_SpringelHernquist::SetFlaggingField(LevelHierarchyEntry *
   return SUCCESS;
 }
 
+/* 
+ * This function can be used to reset the particle acceleration if required.
+ * For example if a massless particle needs to be fixed in space. 
+ * See ActiveParticle_RadiationParticle.C for details. 
+ */
+int ActiveParticleType_SpringelHernquist::ResetAcceleration(FLOAT *ActiveParticleAcceleration)
+{
+  return SUCCESS;
+}
+
 namespace {
   ActiveParticleType_info *SpringelHernquistInfo = 
     register_ptype <ActiveParticleType_SpringelHernquist> ("SpringelHernquist");

@@ -80,7 +80,6 @@ ActiveParticleType::ActiveParticleType(grid *_grid, ActiveParticleFormationData 
   type = 0;
   level = data.level;
   GridID = data.GridID;
-
   /* The correct indices are assigned in CommunicationUpdateActiveParticleCount 
      in ActiveParticleFinalize.*/
   Identifier = INT_UNDEFINED;

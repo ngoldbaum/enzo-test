@@ -2422,13 +2422,26 @@ int zEulerSweep(int j, int NumberOfSubgrids, fluxes *SubgridFluxes[],
 
   void GetActiveParticlePosition(FLOAT *ActiveParticlePosition[]);
 
+  /* Get the active particle mass as a flat array (1D) */
+  
+  void GetActiveParticleMass(float * ActiveParticleMass);
+  void GetActiveParticleFixedInSpace(int * ActiveParticleFixedInSpace);
+
   /* Returns averaged velocity from the 6 neighbor cells and itself */
 
   float* AveragedVelocityAtCell(int index, int DensNum, int Vel1Num);
 
 /* Particle splitter routine. */
 
-  int ParticleSplitter(int level);
+  int ParticleSplitter(int level, int iter);
+
+  int CreateChildParticles(float dx, int NumberOfParticles, float *ParticleMass,
+                           int *ParticleType, FLOAT *ParticlePosition[],
+                           float *ParticleVelocity[], float *ParticleAttribute[],
+                           FLOAT *CellLeftEdge[], int *GridDimension,
+                           int MaximumNumberOfNewParticles, int iter, 
+			   int *NumberOfNewParticles);
+
 
   int CreateChildParticles(float dx, int NumberOfParticles, float *ParticleMass,
 			   int *ParticleType, FLOAT *ParticlePosition[],

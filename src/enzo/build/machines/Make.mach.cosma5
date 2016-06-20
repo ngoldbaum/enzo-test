@@ -1,0 +1,111 @@
+#=======================================================================
+#
+# FILE:        Make.mach.gnu_cosma4
+#
+# DESCRIPTION: Makefile settings for Durham's Cosma 5
+#
+# AUTHOR:      John Regan
+#
+# DATE:        22-10-2015
+#
+#=======================================================================
+
+MACH_TEXT  = Durham - Cosma5
+MACH_VALID = 1
+MACH_FILE  = Make.mach.cosma5
+
+MACHINE_NOTES = " MACHINE_NOTES for Cosma4: \
+        The following modules are needed to compile enzo here with \
+        the default machine file. \
+	    \
+        You can run this command, \
+        $ module load mercurial"
+
+#-----------------------------------------------------------------------
+# Install paths (local variables)
+#-----------------------------------------------------------------------
+LOCAL_COMPILER_DIR = $(OMPI_LDFLAGS)
+LOCAL_MPI_INSTALL = 
+LOCAL_HDF5_INSTALL = 
+
+#-----------------------------------------------------------------------
+# Compiler settings
+#-----------------------------------------------------------------------
+
+MACH_CPP       = mpiCC #C preprocessor command
+
+# With MPI
+
+MACH_CC_MPI    = mpicc
+MACH_CXX_MPI   = mpiCC
+MACH_FC_MPI    = mpif90
+MACH_F90_MPI   = mpif90
+MACH_LD_MPI    = mpiCC
+MACH_AR        = ar
+
+# Without MPI
+
+MACH_CC_NOMPI  = gcc
+MACH_CXX_NOMPI = g++
+MACH_F90_NOMPI = gfortran
+MACH_FC_NOMPI  = gfortran
+MACH_LD_NOMPI  = g++
+
+#-----------------------------------------------------------------------
+# Machine-dependent defines
+#-----------------------------------------------------------------------
+# Note: When compiling against HDF5 version 1.8 or greater, you need to
+# compile HDF5 with --with-default-api-version=v16, or Enzo with
+# -DH5_USE_16_API.
+
+MACH_DEFINES   = -DLINUX -DH5_USE_16_API 
+
+#-----------------------------------------------------------------------
+# Compiler flag settings
+#-----------------------------------------------------------------------
+
+MACH_CPPFLAGS = -P -traditional 
+MACH_CFLAGS   = -fno-leading-underscore
+MACH_CXXFLAGS = -DMPICH_IGNORE_CXX_SEEK -fno-leading-underscore 
+MACH_FFLAGS   = 
+MACH_F90FLAGS = 
+MACH_LDFLAGS  = 
+
+#-----------------------------------------------------------------------
+# Optimization flags
+#-----------------------------------------------------------------------
+
+MACH_OPT_WARN        = -Wall -g
+MACH_OPT_DEBUG       = -O0 -g ##-fsanitize=address -fno-omit-frame-pointer
+MACH_OPT_HIGH        = -O2 -ffast-math
+MACH_OPT_AGGRESSIVE  = -O3 
+
+#-----------------------------------------------------------------------
+# Includes
+#-----------------------------------------------------------------------
+
+LOCAL_INCLUDES_MPI    = -I$(LOCAL_MPI_INSTALL)/include # MPI includes
+LOCAL_INCLUDES_HDF5   = -I$(LOCAL_HDF5_INSTALL)/include # HDF5 includes
+LOCAL_INCLUDES_HYPRE  = # hypre includes
+LOCAL_INCLUDES_PAPI   = # PAPI includes
+
+MACH_INCLUDES         = $(LOCAL_INCLUDES_HDF5)
+MACH_INCLUDES_MPI     = $(LOCAL_INCLUDES_MPI)
+MACH_INCLUDES_HYPRE   = $(LOCAL_INCLUDES_HYPRE)
+MACH_INCLUDES_PAPI    = $(LOCAL_INCLUDES_PAPI)
+
+#-----------------------------------------------------------------------
+# Libraries
+#-----------------------------------------------------------------------
+
+LOCAL_LIBS_MACH   = $(LOCAL_COMPILER_DIR) -lgfortran -lhdf5 -lz
+MACH_LIBS         = $(LOCAL_LIBS_MACH)
+
+
+##LOCAL_GRACKLE_INSTALL  = /cosma/home/dp004/dc-rega4/cosma5/GRACKLE/
+##LOCAL_GRACKLE_INSTALL  = /cosma/home/dp004/dc-rega4/cosma5/Cosma5_Builds/Grackle/UniformRadField/GRACKLE_INSTALL/
+LOCAL_GRACKLE_INSTALL  = /cosma/home/dp004/dc-rega4/cosma5/Cosma5_Builds/Grackle/GRACKLE2_INSTALL/
+LOCAL_INCLUDES_GRACKLE = -I$(LOCAL_GRACKLE_INSTALL)/include
+MACH_INCLUDES_GRACKLE  = $(LOCAL_INCLUDES_GRACKLE)
+LOCAL_LIBS_GRACKLE     = -L$(LOCAL_GRACKLE_INSTALL)/lib -lgrackle
+MACH_LIBS_GRACKLE      = $(LOCAL_LIBS_GRACKLE)

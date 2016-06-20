@@ -301,6 +301,17 @@ int ActiveParticleType_Skeleton::SetFlaggingField(LevelHierarchyEntry *LevelArra
   return SUCCESS;
 }
 
+
+/* 
+ * This function can be used to reset the particle acceleration if required.
+ * For example if a massless particle needs to be fixed in space. 
+ * See ActiveParticle_RadiationParticle.C for details. 
+ */
+int ActiveParticleType_Skeleton::ResetAcceleration(FLOAT *ActiveParticleAcceleration)
+{
+  return SUCCESS;
+}
+
 namespace
 {
 

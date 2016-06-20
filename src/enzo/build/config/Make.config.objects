@@ -372,6 +372,7 @@ OBJS_CONFIG_LIB = \
 	Grid_CollectActiveParticles.o \
         Grid_CollectGridInformation.o \
         Grid_CollectParticles.o \
+	Grid_CreateChildParticles.o \
         Grid_CollectParticleMassFlaggingField.o \
         Grid_CollectStars.o \
 	Grid_CommunicationMoveGrid.o \

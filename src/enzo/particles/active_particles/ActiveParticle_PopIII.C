@@ -248,6 +248,16 @@ bool ActiveParticleType_PopIII::IsARadiationSource(FLOAT Time)
   return true;
 }
 
+/* 
+ * This function can be used to reset the particle acceleration if required.
+ * For example if a massless particle needs to be fixed in space. 
+ * See ActiveParticle_RadiationParticle.C for details. 
+ */
+int ActiveParticleType_PopIII::ResetAcceleration(FLOAT *ActiveParticleAcceleration)
+{
+  return SUCCESS;
+}
+
 namespace {
   ActiveParticleType_info *PopIIIInfo = 
     register_ptype <ActiveParticleType_PopIII> ("PopIII");

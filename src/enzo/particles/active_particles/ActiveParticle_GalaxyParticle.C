@@ -414,6 +414,16 @@ int ActiveParticleType_GalaxyParticle::GalaxyParticleGravity(int nParticles,
 }
 
 
+/* 
+ * This function can be used to reset the particle acceleration if required.
+ * For example if a massless particle needs to be fixed in space. 
+ * See ActiveParticle_RadiationParticle.C for details. 
+ */
+int ActiveParticleType_GalaxyParticle::ResetAcceleration(FLOAT *ActiveParticleAcceleration)
+{
+  return SUCCESS;
+}
+
 namespace {
   ActiveParticleType_info *GalaxyParticleInfo = 
     register_ptype <ActiveParticleType_GalaxyParticle> 

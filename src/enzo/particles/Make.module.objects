@@ -14,6 +14,7 @@ ENZO_OBJS +=\
         ActiveParticleDepositMass.o \
         ActiveParticleFindAll.o \
         ActiveParticleInitialize.o \
+	ActiveParticleResetAccelerations.o \
         ActiveParticleRoutines.o \
         ActiveParticle_AccretingParticle.o \
         AssignActiveParticlesToGrids.o \
@@ -27,6 +28,7 @@ ENZO_OBJS +=\
         ActiveParticle_Skeleton.o \
         ActiveParticle_SphereContained.o \
         ActiveParticle_SpringelHernquist.o \
+	ActiveParticle_RadiationParticle.o
 
 # ENZO BUILD SYSTEM DIRECTORY MODULE
 #
