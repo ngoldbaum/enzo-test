@@ -1,4 +1,4 @@
-name = 'ActiveRadiationParticle'
+name = 'ActiveRadiationParticle_lowres'
 answer_testing_script = None
 nprocs = 2
 runtime = 'long'
@@ -8,7 +8,7 @@ gravity = True
 cosmology = True
 dimensionality = 3
 author = 'John Regan'
-max_time_minutes = 60
-fullsuite = True
-pushsuite = False
-quicksuite = False
+max_time_minutes = 10
+fullsuite = False
+pushsuite = True
+quicksuite = True

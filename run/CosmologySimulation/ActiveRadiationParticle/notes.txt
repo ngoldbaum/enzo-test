@@ -9,3 +9,13 @@ Usage:
 ./inits.exe -d ActiveRadiationParticle.inits
 mpirun -np 2 ./ring.exe pv ParticlePositions ParticleVelocities
 mpirun -np 2 ./enzo.exe -d ActiveRadiationParticle.enzo
+
+Low Resolution version:
+
+A lower resolution version also exists which runs in a couple of minutes on two cores. 
+The usage is very similar to above.
+
+Usage:
+./inits.exe -d ActiveRadiationParticle_lowres.inits
+mpirun -np 2 ./ring.exe pv ParticlePositions ParticleVelocities
+mpirun -np 2 ./enzo.exe -d ActiveRadiationParticle_lowres.enzo

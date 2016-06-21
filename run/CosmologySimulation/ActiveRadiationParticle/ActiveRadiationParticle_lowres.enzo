@@ -1,0 +1,127 @@
+
+# AMR PROBLEM DEFINITION FILE: Cosmology Simulation
+# This is a reionization simulation using radiation hydrodynamic
+# and radiating star particles
+#
+# define problem
+#
+ProblemType                = 30      // cosmology simulation
+TopGridRank                = 3
+TopGridDimensions          = 32 32 32
+SelfGravity                = 1       // gravity on
+TopGridGravityBoundary     = 0       // Periodic BC for gravity
+LeftFaceBoundaryCondition  = 3 3 3   // same for fluid
+RightFaceBoundaryCondition = 3 3 3
+
+#
+# problem parameters
+#
+CosmologySimulationOmegaBaryonNow       = 0.0441
+CosmologySimulationOmegaCDMNow          = 0.2239
+CosmologySimulationDensityName          = GridDensity
+CosmologySimulationVelocity1Name        = GridVelocities
+CosmologySimulationVelocity2Name        = GridVelocities
+CosmologySimulationVelocity3Name        = GridVelocities
+CosmologySimulationParticlePositionName = ParticlePositions
+CosmologySimulationParticleVelocityName = ParticleVelocities
+CosmologySimulationNumberOfInitialGrids = 1
+
+
+#
+# cosmology parameters
+#
+ComovingCoordinates        = 1       // Expansion ON
+CosmologyOmegaMatterNow    = 0.268
+CosmologyOmegaLambdaNow    = 0.732
+CosmologyHubbleConstantNow = 0.704   // in 100 km/s/Mpc
+CosmologyComovingBoxSize   = 10.0    // in Mpc/h 
+CosmologyMaxExpansionRate  = 0.015   // maximum allowed delta(a)/a
+CosmologyInitialRedshift   = 60.0
+CosmologyFinalRedshift 	   = 20.0
+GravitationalConstant      = 1       // this must be true for cosmology
+
+#
+# I/O and stop/start parameters
+#
+DataDumpName     = DD
+DataDirName      = DD
+RedshiftDirName  = RD
+RedshiftDumpName = RD
+dtDataDump 	 = 5.0 
+StopCycle        = 100000
+StopCPUTime      = 3600000
+
+CosmologyOutputRedshift[0] = 50.0
+CosmologyOutputRedshift[1] = 40.0
+CosmologyOutputRedshift[2] = 30.0
+CosmologyOutputRedshift[3] = 20.0
+CosmologyOutputRedshift[4] = 10.0
+CosmologyOutputRedshift[5] = 5.0
+
+
+#
+# hydro parametersCosmologyOutputRedshift[0]
+#
+HydroMethod                 = 0       // PPM
+Gamma                       = 1.6667
+PPMDiffusionParameter       = 0       // diffusion off
+DualEnergyFormalism         = 1       // use total & internal energy
+InterpolationMethod         = 1       // SecondOrderA
+FluxCorrection              = 1
+ConservativeInterpolation   = 1
+CourantSafetyNumber         = 0.5
+ParticleCourantSafetyNumber = 0.8
+UseMinimumPressureSupport   = 0
+
+#
+# microphysics parameters
+# 
+RadiativeCooling   = 1
+MultiSpecies       = 2 
+RadiationFieldType = 0 
+
+
+#Grackle
+#Grackle-2 currently does not support RT
+use_grackle = 0
+
+#Radiation Parameters
+AppendActiveParticleType = RadiationParticle
+NumberOfRadiationParticles     = 1
+RadiationSourcesFileName   = RadiationSourcePositions.txt
+PhotonsPerSecond           = 1.00e+56
+NumberOfEnergyBins         = 7
+RadiationInEvPerBin       = 0.76  8.0  12.8  14.79  20.46  27.62  60.0
+RadiationSEDPerBin         = 0.413  0.317  0.108  0.0414  0.0399  0.0324 0.0278
+
+#
+# grid refinement parameters
+#
+StaticHierarchy                 = 0     // dynamic hierarchy
+MaximumRefinementLevel 	        = 2
+MaximumGravityRefinementLevel   = 2
+MaximumParticleRefinementLevel  = 2
+SubgridSizeAutoAdjust           = 1
+RefineBy                        = 2     // refinement factor
+CellFlaggingMethod              = 2 4   // use baryon mass for refinement
+MinimumEfficiency               = 0.4   // fraction efficiency
+MinimumOverDensityForRefinement = 4. 4. // times the initial density
+
+
+RadiativeTransfer                    = 1
+RadiativeTransferRaysPerCell         = 5.100000
+RadiativeTransferInitialHEALPixLevel = 3
+RadiativeTransferHydrogenOnly        = 0
+RadiativeTransferOpticallyThinH2     = 0
+RadiativeTransferPeriodicBoundary    = 1
+RadiativeTransferAdaptiveTimestep    = 1
+RadiativeTransferSourceClustering    = 0
+RadiativeTransferPhotonMergeRadius   = 0
+RadiativeTransferFluxBackgroundLimit = 0.1
+RadiativeTransferRayMaximumLength    = 0.500000
+
+# some global parameters
+#
+GreensFunctionMaxNumber = 30
+ParallelRootGridIO      = 1
+ParallelParticleIO      = 1
