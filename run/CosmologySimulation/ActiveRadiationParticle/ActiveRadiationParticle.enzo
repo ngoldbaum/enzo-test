@@ -123,5 +123,5 @@ RadiativeTransferRayMaximumLength    = 0.500000
 # some global parameters
 #
 GreensFunctionMaxNumber = 30
-ParallelRootGridIO      = 1
-ParallelParticleIO      = 1
+ParallelRootGridIO      = 0
+ParallelParticleIO      = 0

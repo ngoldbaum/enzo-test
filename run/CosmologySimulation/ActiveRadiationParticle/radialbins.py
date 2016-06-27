@@ -14,7 +14,7 @@ center = [0.5]*3
 ########################################################################
 YFields = []
 Fields = ["Density", "Temperature", "H_fraction", "H_p1_fraction", "He_p1_fraction",
-          "He_p2_fraction", "HI_kph", "HeI_kph", "HeII_kph"]
+          "He_p2_fraction", "HI_kph", "HeI_kph", "HeII_kph", "El_fraction"]
 FieldsFigure = {}
 FieldsAxes = {}
 for elem in Fields:

@@ -7,7 +7,6 @@ it's starting redshift in a seperate file (RadiationSourcePosition.txt).
 
 Usage:
 ./inits.exe -d ActiveRadiationParticle.inits
-mpirun -np 2 ./ring.exe pv ParticlePositions ParticleVelocities
 mpirun -np 2 ./enzo.exe -d ActiveRadiationParticle.enzo
 
 Low Resolution version:
@@ -17,5 +16,4 @@ The usage is very similar to above.
 
 Usage:
 ./inits.exe -d ActiveRadiationParticle_lowres.inits
-mpirun -np 2 ./ring.exe pv ParticlePositions ParticleVelocities
 mpirun -np 2 ./enzo.exe -d ActiveRadiationParticle_lowres.enzo
