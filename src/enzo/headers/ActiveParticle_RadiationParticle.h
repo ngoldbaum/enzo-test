@@ -50,9 +50,10 @@ const char config_radiation_particle_defaults[] =
 
 
 /* Structures */
-struct InitData {   //LL used to store Particle Positions
+struct InitData {   //LL used to store Radiation Particle Data
   FLOAT Position[3];
   float Redshift;
+  float Redshift_end;
   bool Alive;
   bool Create;
   bool Deleteme;
@@ -60,7 +61,7 @@ struct InitData {   //LL used to store Particle Positions
 };
 /* Function prototypes */
 int CosmologyComputeExpansionFactor(FLOAT time, FLOAT *a, FLOAT *dadt);
-bool CheckForCreateParticle(InitData *Root);
+bool CheckForParticleAction(InitData *Root);
 int GetUnits(float *DensityUnits, float *LengthUnits,
 	     float *TemperatureUnits, float *TimeUnits,
 	     float *VelocityUnits, FLOAT Time);
@@ -82,7 +83,7 @@ public:
     {
       // Copy values of instance members using data from the particle instance
       // that is passed as an argument to this function
-    }
+    };
 
   // Needed to Create a copy of a particle when only a pointer to the base
   // class is available.
@@ -91,7 +92,7 @@ public:
     return static_cast<ActiveParticleType*>(
 	   new ActiveParticleType_RadiationParticle(this)
 					   );
-  }
+  };
   /*
    * Run an algorithm to determine whether a particle forms in a grid.
    *

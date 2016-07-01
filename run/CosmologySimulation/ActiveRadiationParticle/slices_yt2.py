@@ -22,5 +22,8 @@ for outp in outputs:
     ds = load(amrfile)
     
     for field in Fields:
-        slc = SlicePlot(ds, 1, field, center=center, width=(Width, 'kpc'))
-        slc.save("%s_slice_%d.png" % (field, outp))
+        try:
+            slc = SlicePlot(ds, 1, field, center=center, width=(Width, 'kpc'))
+            slc.save("%s_slice_%d.png" % (field, outp))
+        except:
+            continue

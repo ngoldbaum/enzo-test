@@ -33,6 +33,9 @@ for outp in outputs:
     ds = load(amrfile)
     sphere = ds.h.sphere(center, (250, 'kpc'))
     for elem in YFields:
-        rp = ProfilePlot(sphere, 'Radiuskpc',  elem, n_bins=32,
-                         weight_field='Density')
-        rp.save()
+        try:
+            rp = ProfilePlot(sphere, 'Radiuskpc',  elem, n_bins=32,
+                             weight_field='Density')
+            rp.save()
+        except:
+            continue

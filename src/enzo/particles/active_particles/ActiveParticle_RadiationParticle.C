@@ -141,13 +141,26 @@ int ActiveParticleType_RadiationParticle::BeforeEvolveLevel
    * First lets see if its time to create this particle yet 
    * If a particle is ready mark it as alive
    */
-  while(node->next != NULL)
+  while(node != NULL)
     {
-      creation_redshift = node->Redshift;
       // creation time is given w.r.t. the current time
-      if (current_redshift > creation_redshift) 
+      if (current_redshift > node->Redshift) 
 	{
+#if APDEBUG
+	  fprintf(stderr, "%s: Not ready to create Radiation source yet " \
+	  	  " - please try again later\n", __FUNCTION__);
+#endif
 	  node->Create = false;
+	}
+      else if (current_redshift <= node->Redshift_end) {
+#if APDEBUG
+	  if(node->Alive == true)
+	    fprintf(stderr, "%s: P[%d]: Deleting Radiation Particle, current redshift (created at z = %f) = %f\n", 
+		    __FUNCTION__, MyProcessorNumber,node->Redshift, current_redshift);
+#endif
+	  node->Deleteme = true;
+	  node->Create = false;
+	  //fprintf(stderr, "Node %p set for deletion\n", node);
 	}
       else
 	{
@@ -215,7 +228,7 @@ int ActiveParticleType_RadiationParticle::BeforeEvolveLevel
 int ActiveParticleType_RadiationParticle::EvaluateFormation(grid *thisgrid_orig, 
 							    ActiveParticleFormationData &data)
 {
-  if (CheckForCreateParticle(Root) == false)  
+  if (CheckForParticleAction(Root) == false)  
     return SUCCESS;  //No particle to form yet
   RadiationParticleGrid *thisGrid = static_cast<RadiationParticleGrid *>(thisgrid_orig);
   int i = 0, j = 0, k = 0;
@@ -235,119 +248,114 @@ int ActiveParticleType_RadiationParticle::EvaluateFormation(grid *thisgrid_orig,
   edge[1] = thisGrid->CellLeftEdge[1][0];
   edge[2] = thisGrid->CellLeftEdge[2][0];
   cellwidth = thisGrid->CellWidth[0][0];
-  while(node->next != NULL)
+  while(node != NULL)
     {
-      if(node->Create == false || node->Alive ==true) //Check which particles are ready to be formed
-	{
-	  node = node->next;
-	  continue;
-	}
-      for(i = 0; i < 3; i++)
-	  ppos[i]  = node->Position[i];
-      creation_redshift = node->Redshift;
-      /* Find the indices in the grid */
-      GridIndices = GetGridIndices(ppos, edge, cellwidth);
+      //Check for the first time
+      if(node->Create == true && node->Alive == false) {   
+	  for(i = 0; i < 3; i++)
+	    ppos[i]  = node->Position[i];
+	  creation_redshift = node->Redshift;
+	  /* Find the indices in the grid */
+	  GridIndices = GetGridIndices(ppos, edge, cellwidth);
 		  
-      /* Only if the indices are all good-looking, and if this grid is at the 
-	 finest level in the hierarchy, then insert the particles; otherwise,
-	 this particle should be created in one of the other grids! */
+	  /* Only if the indices are all good-looking, and if this 
+	     grid is at the finest level in the hierarchy, then 
+	     insert the particles; otherwise, this particle should 
+	     be created in one of the other grids! */
       
-      if ( (GridIndices[0] >= GhostZones)               && 
-	   (GridIndices[0] < (GridDimension[0] - GhostZones)) && 
-	   (GridIndices[1] >= GhostZones)               && 
-	   (GridIndices[1] < (GridDimension[1] - GhostZones)) &&
-	   (GridIndices[2] >= GhostZones)               && 
-	   (GridIndices[2] < (GridDimension[2] - GhostZones)) ) 
-	{	      
-	  mindex = (GridIndices[2] * GridDimension[1] + GridIndices[1]) * 
-	    GridDimension[0] + GridIndices[0];
-	  
-	  if (thisGrid->BaryonField[thisGrid->NumberOfBaryonFields][mindex] == 0.0) 
-	    {
+	  if ( (GridIndices[0] >= GhostZones)               && 
+	    (GridIndices[0] < (GridDimension[0] - GhostZones)) && 
+	    (GridIndices[1] >= GhostZones)               && 
+	    (GridIndices[1] < (GridDimension[1] - GhostZones)) &&
+	       (GridIndices[2] >= GhostZones)               && 
+	       (GridIndices[2] < (GridDimension[2] - GhostZones)) ) 
+	    {	      
+	      mindex = (GridIndices[2] * GridDimension[1] + GridIndices[1]) * 
+		GridDimension[0] + GridIndices[0];
+	      
+	      if (thisGrid->BaryonField[thisGrid->NumberOfBaryonFields][mindex] == 0.0) 
+		{
 	      
 	      /*
 	       * ====================================================================
 	       * PARTICLE CREATION
 	       * ====================================================================
 	       */
-	      ActiveParticleType_RadiationParticle *np = 
-		new ActiveParticleType_RadiationParticle();
-	      data.NumberOfNewParticles++;
-	      data.NewParticles.insert(*np);
-	      np->BirthTime = thisGrid->Time;
-	      
-	      //Mass
-	      np->Mass = 0.0; //massless source particles
-	      
-	      //Positions
-	      np->pos[0] = ppos[0]; 
-	      np->pos[1] = ppos[1]; 
-	      np->pos[2] = ppos[2]; 
-	     
-	      // Velocities are initialised to zero
-	      np->vel[0] = 0.0;
-	      np->vel[1] = 0.0;
-	      np->vel[2] = 0.0;
-	      np->RadiationLifetime = RadiationSourceLifeTime;
-	      np->type =  np->GetEnabledParticleID(); //PARTICLE_TYPE_RAD;
-	      np->level = data.level;
-	      np->GridID = data.GridID;
-	      np->CurrentGrid = thisGrid;
-
-	      fprintf(stdout, "%s: A radiation particle inserted at (%"PSYM",%"PSYM",%"PSYM") " \
-		      "with v=(%f,%f,%f), m=%f, type=%ld, redshift = %f\n", __FUNCTION__,
-		      np->pos[0], 
-		      np->pos[1],
-		      np->pos[2],
-		      np->vel[0], 
-		      np->vel[1],
-		      np->vel[2],
-		      np->Mass,
-		      np->type,
-		      CR);
-	      np->Metallicity = 0.0;
-	      node->Alive = true;
-	      //node->Deleteme = true;
-	    } // refinement field
-	} // indices all OK
-     
-      curnode = node;
-      node = node->next;
-      if(curnode->Deleteme == true)
-	{
-	  /* Pop this entry from the LL */
-	  if(curnode == Root)
+		  ActiveParticleType_RadiationParticle *np = 
+		    new ActiveParticleType_RadiationParticle();
+		  data.NumberOfNewParticles++;
+		  data.NewParticles.insert(*np);
+		  np->BirthTime = thisGrid->Time;
+		  
+		  //Mass
+		  np->Mass = 0.0; //massless source particles
+		  
+		  //Positions
+		  np->pos[0] = ppos[0]; 
+		  np->pos[1] = ppos[1]; 
+		  np->pos[2] = ppos[2]; 
+		  
+		  // Velocities are initialised to zero
+		  np->vel[0] = 0.0;
+		  np->vel[1] = 0.0;
+		  np->vel[2] = 0.0;
+		  np->RadiationLifetime = RadiationSourceLifeTime;
+		  np->type =  np->GetEnabledParticleID(); //PARTICLE_TYPE_RAD;
+		  np->level = data.level;
+		  np->GridID = data.GridID;
+		  np->CurrentGrid = thisGrid;
+		  
+		  fprintf(stdout, "%s: A radiation particle inserted at (%"PSYM",%"PSYM",%"PSYM") " \
+			  "with v=(%f,%f,%f), m=%f, type=%ld, redshift = %f\n", __FUNCTION__,
+			  np->pos[0], 
+			  np->pos[1],
+			  np->pos[2],
+			  np->vel[0], 
+			  np->vel[1],
+			  np->vel[2],
+			  np->Mass,
+			  np->type,
+			  CR);
+		  np->Metallicity = 0.0;
+		  node->Alive = true;
+		} // refinement field
+	    } // indices all OK
+      }
+	  curnode = node;
+	  node = node->next;
+	  if(curnode->Deleteme == true && curnode->Alive == true)
 	    {
-	      Root = curnode->next;
-	      pnode = Root;
-	      delete curnode;
+	      
+	      fprintf(stderr, "%s: A radiation particle was made inactive (%lf,%lf,%lf) " \
+		      "redshift = %f\n", __FUNCTION__,
+		      curnode->Position[0], 
+		      curnode->Position[1],
+		      curnode->Position[2],
+		      CR);
+	      fflush(stderr);
+	      curnode->Alive = false;
+	      /* Delete Radiation Source from Global List */
 	    }
 	  else
 	    {
-	      pnode->next = node->next;
-	      delete node;
+	      pnode = node;
 	    }
-	  
-	}
-      else
-	{
-	  pnode = node;
-	}
-    } //end while
-  /*
-   * This is not ideal but if RadiativeTransfer is turned on 
-   * midrun then the RT values are all zero rather than 
-   * their default values. Here we set the RT values to 
-   * defaults suitable for the radiation particle. 
-   */
-  
-  SetRadiationDefaults();
-
-  if (APDEBUG && data.NumberOfNewParticles > 0) {
-    fprintf(stdout, "AP_RadiationParticle: Have created %"ISYM" new particles\n",
-	    data.NumberOfNewParticles);
-  }
-
+      	  
+      } //end while
+      /*
+       * This is not ideal but if RadiativeTransfer is turned on 
+       * midrun then the RT values are all zero rather than 
+       * their default values. Here we set the RT values to 
+       * defaults suitable for the radiation particle. 
+       */
+      
+      SetRadiationDefaults();
+      
+      if (APDEBUG && data.NumberOfNewParticles > 0) {
+	fprintf(stdout, "AP_RadiationParticle: Have created %"ISYM" new particles\n",
+		data.NumberOfNewParticles);
+      }
+    
 
   return SUCCESS;
 }
@@ -457,19 +465,21 @@ int ActiveParticleType_RadiationParticle::ReadRadiationParameterFile()
   char line[MAX_LINE_LENGTH];
   
   InitData *node = NULL, *pnode = NULL, *cnode = NULL;
-  Root = new InitData;
-  Root->next = NULL;
-  pnode = Root;
+  pnode = NULL;
   //Create nodes for LL
   for(i = 0; i < RadiationNumSources; i++)
     {
       node = new InitData;
       node->Redshift = 0.0;
+      node->Redshift_end = 0.0;
       node->Create = false;
       node->Alive = false;
       node->Deleteme = false;
       node->next = NULL;
-      pnode->next = node;
+      if(pnode)
+	pnode->next = node;
+      else
+	Root = node;
       pnode = node; 
     }
   cnode = Root;
@@ -487,60 +497,57 @@ int ActiveParticleType_RadiationParticle::ReadRadiationParameterFile()
 	} 
       else 
 	{
+	  
 	  /* Now read the files line by line */
 	  while (fgets(line, MAX_LINE_LENGTH, fd) != NULL) 
 	    {
 	      if (line[0] != '#' && strlen(line) > 1) 
 		{  
-		  /* order: Position[3], Creation redshift */
-		  
-		  if (sscanf(line, " %"PSYM"  %"PSYM"  %"PSYM"  %"FSYM, 
+		  /* order: Position[3], Creation redshift, Deletion Redshift */
+		  fprintf(stdout, "line = %s\n", line);
+		  if (sscanf(line, " %"PSYM"  %"PSYM"  %"PSYM"  %"FSYM" %"FSYM"", 
 			     &(cnode->Position[0]), &(cnode->Position[1]), 
-			     &(cnode->Position[2]), &(cnode->Redshift)) != NUMPARAMS) 
+			     &(cnode->Position[2]), &(cnode->Redshift), &(cnode->Redshift_end)) < NUMPARAMS) 
 		    {
 		      fprintf(stderr, "%s: Unrecognised line found in %s - ignoring\n", 
 			      __FUNCTION__, RadiationSourcesFileName);
-		      fprintf(stderr, "%s: line[0] = %c\t length = %ld\n", __FUNCTION__, line[0], 
+		      fprintf(stderr, "%s: line = %s\t length = %ld\n", __FUNCTION__, line, 
 			      strlen(line));
 		      continue;
-		   
+		      
 		    }
 		  else
 		    {
-		      fprintf(stdout, "Particle Positions = (%"PSYM", %"PSYM", %"PSYM")\n", 
+		      fprintf(stdout, "Particle Positions = (%f, %f, %f)\n", 
 			      cnode->Position[0], cnode->Position[1], cnode->Position[2]);
 		      fprintf(stdout,"Particle will be created at z <= %f\n", cnode->Redshift);
+		      fprintf(stdout,"Particle will be deleted at z <= %f\n", cnode->Redshift_end);
 		    }
-
+		  
 		}
 	    }
 	  cnode = cnode->next;
-	  if(cnode->next == NULL)
+	  if(cnode == NULL)
 	    break;
 	}
-    }
-		      
-
-
-
+    } 
   return SUCCESS;
 }
 
 /* Check to see if we should form any radiation particle yet */
-bool CheckForCreateParticle(InitData *Root)
+bool CheckForParticleAction(InitData *Root)
 {
    InitData *node = Root;
-   
-   while(node->next != NULL)
+   while(node != NULL)
      {
-       if(node->Create == true)
+       if(node->Create == true || node->Deleteme == true) {
 	 return true;
+       }
        node = node->next;
      }
    return false;
 
 }
-
 
 
 namespace {
