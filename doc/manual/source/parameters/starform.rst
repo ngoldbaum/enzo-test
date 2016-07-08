@@ -296,15 +296,23 @@ RadiationParticle
 ^^^^^^^^^^^^^^^^^
 
 The parameters below refer to the "RadiationParticle". This is an active
-particle implementation only. Only a single parameter is required to create
-the particle:
+particle implementation only. The particle is created by adding the 
+"RadiationParticle" to the AppendActiveParticleType field in the parameter
+file e.g.
+AppendActiveParticleType = RadiationParticle
+Folling this the Radiation particle will look for an ascii file to 
+look for its position and starting/ending redshifts. The name of the 
+ascii file and other parameters must be added to the parameter file as
+described below.
 
 ``RadiationSourcesFileName`` (external)
    Simple ascii text file name which sets the creation of this particle. All
-   that is required is an initial coordinate and a creation redshift. 
-   E.g. 0.5 0.5 0.5 40.0
+   that is required is an initial coordinate a creation redshift and a deletion
+   redshift. 
+   E.g. 0.5 0.5 0.5 40.0 0.0
    This will create a (massless) particle at the coordinate (0.5, 0.5, 0.5) at
-   a redshift of 40.0. The parameters which subsequently control the behaviour
+   a redshift of 40.0. The radiation will be switched off at a redshift of 10.0
+   in the above example. The parameters which subsequently control the behaviour
    of the particle are all related to the radiation it produces and are
    reproduced below but can also be found in the radiation parameters section.
 

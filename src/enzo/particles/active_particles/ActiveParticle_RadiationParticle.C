@@ -160,7 +160,6 @@ int ActiveParticleType_RadiationParticle::BeforeEvolveLevel
 #endif
 	  node->Deleteme = true;
 	  node->Create = false;
-	  //fprintf(stderr, "Node %p set for deletion\n", node);
 	}
       else
 	{
@@ -306,7 +305,7 @@ int ActiveParticleType_RadiationParticle::EvaluateFormation(grid *thisgrid_orig,
 		  np->CurrentGrid = thisGrid;
 		  
 		  fprintf(stdout, "%s: A radiation particle inserted at (%"PSYM",%"PSYM",%"PSYM") " \
-			  "with v=(%f,%f,%f), m=%f, type=%ld, redshift = %f\n", __FUNCTION__,
+			  "with v=(%"FSYM",%"FSYM",%"FSYM"), m=%"FSYM", type=%"ISYM", redshift = %"FSYM"\n", __FUNCTION__,
 			  np->pos[0], 
 			  np->pos[1],
 			  np->pos[2],
@@ -326,8 +325,8 @@ int ActiveParticleType_RadiationParticle::EvaluateFormation(grid *thisgrid_orig,
 	  if(curnode->Deleteme == true && curnode->Alive == true)
 	    {
 	      
-	      fprintf(stderr, "%s: A radiation particle was made inactive (%lf,%lf,%lf) " \
-		      "redshift = %f\n", __FUNCTION__,
+	      fprintf(stderr, "%s: A radiation particle was made inactive (%"PSYM",%"PSYM",%"PSYM") " \
+		      "redshift = %"FSYM"\n", __FUNCTION__,
 		      curnode->Position[0], 
 		      curnode->Position[1],
 		      curnode->Position[2],
@@ -511,17 +510,17 @@ int ActiveParticleType_RadiationParticle::ReadRadiationParameterFile()
 		    {
 		      fprintf(stderr, "%s: Unrecognised line found in %s - ignoring\n", 
 			      __FUNCTION__, RadiationSourcesFileName);
-		      fprintf(stderr, "%s: line = %s\t length = %ld\n", __FUNCTION__, line, 
+		      fprintf(stderr, "%s: line = %s\t length = %"ISYM"\n", __FUNCTION__, line, 
 			      strlen(line));
 		      continue;
 		      
 		    }
 		  else
 		    {
-		      fprintf(stdout, "Particle Positions = (%f, %f, %f)\n", 
+		      fprintf(stdout, "Particle Positions = (%"PSYM", %"PSYM", %"PSYM")\n", 
 			      cnode->Position[0], cnode->Position[1], cnode->Position[2]);
-		      fprintf(stdout,"Particle will be created at z <= %f\n", cnode->Redshift);
-		      fprintf(stdout,"Particle will be deleted at z <= %f\n", cnode->Redshift_end);
+		      fprintf(stdout,"Particle will be created at z <= %"FSYM"\n", cnode->Redshift);
+		      fprintf(stdout,"Particle will be deleted at z <= %"FSYM"\n", cnode->Redshift_end);
 		    }
 		  
 		}
