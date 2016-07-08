@@ -155,7 +155,8 @@ int ActiveParticleType_RadiationParticle::BeforeEvolveLevel
       else if (current_redshift <= node->Redshift_end) {
 #if APDEBUG
 	  if(node->Alive == true)
-	    fprintf(stderr, "%s: P[%d]: Deleting Radiation Particle, current redshift (created at z = %f) = %f\n", 
+	    fprintf(stderr, "%s: P[%"ISYM"]: Deleting Radiation Particle, "\
+		            "current redshift (created at z = %"FSYM") = %"FSYM"\n", 
 		    __FUNCTION__, MyProcessorNumber,node->Redshift, current_redshift);
 #endif
 	  node->Deleteme = true;
@@ -305,7 +306,8 @@ int ActiveParticleType_RadiationParticle::EvaluateFormation(grid *thisgrid_orig,
 		  np->CurrentGrid = thisGrid;
 		  
 		  fprintf(stdout, "%s: A radiation particle inserted at (%"PSYM",%"PSYM",%"PSYM") " \
-			  "with v=(%"FSYM",%"FSYM",%"FSYM"), m=%"FSYM", type=%"ISYM", redshift = %"FSYM"\n", __FUNCTION__,
+			  "with v=(%"FSYM",%"FSYM",%"FSYM"), m=%"FSYM", type=%"ISYM", " \
+			  "redshift = %"FSYM"\n", __FUNCTION__,
 			  np->pos[0], 
 			  np->pos[1],
 			  np->pos[2],
@@ -325,7 +327,8 @@ int ActiveParticleType_RadiationParticle::EvaluateFormation(grid *thisgrid_orig,
 	  if(curnode->Deleteme == true && curnode->Alive == true)
 	    {
 	      
-	      fprintf(stderr, "%s: A radiation particle was made inactive (%"PSYM",%"PSYM",%"PSYM") " \
+	      fprintf(stderr, "%s: A radiation particle was made inactive " \
+		      "(%"PSYM",%"PSYM",%"PSYM") " \
 		      "redshift = %"FSYM"\n", __FUNCTION__,
 		      curnode->Position[0], 
 		      curnode->Position[1],
