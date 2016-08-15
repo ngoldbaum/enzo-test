@@ -307,14 +307,14 @@ described below.
 
 ``RadiationSourcesFileName`` (external)
    Simple ascii text file name which sets the creation of this particle. All
-   that is required is an initial coordinate a creation redshift and a deletion
+   that is required is an initial coordinate, a creation redshift and a deletion
    redshift. 
    E.g. 0.5 0.5 0.5 40.0 10.0
    This will create a (massless) particle at the coordinate (0.5, 0.5, 0.5) at
    a redshift of 40.0. The radiation will be switched off at a redshift of 10.0
    in the above example. The parameters which subsequently control the behaviour
    of the particle are all related to the radiation it produces and are
-   reproduced below but can also be found in the radiation parameters section.
+   given below.
 
 ``PhotonsPerSecond`` (external)
     For now only usable with the RadiationParticle infrastructure. Sets the
