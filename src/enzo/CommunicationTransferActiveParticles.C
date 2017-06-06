@@ -13,7 +13,6 @@
 /
 ************************************************************************/
 #ifdef USE_MPI
-#include "communicators.h"
 #endif /* USE_MPI */
  
 #include "preincludes.h"

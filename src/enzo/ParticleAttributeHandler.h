@@ -20,7 +20,6 @@
 
 /* http://www.gamedev.net/topic/474803-c-template-pointer-to-member/ */
 
-#include "communicators.h"
 
 class ActiveParticleType;
 

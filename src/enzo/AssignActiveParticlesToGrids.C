@@ -17,7 +17,6 @@
 ************************************************************************/
 
 #ifdef USE_MPI
-#include "communicators.h"
 #endif 
 
 #include "preincludes.h"
@@ -106,9 +105,9 @@ int AssignActiveParticlesToGrids(
 	  LevelMax and assign the particle to the
 	  SavedGrid on that processor.  */
       struct { Eint32 value; Eint32 rank; } sendbuf, recvbuf;
-      MPI_Comm_rank(EnzoTopComm, &sendbuf.rank); 
+      MPI_Comm_rank(MPI_COMM_WORLD, &sendbuf.rank); 
       sendbuf.value = LevelMax;
-      MPI_Allreduce(&sendbuf, &recvbuf, 1, MPI_2INT, MPI_MAXLOC, EnzoTopComm);
+      MPI_Allreduce(&sendbuf, &recvbuf, 1, MPI_2INT, MPI_MAXLOC, MPI_COMM_WORLD);
       NumberOfGrids = GenerateGridArray(LevelArray, recvbuf.value, &LevelGrids); 
       // We're moving it, make sure that the particle position is fixed (if required).
       ParticleList[i]->SetPositionPeriod(period);

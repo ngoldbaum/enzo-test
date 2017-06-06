@@ -25,7 +25,6 @@
 ************************************************************************/
  
 #ifdef USE_MPI
-#include "communicators.h"
 #endif /* USE_MPI */
  
 #include "preincludes.h"
@@ -82,7 +81,7 @@ int CommunicationUpdateActiveParticleCount(HierarchyEntry *Grids[],
   MPI_Arg GridCount = NumberOfGrids;
    
   MPI_Allreduce(PartialNewActiveParticleCount, TotalNewActiveParticleCount, GridCount,
-		DataTypeInt, MPI_SUM, EnzoTopComm);
+		DataTypeInt, MPI_SUM, MPI_COMM_WORLD);
 
 #ifdef MPI_INSTRUMENTATION
   endtime = MPI_Wtime();

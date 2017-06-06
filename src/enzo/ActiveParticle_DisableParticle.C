@@ -11,7 +11,6 @@
 #include "preincludes.h"
 
 #ifdef USE_MPI
-#include "communicators.h"
 #endif
 #include "ErrorExceptions.h"
 #include "macros_and_parameters.h"
