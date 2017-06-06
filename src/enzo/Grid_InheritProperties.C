@@ -14,8 +14,7 @@
 //  Assign basic values to a grid (allocate fields)
 //
 
-#include <stdio.h>
-#include <stdlib.h>
+#include "preincludes.h"
  
 #include "ErrorExceptions.h"
 #include "macros_and_parameters.h"
@@ -26,13 +25,14 @@
 #include "ExternalBoundary.h"
 #include "Grid.h"
  
-void grid::InheritProperties(grid *ParentGrid)
+void grid::InheritProperties(grid *ParentGrid, int level)
 {
  
   /*  Set rank and current time */
  
-  GridRank = ParentGrid->GridRank;
-  Time     = ParentGrid->Time;
+  GridRank  = ParentGrid->GridRank;
+  Time      = ParentGrid->Time;
+  GridLevel = level;
  
   /*  Baryons only: set up field quantities and allocate fields
        (we assume here the grid is uniform in each dimension) */
@@ -43,7 +43,7 @@ void grid::InheritProperties(grid *ParentGrid)
  
   for (int field = 0; field < NumberOfBaryonFields; field++)
     FieldType[field]      = ParentGrid->FieldType[field];
- 
+
   CourantSafetyNumber    = ParentGrid->CourantSafetyNumber;
   PPMFlatteningParameter = ParentGrid->PPMFlatteningParameter;
   PPMDiffusionParameter  = ParentGrid->PPMDiffusionParameter;

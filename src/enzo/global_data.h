@@ -1034,6 +1034,14 @@ EXTERN double MBHParticleIOTemp[30][5+MAX_DIMENSION];
 EXTERN char *MBHInsertLocationFilename;
 EXTERN int OutputWhenJetsHaveNotEjected;
 
+/* Star Class Radiation Particle IO (PARTICLE_TYPE_RAD) */
+EXTERN char *RadiationSourcesFileName;
+EXTERN int   NumberOfRadiationParticles;
+EXTERN double PhotonsPerSecond;
+EXTERN int   NumberOfEnergyBins;
+EXTERN float RadiationEnergyInBin[255];
+EXTERN float RadiationBinSED[255];
+
 /* Vorticity Calculations */
 
 EXTERN int VelAnyl;
@@ -1106,6 +1114,11 @@ EXTERN char *MHDeUnits[3];
 EXTERN char *DatabaseLocation;
 EXTERN int ExtraOutputs[MAX_EXTRA_OUTPUTS];
 EXTERN int CorrectParentBoundaryFlux;
+
+/* Active particles */
+class ActiveParticleType_info;
+EXTERN ActiveParticleType_info *EnabledActiveParticles[MAX_ACTIVE_PARTICLE_TYPES];
+EXTERN int EnabledActiveParticlesCount;
 
 /* For EnzoTiming Behavior */
 EXTERN int TimingCycleSkip; // Frequency of timing data dumps.

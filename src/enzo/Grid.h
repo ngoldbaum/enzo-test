@@ -11,6 +11,8 @@
 ************************************************************************/
 #ifndef GRID_DEFINED__
 #define GRID_DEFINED__
+#include <iostream>
+#include <vector>
 #include "ProtoSubgrid.h"
 #include "ListOfParticles.h"
 #include "region.h"
@@ -18,6 +20,7 @@
 #include "StarParticleData.h"
 #include "AMRH5writer.h"
 #include "Star.h"
+#include "ActiveParticle.h"
 #include "FOF_allvars.h"
 #include "MemoryPool.h"
 #include "list.h"
@@ -65,6 +68,7 @@ struct HierarchyEntry;
 extern int CommunicationDirection;
 int FindField(int f, int farray[], int n);
 struct LevelHierarchyEntry;
+class ActiveParticleType;
 
 class grid
 {
@@ -84,6 +88,7 @@ class grid
                                        //   (zero based)
   FLOAT GridLeftEdge[MAX_DIMENSION];   // starting pos (active problem space)
   FLOAT GridRightEdge[MAX_DIMENSION];  // ending pos (active problem space)
+  int GridLevel;                       // hierarchy level where this grid lives
   float dtFixed;                       // current (fixed) timestep
   FLOAT Time;                          // current problem time
   FLOAT OldTime;                       // time corresponding to OldBaryonField
@@ -133,6 +138,17 @@ class grid
 //
   int NumberOfStars;
   Star *Stars;
+
+  //
+//  Active particle data
+//
+  float* ActiveParticleAcceleration[MAX_DIMENSION+1];
+  int NumberOfActiveParticles;
+  ActiveParticleList<ActiveParticleType> ActiveParticles;
+  // At present this is synched up in CommunicationSyncNumberOfParticles.
+  // Therefore below should be accurate as often as NumberOfParticles and
+  // NumberOfActiveParticles are.
+  int ActiveParticleTypeCount[MAX_ACTIVE_PARTICLE_TYPES];
 
 // For once-per-rootgrid-timestep star formation, the following flag
 // determines whether SF is about to occur or not. It's currently
@@ -208,6 +224,7 @@ class grid
   friend int ExternalBoundary::Prepare(grid *TopGrid);
   friend int ProtoSubgrid::CopyFlaggedZonesFromGrid(grid *Grid);
   friend class Star;
+  friend class ActiveParticleType;
 #ifdef NEW_PROBLEM_TYPES
   friend class EnzoProblemType;
 #endif
@@ -387,6 +404,17 @@ public:
   void SetGridID(int id) { ID = id; };
   int GetGridID(void) { return ID; };
    
+  /* Return, set level of this grid */
+  int GetLevel() { return GridLevel; };
+  int SetLevel(int level) {
+    if (level >= 0) {
+      GridLevel=level;
+      return SUCCESS;
+    } else {
+      return FAIL;
+    }
+  };
+
   /* Baryons: return field types. */
 
   int ReturnFieldType(int type[]) 
@@ -848,6 +876,10 @@ gradient force to gravitational force for one-zone collapse test. */
    int DepositMustRefineParticles(int pmethod, int level,
 				  bool KeepFlaggingField);
 
+/* Particles: deposit regions in the feedback zone to ensure flagging */
+
+   int DepositRefinementZone(int level, FLOAT* ParticlePosition, FLOAT RefinementRadius);
+  
 /* baryons: add baryon density to mass flaggin field (so the mass flagging
             field contains the mass in the cell (not the density) 
             (gg #3) */
@@ -952,7 +984,7 @@ gradient force to gravitational force for one-zone collapse test. */
 /* Inherit properties (rank, baryon field types, etc.) from ParentGrid
    (gg # 5,6) */
 
-   void InheritProperties(grid *ParentGrid);
+  void InheritProperties(grid *ParentGrid, int level);
 
 /* set the grid dimensions, left, right edges and cell quantities based
    on arguments (gg #5,6) */
@@ -1021,6 +1053,9 @@ gradient force to gravitational force for one-zone collapse test. */
 
    int CopyZonesFromGrid(grid *GridOnSameLevel, 
 			 FLOAT EdgeOffset[MAX_DIMENSION]);
+
+  int CopyActiveZonesFromGrid(grid *GridOnSameLevel,
+                  FLOAT EdgeOffset[MAX_DIMENSION], int SendField);
 
 /* gravity: copy coincident potential field zones from grid in the argument
             (gg #7).  Return SUCCESS or FAIL. */
@@ -1195,6 +1230,18 @@ gradient force to gravitational force for one-zone collapse test. */
      GravitatingMassField = NULL;
    };
 
+/* Gravity: Init GravitatingMassField. */
+
+   void InitGravitatingMassField(int size) {
+     GravitatingMassField = new float[size];
+   }
+
+/* Gravity */
+
+    int ReturnGravitatingMassFieldDimension(int dim) {
+      return GravitatingMassFieldDimension[dim];
+    }
+
 /* Gravity: Delete AccelerationField. */
 
    void DeleteAccelerationField() {
@@ -1235,7 +1282,8 @@ gradient force to gravitational force for one-zone collapse test. */
    }
    FLOAT GetGridLeftEdge(int Dimension) {return GridLeftEdge[Dimension];}
    FLOAT GetGridRightEdge(int Dimension) {return GridRightEdge[Dimension];}
-
+   FLOAT GetCellWidth(int Dimension, int index) {return CellWidth[Dimension][index];}
+   FLOAT GetCellLeftEdge(int Dimension, int index) {return CellLeftEdge[Dimension][index];}
 
 #ifdef TRANSFER
 // -------------------------------------------------------------------------
@@ -1413,6 +1461,8 @@ gradient force to gravitational force for one-zone collapse test. */
      for (int dim = 0; dim < GridRank+ComputePotential; dim++) {
        delete [] ParticleAcceleration[dim];
        ParticleAcceleration[dim] = NULL;
+       delete [] ActiveParticleAcceleration[dim];
+       ActiveParticleAcceleration[dim] = NULL;
      }
    };
 
@@ -1427,12 +1477,19 @@ gradient force to gravitational force for one-zone collapse test. */
 /* Particles: return number of particles. */
 
    int ReturnNumberOfParticles() {return NumberOfParticles;};
+  int ReturnNumberOfActiveParticles() {return NumberOfActiveParticles;};
+   int ReturnNumberOfActiveParticlesOfThisType(int ActiveParticleIDToFind);
+   ActiveParticleList<ActiveParticleType>& ReturnActiveParticles() {return Act\
+iveParticles;};
 
    int ReturnNumberOfStarParticles(void);
 
 /* Particles: set number of particles. */
 
    void SetNumberOfParticles(int num) {NumberOfParticles = num;};
+  void SetNumberOfActiveParticles(int num) {NumberOfActiveParticles = num;};
+   void SetActiveParticleTypeCounts(int type, int count)
+    { ActiveParticleTypeCount[type] = count; };
 
 /* Particles: delete particle fields and set null. */
 
@@ -1455,6 +1512,15 @@ gradient force to gravitational force for one-zone collapse test. */
      }   
    };
 
+  void DeleteActiveParticles() {
+    NumberOfActiveParticles = 0;
+    this->ActiveParticles.clear();
+  }
+
+  void CorrectActiveParticleCounts() {
+    NumberOfActiveParticles = ActiveParticles.size();
+  }
+  
 /* Particles: allocate new particle fields. */
 
    void AllocateNewParticles(int NumberOfNewParticles) {
@@ -1543,6 +1609,7 @@ gradient force to gravitational force for one-zone collapse test. */
 /* Particles: sort particle data in ascending order by number (id) or type. */
 
 void SortParticlesByNumber();
+void SortActiveParticlesByNumber();
 void SortParticlesByType();
 
 int CreateParticleTypeGrouping(hid_t ptype_dset,
@@ -1608,11 +1675,17 @@ int CreateParticleTypeGrouping(hid_t ptype_dset,
 				 star_data *&List, int *Layout, 
 				 int *GStartIndex[], int *GridMap, 
 				 int CopyDirection);
+int CommunicationTransferActiveParticles(grid* Grids[], int NumberOfGrids,
+       int ThisGridNum, int TopGridDims[], int *&NumberToMove,
+       int StartIndex, int EndIndex, ActiveParticleList<ActiveParticleType> &List,
+       int *Layout, int *GStartIndex[], int *GridMap, int CopyDirection);
 
   int CollectParticles(int GridNum, int* &NumberToMove, 
 		       int &StartIndex, int &EndIndex, 
 		       particle_data* &List, int CopyDirection);
-
+  int CollectActiveParticles(int GridNum, int* &NumberToMove,
+                 int &StartIndex, int &EndIndex,
+                 ActiveParticleList<ActiveParticleType> &List, int CopyDirection);
   int CollectStars(int GridNum, int* &NumberToMove, 
 		   int &StartIndex, int &EndIndex, 
 		   star_data* &List, int CopyDirection);
@@ -1620,7 +1693,8 @@ int CreateParticleTypeGrouping(hid_t ptype_dset,
   // Only used for static hierarchies
   int MoveSubgridStars(int NumberOfSubgrids, grid* ToGrids[],
 		       int AllLocal);
-
+  int MoveSubgridActiveParticles(int NumberOfSubgrids, grid* ToGrids[],
+                 int AllLocal);
   int TransferSubgridParticles(grid* Subgrids[], int NumberOfSubgrids, 
 			       int* &NumberToMove, int StartIndex, 
 			       int EndIndex, particle_data* &List, 
@@ -1636,6 +1710,13 @@ int CreateParticleTypeGrouping(hid_t ptype_dset,
 			   int CopyDirection,
 			   int IncludeGhostZones = FALSE);
 
+int TransferSubgridActiveParticles(grid* Subgrids[], int NumberOfSubgrids,
+                     int* &NumberToMove, int StartIndex,
+                     int EndIndex, ActiveParticleList<ActiveParticleType> &List,
+                     bool KeepLocal, bool ParticlesAreLocal,
+                     int CopyDirection,
+                     int IncludeGhostZones = FALSE,
+                     int CountOnly = FALSE);
 // -------------------------------------------------------------------------
 // Helper functions (should be made private)
 //
@@ -2321,6 +2402,21 @@ int zEulerSweep(int j, int NumberOfSubgrids, fluxes *SubgridFluxes[],
   int AppendForcingToBaryonFields();
   int DetachForcingFromBaryonFields();
   int RemoveForcingFromBaryonFields();
+   int AllocateAndZeroBaryonField() {
+    if (MyProcessorNumber != ProcessorNumber)
+      return SUCCESS;
+
+    if (BaryonField[0] != NULL)
+      return FAIL;
+
+    int size = this->GetGridSize();
+
+    for (int field = 0; field < NumberOfBaryonFields; field++) {
+      BaryonField[field] = new float[size]();
+    }
+
+    return SUCCESS;
+  };
   int AddRandomForcing(float * norm, float dtTopGrid);
   int PrepareRandomForcingNormalization(float * GlobVal, int GlobNum);
   int ReadRandomForcingFields(FILE *main_file_pointer, char DataFilename[]);
@@ -2409,6 +2505,32 @@ int zEulerSweep(int j, int NumberOfSubgrids, fluxes *SubgridFluxes[],
   int StarParticleHandler(HierarchyEntry* SubgridPointer, int level,
 			  float dtLevelAbove, float TopGridTimeStep);
 
+  int ActiveParticleHandler(HierarchyEntry* SubgridPointer, int level,
+                float dtLevelAbove, int &NumberOfNewActiveParticles);
+
+    /* Append and detach active particles data to 'normal' particle
+     arrays */
+
+  int AddActiveParticles(ActiveParticleList<ActiveParticleType> &NewParticles,
+      int start, int end);
+  int AddActiveParticle(ActiveParticleType* ThisParticle);
+  int AppendActiveParticlesToList(ActiveParticleList<ActiveParticleType> &APArray,
+      int search_id);
+  int DebugActiveParticles(int level);
+
+  /* Create flat arrays of active particle data */
+
+  void GetActiveParticlePosition(FLOAT *ActiveParticlePosition[]);
+
+  /* Get the active particle mass as a flat array (1D) */
+
+  void GetActiveParticleMass(float * ActiveParticleMass);
+  void GetActiveParticleFixedInSpace(int * ActiveParticleFixedInSpace);
+
+  /* Returns averaged velocity from the 6 neighbor cells and itself */
+
+  float* AveragedVelocityAtCell(int index, int DensNum, int Vel1Num);
+  
 /* Particle splitter routine. */
 
   int ParticleSplitter(int level);
@@ -2580,6 +2702,8 @@ int zEulerSweep(int j, int NumberOfSubgrids, fluxes *SubgridFluxes[],
 
   int RemoveParticle(int ID, bool disable=false);
 
+  int RemoveActiveParticle(PINT ID, int NewProcessorNumber);
+  
   int AddFeedbackSphere(Star *cstar, int level, float radius, float DensityUnits,
 			float LengthUnits, float VelocityUnits, 
 			float TemperatureUnits, float TimeUnits, double EjectaDensity, 
@@ -2596,7 +2720,7 @@ int zEulerSweep(int j, int NumberOfSubgrids, fluxes *SubgridFluxes[],
   int MoveAllStarsOld(int NumberOfGrids, grid* FromGrid[], int TopGridDimension);
 
   int CommunicationSendStars(grid *ToGrid, int ToProcessor);
-
+  int CommunicationSendActiveParticles(grid *ToGrid, int ToProcessor, bool DeleteParticles = true);
   int TransferSubgridStars(int NumberOfSubgrids, grid* ToGrids[], int AllLocal);
   
   int FindNewStarParticles(int level);
@@ -2613,6 +2737,17 @@ int zEulerSweep(int j, int NumberOfSubgrids, fluxes *SubgridFluxes[],
   int AddH2DissociationFromSources(Star *AllStars);
 
   int ReturnStarStatistics(int &Number, float &minLife);
+
+    int AccreteOntoAccretingParticle(ActiveParticleType* ThisParticle,
+      FLOAT AccretionRadius,
+      float* AccretionRate);
+
+  int AddMassAndMomentumToAccretingParticle(float GlobalSubtractedMass, float GlobalSubtractedMomentum[],
+                        ActiveParticleType* ThisParticle, LevelHierarchyEntry *LevelArray[]);
+
+  int ApplyGalaxyParticleFeedback(ActiveParticleType** ThisParticle);
+
+  int ApplyGalaxyParticleGravity(ActiveParticleType** ThisParticle);
 
 //------------------------------------------------------------------------
 // Radiative transfer methods that don't fit in the TRANSFER define
@@ -2648,6 +2783,9 @@ int zEulerSweep(int j, int NumberOfSubgrids, fluxes *SubgridFluxes[],
       }
   }
 
+  void ConvertColorFieldsToFractions(); 
+  void ConvertColorFieldsFromFractions(); 
+  
 //-----------------------------------------------------------------------
 //  Returns radiative cooling by component
 //-----------------------------------------------------------------------

@@ -25,6 +25,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+
+#include <iostream>
+#include <vector>
  
 #define DEFINE_STORAGE
 #include "EnzoTiming.h"

@@ -3,6 +3,8 @@
 /*             Methods for handling Photon Packages                */
 /*******************************************************************/
 
+#include "macros_and_parameters.h"
+
 void SetOriginalProcessorNumber(int num) { OriginalProcessorNumber = num; };
 int ReturnOriginalProcessorNumber() { return OriginalProcessorNumber; };
 void DeleteSubgridMarker() { delete [] SubgridMarker; SubgridMarker = NULL; };
