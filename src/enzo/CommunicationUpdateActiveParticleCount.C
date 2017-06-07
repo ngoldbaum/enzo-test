@@ -121,17 +121,17 @@ int CommunicationUpdateActiveParticleCount(HierarchyEntry *Grids[],
   int *buffer = new int[NumberOfGrids * stride];
 
   for (i = 0, idx = 0; i < NumberOfGrids; i++, idx += stride)
-      if (Grids[i]->GridData->ReturnProcessorNumber() == MyProcessorNumber) {
-	nap = Grids[i]->GridData->ReturnNumberOfActiveParticles();
+    if (Grids[i]->GridData->ReturnProcessorNumber() == MyProcessorNumber) {
+      nap = Grids[i]->GridData->ReturnNumberOfActiveParticles();
 	  for (j = 0; j < EnabledActiveParticlesCount; j++) {
 	    buffer[idx+j] = Grids[i]->GridData->ReturnNumberOfActiveParticlesOfThisType(j);
 	  }
-      }
-      else {
-	for (j = 0; j < EnabledActiveParticlesCount; j++)
-	  buffer[idx + j] = 0;
-      }
-
+    }
+    else {
+      for (j = 0; j < EnabledActiveParticlesCount; j++)
+        buffer[idx + j] = 0;
+    }
+  
 #ifdef USE_MPI
   CommunicationAllReduceValues(buffer, NumberOfGrids * stride, MPI_SUM);
 #endif

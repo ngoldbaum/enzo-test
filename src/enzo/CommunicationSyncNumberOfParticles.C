@@ -68,7 +68,7 @@ int CommunicationSyncNumberOfParticles(HierarchyEntry *GridHierarchyPointer[],
   for (i = 0, idx = 0; i < NumberOfGrids; i++, idx += 2) {
     GridHierarchyPointer[i]->GridData->SetNumberOfParticles(buffer[idx]);
     GridHierarchyPointer[i]->GridData->SetNumberOfStars(buffer[idx+1]);
-    GridHierarchyPointer[i]->GridData->SetNumberOfActiveParticles(buffer[idx+1]);
+    GridHierarchyPointer[i]->GridData->SetNumberOfActiveParticles(buffer[idx+2]);
     for (j = 0; j < MAX_ACTIVE_PARTICLE_TYPES; j++) {
       GridHierarchyPointer[i]->GridData->SetActiveParticleTypeCounts(j,
         buffer[idx+2+j]);

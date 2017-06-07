@@ -32,7 +32,8 @@ int grid::ReturnNumberOfActiveParticlesOfThisType(int ActiveParticleIDToFind) {
   
   int NumberOfActiveParticlesOfThisType = 0;
   for (int j = 0; j<NumberOfActiveParticles; j++) {
-    if (this->ActiveParticles[j]->GetEnabledParticleID() == ActiveParticleIDToFind) {
+    int apid = this->ActiveParticles[j]->GetEnabledParticleID();
+    if (apid == ActiveParticleIDToFind) {
       NumberOfActiveParticlesOfThisType++;
     }
   }
