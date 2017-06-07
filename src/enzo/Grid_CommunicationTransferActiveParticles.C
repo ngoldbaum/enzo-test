@@ -14,9 +14,6 @@
 /  PURPOSE:
 /
 ************************************************************************/
-#ifdef USE_MPI
-#include <communicators.h>
-#endif
 #include "preincludes.h"
 
 #include "ErrorExceptions.h"

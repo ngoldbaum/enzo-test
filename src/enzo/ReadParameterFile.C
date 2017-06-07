@@ -39,6 +39,7 @@
 #include "TopGridData.h"
 #include "hydro_rk/EOS.h" 
 #include "CosmologyParameters.h"
+#include "ActiveParticle.h"
 
 /* This variable is declared here and only used in Grid_ReadGrid. */
  
@@ -77,7 +78,11 @@ int ReadParameterFile(FILE *fptr, TopGridData &MetaData, float *Initialdt)
   char *dummy = new char[MAX_LINE_LENGTH];
   dummy[0] = 0;
   int comment_count = 0;
- 
+
+  char **active_particle_types;
+  active_particle_types = new char*[MAX_ACTIVE_PARTICLE_TYPES];
+  int active_particles = 0;
+  
   /* read until out of lines */
 
   rewind(fptr);
@@ -1266,6 +1271,11 @@ int ReadParameterFile(FILE *fptr, TopGridData &MetaData, float *Initialdt)
 		  ResetMagneticFieldAmplitude+1,
 		  ResetMagneticFieldAmplitude+2);
 
+    if (sscanf(line, "AppendActiveParticleType = %s", dummy) == 1) {
+      active_particle_types[active_particles] = dummy;
+      active_particles++;
+    }
+
     ret += sscanf(line, "UseGasDrag = %"ISYM, &UseGasDrag);
     ret += sscanf(line, "GasDragCoefficient = %"GSYM, &GasDragCoefficient);
 
@@ -1356,6 +1366,16 @@ int ReadParameterFile(FILE *fptr, TopGridData &MetaData, float *Initialdt)
  
   }
 
+  // Enable the active particles that were selected.
+  for (i = 0;i < active_particles;i++) {
+    if (MyProcessorNumber == ROOT_PROCESSOR) {
+      fprintf(stdout, "Enabling particle type %s\n", active_particle_types[i]);
+    }
+    EnableActiveParticleType(active_particle_types[i]);
+    delete [] active_particle_types[i];
+  }
+  delete [] active_particle_types;
+  
   // HierarchyFile IO sanity check
 
   // Note that although I only do not allow HierarchyFileInputFormat=2

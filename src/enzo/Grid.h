@@ -69,6 +69,7 @@ extern int CommunicationDirection;
 int FindField(int f, int farray[], int n);
 struct LevelHierarchyEntry;
 class ActiveParticleType;
+class ActiveParticle_AccretingParticle;
 
 class grid
 {
@@ -225,6 +226,15 @@ class grid
   friend int ProtoSubgrid::CopyFlaggedZonesFromGrid(grid *Grid);
   friend class Star;
   friend class ActiveParticleType;
+  friend class ActiveParticleType_AccretingParticle;
+  friend class ActiveParticleType_CenOstriker;
+  friend class ActiveParticleType_GalaxyParticle;
+  friend class ActiveParticleType_Kravtsov;
+  friend class ActiveParticleType_PopIII;
+  friend class ActiveParticleType_RadiationParticle;
+  friend class ActiveParticleType_Skeleton;
+  friend class ActiveParticleType_SpringelHernquist;
+
 #ifdef NEW_PROBLEM_TYPES
   friend class EnzoProblemType;
 #endif
@@ -1554,6 +1564,7 @@ iveParticles;};
 /* Particles: Set new star particle index. */
 
    void SetNewParticleIndex(int &NumberCount1, PINT &NumberCount2);
+   void SetNewActiveParticleIndex(PINT &NumberCount);
 
 /* Particles: Set new star particle index. - Old version */
 
@@ -2738,12 +2749,9 @@ int zEulerSweep(int j, int NumberOfSubgrids, fluxes *SubgridFluxes[],
 
   int ReturnStarStatistics(int &Number, float &minLife);
 
-    int AccreteOntoAccretingParticle(ActiveParticleType* ThisParticle,
-      FLOAT AccretionRadius,
-      float* AccretionRate);
-
-  int AddMassAndMomentumToAccretingParticle(float GlobalSubtractedMass, float GlobalSubtractedMomentum[],
-                        ActiveParticleType* ThisParticle, LevelHierarchyEntry *LevelArray[]);
+  int AccreteOntoAccretingParticle(ActiveParticleType* ThisParticle,
+                                   FLOAT AccretionRadius,
+                                   float* AccretionRate);
 
   int ApplyGalaxyParticleFeedback(ActiveParticleType** ThisParticle);
 

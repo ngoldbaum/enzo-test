@@ -172,6 +172,11 @@ grid::grid()
   NumberOfStars = 0;
   Stars = NULL;
 
+  NumberOfActiveParticles = 0;
+  for (i=0; i<MAX_ACTIVE_PARTICLE_TYPES; i++) {
+    ActiveParticleTypeCount[i] = 0;
+  }
+  
   for(i=0;i<3;i++){
     MagneticField[i] = NULL;
     ElectricField[i] = NULL;

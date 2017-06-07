@@ -213,6 +213,12 @@ int CreateSUBlingList(TopGridData *MetaData,
 int DeleteSUBlingList(int NumberOfGrids,
 		      LevelHierarchyEntry **SUBlingList);
 
+int ActiveParticleInitialize(HierarchyEntry *Grids[], TopGridData *MetaData,
+                 int NumberOfGrids, LevelHierarchyEntry *LevelArray[],
+                 int ThisLevel);
+int ActiveParticleFinalize(HierarchyEntry *Grids[], TopGridData *MetaData,
+               int NumberOfGrids, LevelHierarchyEntry *LevelArray[],
+               int level, int NumberOfNewActiveParticles[]);
 int StarParticleInitialize(HierarchyEntry *Grids[], TopGridData *MetaData,
 			   int NumberOfGrids, LevelHierarchyEntry *LevelArray[], 
 			   int ThisLevel, Star *&AllStars,
@@ -294,6 +300,7 @@ int EvolveLevel(TopGridData *MetaData, LevelHierarchyEntry *LevelArray[],
   typedef HierarchyEntry* HierarchyEntryPointer;
   HierarchyEntry **Grids;
   int NumberOfGrids = GenerateGridArray(LevelArray, level, &Grids);
+  int *NumberOfNewActiveParticles = new int[NumberOfGrids]();
   int *NumberOfSubgrids = new int[NumberOfGrids];
   fluxes ***SubgridFluxesEstimate = new fluxes **[NumberOfGrids];
   int *TotalStarParticleCountPrevious = new int[NumberOfGrids];
@@ -422,6 +429,9 @@ int EvolveLevel(TopGridData *MetaData, LevelHierarchyEntry *LevelArray[],
 
     /* Initialize the star particles */
 
+    ActiveParticleInitialize(Grids, MetaData, NumberOfGrids, LevelArray,
+                             level);
+    
     Star *AllStars = NULL;
     StarParticleInitialize(Grids, MetaData, NumberOfGrids, LevelArray,
 			   level, AllStars, TotalStarParticleCountPrevious);
@@ -570,6 +580,10 @@ int EvolveLevel(TopGridData *MetaData, LevelHierarchyEntry *LevelArray[],
       Grids[grid1]->GridData->StarParticleHandler
 	(Grids[grid1]->NextGridNextLevel, level ,dtLevelAbove, TopGridTimeStep);
 
+      Grids[grid1]->GridData->ActiveParticleHandler
+        (Grids[grid1]->NextGridNextLevel, level ,dtLevelAbove,
+         NumberOfNewActiveParticles[grid1]);
+
       /* Include shock-finding */
 
       Grids[grid1]->GridData->ShocksHandler();
@@ -610,7 +624,10 @@ int EvolveLevel(TopGridData *MetaData, LevelHierarchyEntry *LevelArray[],
 	Grids[grid1]->GridData->ComovingExpansionTerms();
  
     }  // end loop over grids
- 
+
+    ActiveParticleFinalize(Grids, MetaData, NumberOfGrids, LevelArray,
+                           level, NumberOfNewActiveParticles);
+    
     /* Finalize (accretion, feedback, etc.) star particles */
 
     StarParticleFinalize(Grids, MetaData, NumberOfGrids, LevelArray,
@@ -826,6 +843,7 @@ int EvolveLevel(TopGridData *MetaData, LevelHierarchyEntry *LevelArray[],
   /* Clean up. */
  
   delete [] NumberOfSubgrids;
+  delete [] NumberOfNewActiveParticles;
   delete [] Grids;
   delete [] SubgridFluxesEstimate;
   delete [] TotalStarParticleCountPrevious;

@@ -100,12 +100,9 @@ int CommunicationUpdateActiveParticleCount(HierarchyEntry *Grids[],
     NumberOfActiveParticles += TotalNewActiveParticleCount[grid];
     
     if (Grids[grid]->GridData->ReturnProcessorNumber() == MyProcessorNumber) 
-
       /* If this grid is on this processor, then call routine to set the
 	 particle index numbers.  */
-
-      Grids[grid]->GridData->SetNewParticleIndex(NextActiveParticleID);
-
+        Grids[grid]->GridData->SetNewActiveParticleIndex(NextActiveParticleID);
     else {
  
       /* If not on this processor, then keep track of the number of new

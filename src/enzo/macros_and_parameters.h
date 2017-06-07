@@ -2,7 +2,10 @@
 #define __macros_and_parameters_h_
 
 #include <iostream>
+#include <iomanip>
 #include <vector>
+#include <map>
+#include <cassert>
 
 /***********************************************************************
 /  
