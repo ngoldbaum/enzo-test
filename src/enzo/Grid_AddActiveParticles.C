@@ -40,8 +40,8 @@ int grid::AddActiveParticles(ActiveParticleList<ActiveParticleType> &NewParticle
     this->ActiveParticles.copy_and_insert(*NewParticles[i]);
   }
 
-#define NO_DEBUG
-#ifdef DEBUG
+#define NO_DEBUG_APs
+#ifdef DEBUG_APs
   int dim, inside;
   FLOAT *pos;
   float TotalMass = 0;

@@ -50,7 +50,7 @@ int grid::MoveAllParticles(int NumberOfGrids, grid* FromGrid[])
       NumberOfSubgridParticles += FromGrid[grid]->NumberOfParticles;
       NumberOfSubgridActiveParticles += FromGrid[grid]->NumberOfActiveParticles;
     }
-  if (NumberOfSubgridParticles == 0) 
+  if (NumberOfSubgridParticles + NumberOfSubgridActiveParticles == 0) 
     return SUCCESS;
   
   TotalNumberOfParticles += NumberOfSubgridParticles;

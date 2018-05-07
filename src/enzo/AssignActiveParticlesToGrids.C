@@ -45,7 +45,7 @@ int AssignActiveParticlesToGrids(
     int nParticles, 
     LevelHierarchyEntry *LevelArray[]) 
 {
-  int LevelMax, SavedGrid, NumberOfGrids, i, level, NumberOfLevelGrids, gridnum;
+  int LevelMax, GlobalLevelMax, SavedGrid, NumberOfGrids, i, level, NumberOfLevelGrids, gridnum;
   int dim, SavedGridOffProc;
   HierarchyEntry **LevelGrids = NULL;
   FLOAT* pos, pos1[3];
@@ -65,7 +65,7 @@ int AssignActiveParticlesToGrids(
       }
     }
     // Find the grid and processor this particle lives on
-    LevelMax = SavedGrid = SavedGridOffProc = -1;
+    GlobalLevelMax = LevelMax = SavedGrid = SavedGridOffProc = -1;
     for (level = 0; level < MAX_DEPTH_OF_HIERARCHY; level++) {
       NumberOfLevelGrids = GenerateGridArray(LevelArray, level, &LevelGrids);     
       for (gridnum = 0; gridnum < NumberOfLevelGrids; gridnum++) {
@@ -77,6 +77,7 @@ int AssignActiveParticlesToGrids(
 	          LevelMax = level;
 	        }
 	      }
+          GlobalLevelMax = level;
 	    } // if MyProc
 	  } // for gridnum
       delete [] LevelGrids;
@@ -105,10 +106,8 @@ int AssignActiveParticlesToGrids(
 	  LevelMax and assign the particle to the
 	  SavedGrid on that processor.  */
       struct { Eint32 value; Eint32 rank; } sendbuf, recvbuf;
-      MPI_Comm_rank(MPI_COMM_WORLD, &sendbuf.rank); 
-      sendbuf.value = LevelMax;
-      MPI_Allreduce(&sendbuf, &recvbuf, 1, MPI_2INT, MPI_MAXLOC, MPI_COMM_WORLD);
-      NumberOfGrids = GenerateGridArray(LevelArray, recvbuf.value, &LevelGrids); 
+      MPI_Comm_rank(MPI_COMM_WORLD, &sendbuf.rank);
+      NumberOfGrids = GenerateGridArray(LevelArray, GlobalLevelMax, &LevelGrids); 
       // We're moving it, make sure that the particle position is fixed (if required).
       ParticleList[i]->SetPositionPeriod(period);
       // Below this effectively removes the particle from the sending proc.
@@ -116,13 +115,13 @@ int AssignActiveParticlesToGrids(
       int ID = ParticleList[i]->ReturnID();
       OldGrid->RemoveActiveParticle(ID,LevelGrids[SavedGridOffProc]->GridData->ReturnProcessorNumber());
       // if this is the receiving proc, add it.
-      if (LevelMax == recvbuf.value) {
+      if (LevelMax == GlobalLevelMax) {
 	    if (LevelGrids[SavedGrid]->GridData->AddActiveParticle(
                 static_cast<ActiveParticleType*>(ParticleList[i])) == FAIL) {
 	      ENZO_FAIL("Active particle grid assignment failed"); 
 	    } 
       }
-      LevelMax = recvbuf.value;
+      LevelMax = GlobalLevelMax;
 #endif // endif parallel
     } // end else
     

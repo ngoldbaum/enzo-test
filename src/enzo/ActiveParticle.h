@@ -468,8 +468,8 @@ namespace ActiveParticleHelpers {
       int i, size = 0, Count = 0;
       char *buffer, *_buffer;
       AttributeVector &handlers = APClass::AttributeHandlers;
-      const char *_name = name.c_str();
-      hid_t node = H5Gcreate(grid_node, _name, 0);
+      const char *_ap_name = name.c_str();
+      hid_t node = H5Gcreate(grid_node, _ap_name, 0);
 
       /* Now we count up our particles */
       for (i = 0; i < TotalParticles; i++) {
@@ -498,7 +498,7 @@ namespace ActiveParticleHelpers {
             (*it)->GetAttribute(&_buffer, InList[i]);
           }
           /* Now write it to disk */
-          _name = (*it)->name.c_str();
+          const char *_name = (*it)->name.c_str();
           APClass::WriteDataset(ndims, dims, _name, node,
                                 (*it)->hdf5type, buffer);
           delete [] buffer;

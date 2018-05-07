@@ -5,7 +5,8 @@
 /  written by: John Wise
 /  date:       May, 2009
 /  modified:   July, 2009 by John Wise to collect stars as well
-/
+/  modified2:  December, 2011 by John Wise -- modified for active 
+/              particles
 /  PURPOSE:
 /
 /  NOTE: communication modeled after the optimized version of 
@@ -78,6 +79,8 @@ int CommunicationCollectParticles(LevelHierarchyEntry *LevelArray[],
 
   Temp = LevelArray[level];
   while (Temp != NULL) {
+    if (level == 0)
+      Temp->GridHierarchyEntry->GridData->SetGridID(NumberOfGrids);
     GridHierarchyPointer[NumberOfGrids++] = Temp->GridHierarchyEntry;
     Temp = Temp->NextGridThisLevel;
   }
@@ -137,7 +140,7 @@ int CommunicationCollectParticles(LevelHierarchyEntry *LevelArray[],
 #ifdef DEBUG_CCP
     for (i = 0; i < NumberOfGrids; i++)
       printf("CCP[P%"ISYM"B]: grid %"ISYM", %"ISYM" proc, %"ISYM" particles, "
-             "%"ISYM" stars, "ISYM" active particles\n",
+             "%"ISYM" stars, %"ISYM" active particles\n",
              MyProcessorNumber, i,
              GridHierarchyPointer[i]->GridData->ReturnProcessorNumber(),
              GridHierarchyPointer[i]->GridData->ReturnNumberOfParticles(),
@@ -145,11 +148,11 @@ int CommunicationCollectParticles(LevelHierarchyEntry *LevelArray[],
              GridHierarchyPointer[i]->GridData->ReturnNumberOfActiveParticles());
     for (i = 0; i < NumberOfSubgrids; i++)
       printf("CCP[P%"ISYM"B]: subgrid %"ISYM", %"ISYM" proc, %"ISYM" particles, "
-             "%"ISYM" stars, "ISYM" active particles\n",
+             "%"ISYM" stars, %"ISYM" active particles\n",
              MyProcessorNumber, i,
              SubgridHierarchyPointer[i]->GridData->ReturnProcessorNumber(),
              SubgridHierarchyPointer[i]->GridData->ReturnNumberOfParticles(),
-             SubgridHierarchyPointer[i]->GridData->ReturnNumberOfStars()
+             SubgridHierarchyPointer[i]->GridData->ReturnNumberOfStars(),
              SubgridHierarchyPointer[i]->GridData->ReturnNumberOfActiveParticles());
 #endif /* DEBUG_CCP */
 
@@ -172,42 +175,42 @@ int CommunicationCollectParticles(LevelHierarchyEntry *LevelArray[],
     for (j = 0; j < NumberOfGrids; j++)
       if (GridHierarchyPointer[j]->NextGridNextLevel != NULL) {
 
-	if (GridHierarchyPointer[j]->GridData->ReturnNumberOfParticles() == 0 &&
-	    GridHierarchyPointer[j]->GridData->ReturnNumberOfStars() == 0 &&
-        GridHierarchyPointer[j]->GridData->ReturnNumberOfActiveParticles() == 0)
-	  continue;
+        if (GridHierarchyPointer[j]->GridData->ReturnNumberOfParticles() == 0 &&
+            GridHierarchyPointer[j]->GridData->ReturnNumberOfStars() == 0 &&
+            GridHierarchyPointer[j]->GridData->ReturnNumberOfActiveParticles() == 0)
+          continue;
 
-	GridHierarchyPointer[j]->GridData->
-	  ZeroSolutionUnderSubgrid(NULL, ZERO_UNDER_SUBGRID_FIELD, 1.0, 
-				   ZeroOnAllProcs);
- 
-	for (Subgrid = GridHierarchyPointer[j]->NextGridNextLevel;
-	     Subgrid; Subgrid = Subgrid->NextGridThisLevel) {
-	  ThisID = Subgrid->GridData->GetGridID();
-	  GridHierarchyPointer[j]->GridData->ZeroSolutionUnderSubgrid
-	    (Subgrid->GridData, ZERO_UNDER_SUBGRID_FIELD, float(ThisID+1),
-	     ZeroOnAllProcs);
-	}
-
-	if (MoveStars)
-	  GridHierarchyPointer[j]->GridData->TransferSubgridStars
-	    (SubgridPointers, NumberOfSubgrids, StarsToMove, Zero, Zero, 
-	     StarSendList, KeepLocal, ParticlesAreLocal, COPY_OUT);
-
-    GridHierarchyPointer[j]->GridData->TransferSubgridActiveParticles
-      (SubgridPointers, NumberOfSubgrids, APNumberToMove, Zero, Zero,
-       APSendList, KeepLocal, ParticlesAreLocal, COPY_OUT, FALSE, TRUE);
-
-    // SendList is NULL at this point, but this is ok because it will not be
-    // manipulated in this function since CountOnly (the last argument) is
-    // unconditionally TRUE
-
-	GridHierarchyPointer[j]->GridData->TransferSubgridParticles
-	    (SubgridPointers, NumberOfSubgrids, NumberToMove, Zero, Zero, 
-	     SendList, KeepLocal, ParticlesAreLocal, COPY_OUT, FALSE, TRUE);
- 
+        GridHierarchyPointer[j]->GridData->
+          ZeroSolutionUnderSubgrid(NULL, ZERO_UNDER_SUBGRID_FIELD, 1.0, 
+                                   ZeroOnAllProcs);
+        
+        for (Subgrid = GridHierarchyPointer[j]->NextGridNextLevel;
+             Subgrid; Subgrid = Subgrid->NextGridThisLevel) {
+          ThisID = Subgrid->GridData->GetGridID();
+          GridHierarchyPointer[j]->GridData->ZeroSolutionUnderSubgrid
+            (Subgrid->GridData, ZERO_UNDER_SUBGRID_FIELD, float(ThisID+1),
+             ZeroOnAllProcs);
+        }
+        
+        if (MoveStars)
+          GridHierarchyPointer[j]->GridData->TransferSubgridStars
+            (SubgridPointers, NumberOfSubgrids, StarsToMove, Zero, Zero, 
+             StarSendList, KeepLocal, ParticlesAreLocal, COPY_OUT);
+        
+        GridHierarchyPointer[j]->GridData->TransferSubgridActiveParticles
+          (SubgridPointers, NumberOfSubgrids, APNumberToMove, Zero, Zero,
+           APSendList, KeepLocal, ParticlesAreLocal, COPY_OUT, FALSE, TRUE);
+        
+        // SendList is NULL at this point, but this is ok because it will not be
+        // manipulated in this function since CountOnly (the last argument) is
+        // unconditionally TRUE
+        
+        GridHierarchyPointer[j]->GridData->TransferSubgridParticles
+          (SubgridPointers, NumberOfSubgrids, NumberToMove, Zero, Zero, 
+           SendList, KeepLocal, ParticlesAreLocal, COPY_OUT, FALSE, TRUE);
+        
       } // ENDIF subgrids exist
-
+    
     /* Now allocate the memory once and store the particles to move */
 
     TotalNumber = 0;
@@ -380,7 +383,7 @@ int CommunicationCollectParticles(LevelHierarchyEntry *LevelArray[],
              MyProcessorNumber, i,
              GridHierarchyPointer[i]->GridData->ReturnProcessorNumber(),
              GridHierarchyPointer[i]->GridData->ReturnNumberOfParticles(),
-             GridHierarchyPointer[i]->GridData->ReturnNumberOfStars()
+             GridHierarchyPointer[i]->GridData->ReturnNumberOfStars(),
              GridHierarchyPointer[i]->GridData->ReturnNumberOfActiveParticles());
     for (i = 0; i < NumberOfSubgrids; i++)
       printf("CCP[P%"ISYM"A]: subgrid %"ISYM", %"ISYM" proc, %"ISYM" particles, "
@@ -388,7 +391,7 @@ int CommunicationCollectParticles(LevelHierarchyEntry *LevelArray[],
              MyProcessorNumber, i,
              SubgridHierarchyPointer[i]->GridData->ReturnProcessorNumber(),
              SubgridHierarchyPointer[i]->GridData->ReturnNumberOfParticles(),
-             SubgridHierarchyPointer[i]->GridData->ReturnNumberOfStars()
+             SubgridHierarchyPointer[i]->GridData->ReturnNumberOfStars(),
              SubgridHierarchyPointer[i]->GridData->ReturnNumberOfActiveParticles());
 #endif /* DEBUG_CCP */
 
@@ -491,7 +494,7 @@ int CommunicationCollectParticles(LevelHierarchyEntry *LevelArray[],
 #ifdef DEBUG_CCP
       printf("CCP[%d]: Collecting a total of %"ISYM" (%"ISYM" local) "
 	     "particles and %"ISYM" active particles over grids %"ISYM"->%"ISYM".\n", 
-	     MyProcessorNumber, AllMovedParticles, TotalNumberToMove, TotalActiveParticlesToMove
+         MyProcessorNumber, AllMovedParticles, TotalNumberToMove, TotalActiveParticlesToMove,
 	     StartGrid, EndGrid-1);  
 
     for (i = StartGrid; i < EndGrid; i++)
