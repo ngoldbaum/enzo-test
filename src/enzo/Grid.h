@@ -1336,6 +1336,8 @@ gradient force to gravitational force for one-zone collapse test. */
    float* AccessKPhHeII();
    float* AccessGammaHeII();
    float* AccessKDissH2I();
+   float* AccessKPhHM();
+   float* AccessKDissH2II();
    float* AccessGravPotential();
    float* AccessAcceleration0();
    float* AccessAcceleration1();
@@ -2763,7 +2765,8 @@ int zEulerSweep(int j, int NumberOfSubgrids, fluxes *SubgridFluxes[],
 
   int IdentifyRadiativeTransferFields(int &kphHINum, int &gammaNum,
 				      int &kphHeINum, int &kphHeIINum, 
-				      int &kdissH2INum);
+				      int &kdissH2INum, int &kphHMNum,
+				      int &kdissH2IINum);
 
 #ifdef TRANSFER
 #include "PhotonGrid_Methods.h"
@@ -2845,6 +2848,8 @@ int zEulerSweep(int j, int NumberOfSubgrids, fluxes *SubgridFluxes[],
 
   int ClusterSMBHFeedback(int level);
   int ClusterSMBHEachGridGasMass(int level);
+  int OldStarFeedback();
+  int AddStellarWind();
   int SetNumberOfColours(void);
   int SaveSubgridFluxes(fluxes *SubgridFluxes[], int NumberOfSubgrids,
                         float *Flux3D[], int flux, float fluxcoef, float dt);
@@ -3140,6 +3145,7 @@ int zEulerSweep(int j, int NumberOfSubgrids, fluxes *SubgridFluxes[],
                              float Energy0,  float Energy1,
                              float Velocity0[], float Velocity1[],
                              float B0[], float B1[],
+                             float MetalDensity0, float MetalDensity1, int UseMetal, float MetalOffsetInX,
                              float Radius, float MHDBlastCenter[], int LongDimension,
                              float PerturbAmplitude, int PerturbMethod, float PerturbWavelength[],
                              int InitStyle);

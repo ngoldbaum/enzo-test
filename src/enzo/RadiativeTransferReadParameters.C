@@ -12,6 +12,11 @@
 /
 ************************************************************************/
 
+#ifdef USE_GRACKLE
+extern "C" {
+#include <grackle.h>
+} // USE_GRACKLE
+#endif
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -68,8 +73,12 @@ int RadiativeTransferReadParameters(FILE *fptr)
   RadiativeTransferTraceSpectrumTable         = (char*) "spectrum_table.dat";
   RadiativeTransferSourceBeamAngle            = 30.0;
   RadiativeTransferLoadBalance                = FALSE;
+  RadiativeTransferRayMaximumLength           = 1.7320508; //sqrt(3.0)
+  RadiativeTransferUseH2Shielding             = TRUE;
+  RadiativeTransferH2ShieldType               = 0;
+  RadiativeTransferH2IIDiss                   = TRUE;
   RadiativeTransferHubbleTimeFraction         = 0.1;
-
+  
   if (MultiSpecies == 0)
     RadiativeTransferOpticallyThinH2 = FALSE;
 
@@ -127,10 +136,18 @@ int RadiativeTransferReadParameters(FILE *fptr)
 		  &RadiativeTransferAdaptiveTimestep);
     ret += sscanf(line, "RadiativeTransferHydrogenOnly = %"ISYM, 
 		  &RadiativeTransferHydrogenOnly);
+    ret += sscanf(line, "RadiativeTransferH2ShieldType = %"ISYM, 
+		  &RadiativeTransferH2ShieldType);
+    ret += sscanf(line, "RadiativeTransferH2IIDiss = %"ISYM, 
+		  &RadiativeTransferH2IIDiss);
+    ret += sscanf(line, "RadiativeTransferUseH2Shielding = %"ISYM, 
+		  &RadiativeTransferUseH2Shielding);
     ret += sscanf(line, "RadiativeTransferTraceSpectrum = %"ISYM, 
 		  &RadiativeTransferTraceSpectrum);
     ret += sscanf(line, "RadiativeTransferLoadBalance = %"ISYM, 
 		  &RadiativeTransferLoadBalance);
+    ret += sscanf(line, "RadiativeTransferRayMaximumLength = %"FSYM, 
+		  &RadiativeTransferRayMaximumLength);
     ret += sscanf(line, "RadiativeTransferHubbleTimeFraction = %"FSYM, 
 		  &RadiativeTransferHubbleTimeFraction);
     if (sscanf(line, "RadiativeTransferTraceSpectrumTable = %s", dummy) == 1)
@@ -211,6 +228,13 @@ int RadiativeTransferReadParameters(FILE *fptr)
   if (RadiativeTransferFLD > 1  &&  (ImplicitProblem == 0)) 
     ENZO_FAIL("Error: RadiativeTransferFLD > 1 requires ImplicitProblem > 0!")
 
+#ifdef USE_GRACKLE
+  // Set some radiative transfer grackle parameters.
+  if (grackle_data->use_grackle == TRUE) {
+    grackle_data->radiative_transfer_coupled_rate_solver = (Eint32) RadiativeTransferCoupledRateSolver;
+    grackle_data->radiative_transfer_hydrogen_only       = (Eint32) RadiativeTransferHydrogenOnly;
+  }
+#endif // USE_GRACKLE
 
   delete [] dummy;
 
