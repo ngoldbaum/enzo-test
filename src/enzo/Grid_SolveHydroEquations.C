@@ -17,6 +17,7 @@
 //
 
 #include <stdio.h>
+#include <vector>
 #include "ErrorExceptions.h"
 #include "EnzoTiming.h"
 #include "performance.h"

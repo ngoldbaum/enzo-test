@@ -21,9 +21,10 @@
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
-
-#include "EnzoTiming.h" 
+#include <vector>
 #include "ErrorExceptions.h"
+#include "EnzoTiming.h" 
+
 #include "performance.h"
 #include "macros_and_parameters.h"
 #include "typedefs.h"

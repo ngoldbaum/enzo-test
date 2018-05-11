@@ -19,7 +19,7 @@
 #endif
 #include <signal.h>
 #include <stdio.h>
-
+#include <algorithm>
 #include <exception>
 
 // If we are using the new problem type initializers, we need to include these

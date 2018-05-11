@@ -1,7 +1,8 @@
-#include <math.h>
-#include <string.h>
+#include <algorithm>
 #include <stdio.h>
-
+#include <string.h>
+#include <math.h>
+#include <vector>
 #include "ErrorExceptions.h"
 #include "macros_and_parameters.h"
 #include "typedefs.h"

@@ -1,0 +1,2 @@
+This test runs the Burkert & Bodenheimer test for sink particles. It is useful to test the creation, accretion  and merging of sinks. To run:
+./enzo.exe -d BBCollapseTestAccretingParticle.enzo

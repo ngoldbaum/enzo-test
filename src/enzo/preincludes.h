@@ -31,9 +31,11 @@ extern "C" {
 }
 #endif
 /* #include <stdlib.h> */
+#include <algorithm>
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+#include <vector>
 #ifdef USE_HYPRE
 #include "HYPRE_sstruct_ls.h"
 #endif
