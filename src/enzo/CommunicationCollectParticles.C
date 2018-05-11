@@ -4,10 +4,9 @@
 /
 /  written by: John Wise
 /  date:       May, 2009
-/  modified1:  July, 2009 by John Wise to collect stars as well
+/  modified:   July, 2009 by John Wise to collect stars as well
 /  modified2:  December, 2011 by John Wise -- modified for active 
 /              particles
-/
 /  PURPOSE:
 /
 /  NOTE: communication modeled after the optimized version of 
@@ -40,7 +39,6 @@
 #include "LevelHierarchy.h"
 #include "ActiveParticle.h"
 #include "CommunicationUtilities.h"
-#include "ActiveParticle.h"
 #include "SortCompareFunctions.h"
 void my_exit(int status);
 
@@ -176,41 +174,43 @@ int CommunicationCollectParticles(LevelHierarchyEntry *LevelArray[],
 
     for (j = 0; j < NumberOfGrids; j++)
       if (GridHierarchyPointer[j]->NextGridNextLevel != NULL) {
-	if (GridHierarchyPointer[j]->GridData->ReturnNumberOfParticles() == 0 &&
-	    GridHierarchyPointer[j]->GridData->ReturnNumberOfStars() == 0 &&
-	    GridHierarchyPointer[j]->GridData->ReturnNumberOfActiveParticles() == 0)
-	  continue;
-	GridHierarchyPointer[j]->GridData->
-	  ZeroSolutionUnderSubgrid(NULL, ZERO_UNDER_SUBGRID_FIELD, 1.0, 
-				   ZeroOnAllProcs);
- 
-	for (Subgrid = GridHierarchyPointer[j]->NextGridNextLevel;
-	     Subgrid; Subgrid = Subgrid->NextGridThisLevel) {
-	  ThisID = Subgrid->GridData->GetGridID();
-	  GridHierarchyPointer[j]->GridData->ZeroSolutionUnderSubgrid
-	    (Subgrid->GridData, ZERO_UNDER_SUBGRID_FIELD, float(ThisID+1),
-	     ZeroOnAllProcs);
-	}
 
-	if (MoveStars)
-	  GridHierarchyPointer[j]->GridData->TransferSubgridStars
-	    (SubgridPointers, NumberOfSubgrids, StarsToMove, Zero, Zero, 
-	     StarSendList, KeepLocal, ParticlesAreLocal, COPY_OUT);
+        if (GridHierarchyPointer[j]->GridData->ReturnNumberOfParticles() == 0 &&
+            GridHierarchyPointer[j]->GridData->ReturnNumberOfStars() == 0 &&
+            GridHierarchyPointer[j]->GridData->ReturnNumberOfActiveParticles() == 0)
+          continue;
 
-    GridHierarchyPointer[j]->GridData->TransferSubgridActiveParticles
-      (SubgridPointers, NumberOfSubgrids, APNumberToMove, Zero, Zero,
-       APSendList, KeepLocal, ParticlesAreLocal, COPY_OUT, FALSE, TRUE);
-
-    // SendList is NULL at this point, but this is ok because it will not be
-    // manipulated in this function since CountOnly (the last argument) is
-    // unconditionally TRUE
-
-	GridHierarchyPointer[j]->GridData->TransferSubgridParticles
-	    (SubgridPointers, NumberOfSubgrids, NumberToMove, Zero, Zero, 
-	     SendList, KeepLocal, ParticlesAreLocal, COPY_OUT, FALSE, TRUE);
-
+        GridHierarchyPointer[j]->GridData->
+          ZeroSolutionUnderSubgrid(NULL, ZERO_UNDER_SUBGRID_FIELD, 1.0, 
+                                   ZeroOnAllProcs);
+        
+        for (Subgrid = GridHierarchyPointer[j]->NextGridNextLevel;
+             Subgrid; Subgrid = Subgrid->NextGridThisLevel) {
+          ThisID = Subgrid->GridData->GetGridID();
+          GridHierarchyPointer[j]->GridData->ZeroSolutionUnderSubgrid
+            (Subgrid->GridData, ZERO_UNDER_SUBGRID_FIELD, float(ThisID+1),
+             ZeroOnAllProcs);
+        }
+        
+        if (MoveStars)
+          GridHierarchyPointer[j]->GridData->TransferSubgridStars
+            (SubgridPointers, NumberOfSubgrids, StarsToMove, Zero, Zero, 
+             StarSendList, KeepLocal, ParticlesAreLocal, COPY_OUT);
+        
+        GridHierarchyPointer[j]->GridData->TransferSubgridActiveParticles
+          (SubgridPointers, NumberOfSubgrids, APNumberToMove, Zero, Zero,
+           APSendList, KeepLocal, ParticlesAreLocal, COPY_OUT, FALSE, TRUE);
+        
+        // SendList is NULL at this point, but this is ok because it will not be
+        // manipulated in this function since CountOnly (the last argument) is
+        // unconditionally TRUE
+        
+        GridHierarchyPointer[j]->GridData->TransferSubgridParticles
+          (SubgridPointers, NumberOfSubgrids, NumberToMove, Zero, Zero, 
+           SendList, KeepLocal, ParticlesAreLocal, COPY_OUT, FALSE, TRUE);
+        
       } // ENDIF subgrids exist
-
+    
     /* Now allocate the memory once and store the particles to move */
 
     TotalNumber = 0;

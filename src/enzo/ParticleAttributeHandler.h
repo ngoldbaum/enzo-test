@@ -135,53 +135,29 @@ class ArrayHandler : public ParticleAttributeHandler
         } else {
             ENZO_FAIL("Unrecognized data type");
         }
-	const char *_name = this->name.c_str();
-	/* particle_position and particle_velocity are not actually stored as arrays */
-	if(strncmp(_name, "particle_", 9) == 0)
-	  this->element_size = sizeof(Type);  
-	else
-	  this->element_size = sizeof(Type)*N;
+
+	this->element_size = sizeof(Type);  
+
     }
 
     void SetAttribute(char **buffer, ActiveParticleType *pp_) {
         APClass *pp = static_cast<APClass*>(pp_);
         Type *pb = (Type *)(*buffer);
 	
-	/* For everything except particle_position and particle_velocity 
-	 * we need to loop over the size of the arrays
-	 */
-	const char *_name = this->name.c_str();
-	
-	if(strncmp(_name, "particle_", 9) == 0) {
-	  (pp->*var)[this->offset] = *(pb++);
-	  *buffer = (char *) pb;
-	}
-	else {
-	  for(int ii = 0; ii < N; ii++) {
-	    (pp->*var)[ii] =  *(pb++);
-	    *(buffer)  = (char *) pb;
-	  }
-	}
+
+	(pp->*var)[this->offset] = *(pb++);
+	*buffer = (char *) pb;
+
     }
 
     int GetAttribute(char **buffer, ActiveParticleType *pp_) {
         APClass *pp = static_cast<APClass*>(pp_);
         Type *pb = (Type *)(*buffer);
 
-	/* For everything except particle_position and particle_velocity 
-	 * we need to loop over the size of the arrays
-	 */
-	const char *_name = this->name.c_str();
-	if(strncmp(_name, "particle_", 9) == 0) {
-	  *(pb++) = (pp->*var)[this->offset];
-	  *buffer = (char *) pb;
-	}
-	else {
-	  for(int ii = 0; ii < N; ii++) {
-	    *(pb++) = (pp->*var)[ii];
-	    *(buffer) = (char *) pb;
-	  }
-	}
+
+	*(pb++) = (pp->*var)[this->offset];
+	*buffer = (char *) pb;
+
         return this->element_size;
     }
 

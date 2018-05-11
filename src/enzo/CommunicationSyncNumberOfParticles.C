@@ -36,7 +36,7 @@ int CommunicationSyncNumberOfParticles(HierarchyEntry *GridHierarchyPointer[],
 {
 
   int i, j, idx;
-  int stride = NUMBER_ENZO_PARTCLE_TYPES + MAX_ACTIVE_PARTICLE_TYPES;
+  int stride = NUMBER_ENZO_PARTICLE_TYPES + MAX_ACTIVE_PARTICLE_TYPES;
   int *buffer = new int[NumberOfGrids * stride];
 
   for (i = 0, idx = 0; i < NumberOfGrids; i++, idx += stride)
