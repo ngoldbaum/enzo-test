@@ -29,8 +29,8 @@
 #include <cstring>
 #include <map>
 
-#define min(A,B) ((A) < (B) ? (A) : (B))
-#define max(A,B) ((A) > (B) ? (A) : (B))
+#define _min(A,B) ((A) < (B) ? (A) : (B))
+#define _max(A,B) ((A) > (B) ? (A) : (B))
 
 double ReturnWallTime(void);
 void Reduce_Times(double time, double *time_array);
@@ -282,8 +282,8 @@ namespace enzo_timing{
       for (int i=1; i<N; i++){
         q += (i*pow((double)(time_array[i] - m), (double)(2.0)))/(i+1);
         m += (time_array[i] - m)/(i+1);
-        mint = min(mint,time_array[i]);
-        maxt = max(maxt,time_array[i]); 
+        mint = _min(mint,time_array[i]);
+        maxt = _max(maxt,time_array[i]); 
       }
       *stddev_time = sqrt(q/N);
       *mean_time = m;
