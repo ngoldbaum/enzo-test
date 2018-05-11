@@ -36,6 +36,8 @@
 #include "CommunicationUtilities.h"
 #include "phys_constants.h"
 
+#define NO_DEBUG_ASSIGN
+
 int GenerateGridArray(LevelHierarchyEntry *LevelArray[], int level,
 		      HierarchyEntry **Grids[]);
 int CommunicationSyncNumberOfParticles(HierarchyEntry *GridHierarchyPointer[],int NumberOfGrids);
@@ -45,8 +47,8 @@ int AssignActiveParticlesToGrids(
     int nParticles, 
     LevelHierarchyEntry *LevelArray[]) 
 {
-  int LevelMax, GlobalLevelMax, SavedGrid, NumberOfGrids, i, level, NumberOfLevelGrids, gridnum;
-  int dim, SavedGridOffProc;
+  int LevelMax, GlobalLevelMax = -1, SavedGrid, NumberOfGrids = -1, i, level, NumberOfLevelGrids = -1, gridnum;
+  int dim, SavedGridOffProc = -1, ProcessorNumber = -1;
   HierarchyEntry **LevelGrids = NULL;
   FLOAT* pos, pos1[3];
   float mass;

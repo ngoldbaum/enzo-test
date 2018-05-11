@@ -320,7 +320,7 @@ int CommunicationTransferSubgridParticles(LevelHierarchyEntry *LevelArray[],
 
   delete [] NumberToMove;
   delete [] StarsToMove;
-
+  delete [] APNumberToMove;
   return SUCCESS;
 }
 

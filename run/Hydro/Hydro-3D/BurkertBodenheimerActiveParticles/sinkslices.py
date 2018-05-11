@@ -11,7 +11,7 @@ yt.enable_parallelism()
 Mu = 3.0
 CENTRE = [0.5, 0.5, 0.5]
 
-AccretionRadius = 4
+AccretionRadius = 2
 BASE = "./"
 fns = glob.glob(BASE + "DD001*/DD001*.hierarchy")
 fns.sort()

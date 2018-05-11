@@ -102,6 +102,8 @@
 
 #define VERSION                             2.5  /* current version number */
 
+#define NUMBER_ENZO_PARTCLE_TYPES           3  /* Dark Matter, Stars, Active Particles */
+
 /* Unmodifiable Parameters */
 
 #define MAX_DIMENSION                       3  /* must be 3! */
