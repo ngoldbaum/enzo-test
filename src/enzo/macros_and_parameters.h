@@ -1,6 +1,7 @@
 #ifndef __macros_and_parameters_h_
 #define __macros_and_parameters_h_
 
+#include "string.h"
 #include <iostream>
 #include <iomanip>
 #include <vector>
