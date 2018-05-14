@@ -23,31 +23,6 @@
 #include "ActiveParticle.h"
 
 #define DEBUG 0
-#ifdef NEW_CONFIG
-
-#include "ParameterControl/ParameterControl.h"
-extern Configuration Param;
-
-/* Set default parameter values. */
-
-const char config_radiation_particle_defaults[] =
-"### RADIATION PARTICLE DEFAULTS ###\n"
-"\n"
-"Physics: {\n"
-"    ActiveParticles: {\n"
-"        RadiationParticle: {\n"
-"            RadiationNumSources      = 1;\n"
-"            RadiationSEDNumberOfBins = 1;\n"
-"            PhotonsPerSecond         = [1e50];\n"
-"            RadiationEnergyBins      = [15.0];\n"
-"            RadiationSED             = [1.0];\n"
-"            RadiationLifetime        = 10000;\n"
-"        };\n"
-"    };\n"
-"};\n";
-
-#endif
-
 
 /* Structures */
 struct InitData {   //LL used to store Radiation Particle Data
