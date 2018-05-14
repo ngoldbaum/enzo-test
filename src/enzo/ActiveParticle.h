@@ -18,6 +18,7 @@
 #define __ACTIVE_PARTICLE_H
 
 #include <typeinfo>
+#include "ErrorExceptions.h"
 #include "TopGridData.h"
 #include "ParticleAttributeHandler.h"
 #include "h5utilities.h"
