@@ -45,6 +45,20 @@ If you use a Mac, the command is slightly different:
 
   $ ls ActiveParticle_Awesome.[h,C] | xargs sed -i '' -e 's/Skeleton/Awesome/g'
 
+Finally, you will need to add an entry in ``Grid.h`` for the new particle type::
+
+  diff --git a/src/enzo/Grid.h b/src/enzo/Grid.h
+  --- a/src/enzo/Grid.h
+  +++ b/src/enzo/Grid.h
+  @@ -227,6 +227,7 @@ class grid
+     friend class Star;
+     friend class ActiveParticleType;
+     friend class ActiveParticleType_AccretingParticle;
+  +  friend class ActiveParticleType_AwesomeParticle;
+     friend class ActiveParticleType_CenOstriker;
+     friend class ActiveParticleType_GalaxyParticle;
+     friend class ActiveParticleType_Kravtsov;  
+
 Now try building Enzo:
   
   $ make -j4
@@ -57,7 +71,6 @@ useful, you will need to modify the new particle you've added, filling in the
 functions in the active particle API. This process is described below.
 
 
-  
 Available hooks
 ---------------
 
