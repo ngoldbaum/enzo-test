@@ -1,13 +1,13 @@
 .. _star_particles:
 
 
-Active Particles: Stars, BH, and Sinks
-======================================
+Star Particles
+==============
 
 There are many different subgrid models of star formation and feedback
 in the astrophysical literature, and we have included several of them
 in Enzo.  There are also methods that include routines for black hole,
-sink, and Pop III stellar tracer formation.  Here we give the details
+and Pop III stellar tracer formation.  Here we give the details
 of each implementation and the parameters that control them.
 For relevant parameters please also see :ref:`StarParticleParameters`.
 
@@ -139,12 +139,13 @@ the stellar mass and is deposited in a sphere with radius
 ``PopIIISupernovaRadius`` in *units of pc*.  To track metal
 enrichment, turn on the parameter ``PopIIISupernovaUseColour``.
 
-Method 4: Sink particles
-------------------------
+Method 4: Sink particles (Deprecated)
+-------------------------------------
 Select this method by setting ``StarParticleCreation = 16``.
 
-*Source: sink_maker.C*
+This method is deprecated, please use the active particles instead. See :ref:`active_particles`.
 
+*Source: sink_maker.C*
 
 A couple of variations on this method exist but are not being actively maintained.  
 They require a completely different set of parameters to turn on such as BigStarFormation; 

@@ -18,6 +18,7 @@ of AMR and numerical methods is assumed throughout this documentation.
    DebuggingWithGDB.rst
    FineGrainedOutput.rst
    AddingNewParameters.rst
+   AddingNewActiveParticles.rst           
    HowToAddNewBaryonField.rst
    FloatIsDouble.rst
    AddingRefinementCriteria.rst
