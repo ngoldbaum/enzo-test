@@ -47,26 +47,6 @@ float CR = 0.0;
 
 int ActiveParticleType_RadiationParticle::InitializeParticleType() {
 
-#ifdef NEW_CONFIG
-  
-  // Update the parameter config to include the local defaults.  Note
-  // that this does not overwrite any values previously specified.
-  Param.Update(config_radiation_particle_defaults);
-
-  // Retrieve parameters from Param structure
-  Param.GetScalar(RadiationNumSources, 
-		  "Physics.ActiveParticles.RadiationParticle.RadiationNumSources");
-  Param.GetScalar(RadiationSEDNumberOfBins, 
-		  "Physics.ActiveParticles.RadiationParticle.RadiationSEDNumberOfBins");
-  Param.GetScalar(RadiationPhotonsPerSecond, 
-		 "Physics.ActiveParticles.RadiationParticle.RadiationPhotonsPerSecond");
-  Param.GetArray(RadiationEnergyBins, 
-		 "Physics.ActiveParticles.RadiationParticle.RadiationEnergyBins");
-  Param.GetArray(RadiationSED, 
-		 "Physics.ActiveParticles.RadiationParticle.RadiationSED");
-  
-#else
-
   RadiationNumSources = NumberOfRadiationParticles;
   RadiationSEDNumberOfBins = NumberOfEnergyBins;
   RadiationEnergyBins = new float[RadiationSEDNumberOfBins];
@@ -89,7 +69,7 @@ int ActiveParticleType_RadiationParticle::InitializeParticleType() {
   RadiationLifetime = RadiationSourceLifeTime;
   RadiationPhotonsPerSecond = PhotonsPerSecond;
   FixedInSpace = TRUE; //Hardcoded for the moment but could potentially be a parameter
-#endif
+
   /* Error check parameters */
 
   if (RadiativeTransfer == FALSE)

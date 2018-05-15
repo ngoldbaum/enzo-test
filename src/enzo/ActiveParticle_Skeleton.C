@@ -7,28 +7,6 @@
 #include "ActiveParticle_Skeleton.h"
 #include "phys_constants.h"
 
-#ifdef NEW_CONFIG
-#include "ParameterControl/ParameterControl.h"
-
-/* Set parameter defaults for this particle type. */
-
-extern Configuration Param;
-
-const char config_skeleton_particle_defaults[] =
-  "### SKELETON STAR PARTICLE DEFAULTS ###\n"
-  "\n"
-  "Physics: {\n"
-  "    ActiveParticles: {\n"
-  "        Skeleton: {\n"
-  "            OverdensityThreshold = 100;\n"
-  "            MassEfficiency       = 1;\n"
-  "        };\n"
-  "    };\n"
-  "};\n";
-
-#endif
-
-
 
 /*
  * A 'friend' class can can be used to access private and protected member
@@ -53,25 +31,12 @@ float ActiveParticleType_Skeleton::MassEfficiency = FLOAT_UNDEFINED;
 
 int ActiveParticleType_Skeleton::InitializeParticleType() {
 
-#ifdef NEW_CONFIG
-
-  // Update the parameter config to include the local defaults.  Note
-  // that this does not overwrite any values previously specified.
-  Param.Update(config_skeleton_particle_defaults);
-
-  // Retrieve parameters from Param structure
-  Param.GetScalar(OverdensityThreshold, "Physics.ActiveParticles.Skeleton.OverdensityThreshold");
-  Param.GetScalar(MassEfficiency, "Physics.ActiveParticles.Skeleton.MassEfficiency");
-
-#else
-
   // This is here for compatibility with old-style ascii parameter files, where
   // these parameters exist as global variables that are assigned in
   // ReadParameterFile using sscanf.
   OverdensityThreshold = StarMakerOverDensityThreshold;
   MassEfficiency = StarMakerMassEfficiency;
 
-#endif
 
   AttributeVector &ah = ActiveParticleType_Skeleton::AttributeHandlers;
 

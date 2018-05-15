@@ -21,6 +21,19 @@
 class ActiveParticleType_Skeleton : public ActiveParticleType
 {
 public:
+  /*
+   * Static variables should be defined here.  Since they are static, there is
+   * only one copy of these variables for all instances of the class.  This is
+   * useful for storing the value of a runtime parameter, for example.
+   */
+  static float OverdensityThreshold, MassEfficiency;
+
+  /*
+   * Instance variables should be defined here. Each instance of the particle
+   * class will have its own version of these variables.
+   */
+  float AccretionRate;
+
   // void constructor (no arguments)
   ActiveParticleType_Skeleton(void) : ActiveParticleType()
     {
@@ -177,19 +190,6 @@ public:
    * simulation to simulation.
    */
   ENABLED_PARTICLE_ID_ACCESSOR
-
-  /*
-   * Static variables should be defined here.  Since they are static, there is
-   * only one copy of these variables for all instances of the class.  This is
-   * useful for storing the value of a runtime parameter, for example.
-   */
-  static float OverdensityThreshold, MassEfficiency;
-
-  /*
-   * Instance variables should be defined here. Each instance of the particle
-   * class will have its own version of these variables.
-   */
-  float AccretionRate;
 
   /*
    * The AttributeHandler is used to save active particles to output files and

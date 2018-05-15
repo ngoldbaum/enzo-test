@@ -12,29 +12,6 @@
 
 #include "ActiveParticle_PopIII.h"
 
-#ifdef NEW_CONFIG
-
-#include "ParameterControl/ParameterControl.h"
-extern Configuration Param;
-
-/* Set default parameter values. */
-
-const char config_popiii_particle_defaults[] = 
-"### POPIII STAR PARTICLE DEFAULTS ###\n"
-"\n"
-"Physics: {\n"
-"    ActiveParticles: {\n"
-"        PopIII: {\n"
-"            OverDensityThreshold = 1e6;\n"
-"            MetalCriticalFraction = 1e-4;\n"
-"            H2CriticalFraction = 5e-4;\n"
-"            StarMass = 100;\n"
-"        };\n"
-"    };\n"
-"};\n";
-
-#endif
-
 float CalculatePopIIILifetime(float Mass);
 
 /* We need to make sure that we can operate on the grid, so this dance is
@@ -52,26 +29,11 @@ float ActiveParticleType_PopIII::StarMass = FLOAT_UNDEFINED;
 // get some parameters from the Param object
 int ActiveParticleType_PopIII::InitializeParticleType() {
 
-#ifdef NEW_CONFIG
-
-  // Update the parameter config to include the local defaults. Note
-  // that this does not overwrite any values previously specified.
-  Param.Update(config_popiii_particle_defaults);
-
-  // Retrieve parameters from Param structure
-  Param.GetScalar(OverDensityThreshold, "Physics.ActiveParticles.PopIII.OverDensityThreshold");
-  Param.GetScalar(MetalCriticalFraction, "Physics.ActiveParticles.PopIII.MetalCriticalFraction");
-  Param.GetScalar(H2CriticalFraction, "Physics.ActiveParticles.PopIII.H2CriticalFraction");
-  Param.GetScalar(StarMass, "Physics.ActiveParticles.PopIII.StarMass");
-
-#else
-
   OverDensityThreshold = PopIIIOverDensityThreshold;
   MetalCriticalFraction = PopIIIMetalCriticalFraction;
   H2CriticalFraction = PopIIIH2CriticalFraction;
   StarMass = PopIIIStarMass;
 
-#endif
 
   ActiveParticleType::SetupBaseParticleAttributes(
     ActiveParticleType_PopIII::AttributeHandlers);

@@ -7,39 +7,6 @@
 #include "ActiveParticle_CenOstriker.h"
 #include "phys_constants.h"
 
-#ifdef NEW_CONFIG
-
-#include "ParameterControl/ParameterControl.h"
-extern Configuration Param;
-
-/* Set default parameter values. */
-
-const char config_cen_ostriker_particle_defaults[] =
-"### CEN OSTRIKER STAR PARTICLE DEFAULTS ###\n"
-"\n"
-"Physics: {\n"
-"    ActiveParticles: {\n"
-"        CenOstriker: {\n"
-"            OverdensityThreshold = 100; # [with respect to rho_crit(z)]\n"
-"            JeansMassCriterion   = true;\n"
-"            StochasticStarFormation = false;\n"
-"            UnigridVelocities    = false;\n"
-"            PhysicalOverdensity  = false;\n"
-"            dtDependence         = true;\n"
-"            MassEfficiency       = 1;\n"
-"            MinimumDynamicalTime = 1.0e6; # [years]\n"
-"            MinimumStarMass = 1.0e9; # [Msun]\n"
-"            MassEjectionFraction = 0.25;\n"
-"            FeedbackDistTotalCells = 1;\n"
-"            FeedbackDistRadius     = 0;\n"
-"            FeedbackDistCellStep   = 0;\n"
-"            EnergyToThermalFeedback = 1.0e-5;\n"
-"            MetalYield              = 0.02;\n"
-"        };\n"
-"    };\n"
-"};\n";
-
-#endif
 
 /* We need to make sure that we can operate on the grid, so this dance is
  * necessary to make sure that grid is 'friend' to this particle type. */
@@ -69,29 +36,6 @@ bool ActiveParticleType_CenOstriker::PhysicalOverdensity = false;
 bool ActiveParticleType_CenOstriker::dtDependence = true;
 
 int ActiveParticleType_CenOstriker::InitializeParticleType() {
-
-#ifdef NEW_CONFIG
-  
-  // Update the parameter config to include the local defaults.  Note
-  // that this does not overwrite any values previously specified.
-  Param.Update(config_cen_ostriker_particle_defaults);
-
-  // Retrieve parameters from Param structure
-  Param.GetScalar(OverdensityThreshold, "Physics.ActiveParticles.CenOstriker.OverdensityThreshold");
-  Param.GetScalar(MassEfficiency, "Physics.ActiveParticles.CenOstriker.MassEfficiency");
-  Param.GetScalar(MinimumDynamicalTime, "Physics.ActiveParticles.CenOstriker.MinimumDynamicalTime");
-  Param.GetScalar(MinimumStarMass, "Physics.ActiveParticles.CenOstriker.MinimumStarMass");
-  Param.GetScalar(MassEjectionFraction, "Physics.ActiveParticles.CenOstriker.MassEjectionFraction");
-  Param.GetScalar(EnergyToThermalFeedback, "Physics.ActiveParticles.CenOstriker.EnergyToThermalFeedback");
-  Param.GetScalar(MetalYield, "Physics.ActiveParticles.CenOstriker.MetalYield");
-  Param.GetScalar(FeedbackDistRadius, "Physics.ActiveParticles.CenOstriker.FeedbackDistRadius");
-  Param.GetScalar(FeedbackDistCellStep, "Physics.ActiveParticles.CenOstriker.FeedbackDistCellStep");
-  Param.GetScalar(JeansMassCriterion, "Physics.ActiveParticles.CenOstriker.JeansMassCriterion");
-  Param.GetScalar(StochasticStarFormation, "Physics.ActiveParticles.CenOstriker.StochasticStarFormation");
-  Param.GetScalar(UnigridVelocities, "Physics.ActiveParticles.CenOstriker.UnigridVelocities");
-  Param.GetScalar(PhysicalOverdensity, "Physics.ActiveParticles.CenOstriker.PhysicalOverdensity");
-
-#else
   
   OverdensityThreshold = StarMakerOverDensityThreshold;
   MassEfficiency = StarMakerMassEfficiency;
@@ -107,7 +51,6 @@ int ActiveParticleType_CenOstriker::InitializeParticleType() {
   UnigridVelocities = false;
   PhysicalOverdensity = true;
 
-#endif
 
   ActiveParticleType::SetupBaseParticleAttributes(
     ActiveParticleType_CenOstriker::AttributeHandlers);
