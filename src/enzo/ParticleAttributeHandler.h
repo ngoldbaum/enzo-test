@@ -18,6 +18,8 @@
 #ifndef __PARTICLE_ATTRIBUTE_HANDLER_H
 #define __PARTICLE_ATTRIBUTE_HANDLER_H
 
+#include <hdf5.h>
+
 /* http://www.gamedev.net/topic/474803-c-template-pointer-to-member/ */
 
 
@@ -32,7 +34,7 @@ class ParticleAttributeHandler
 #ifdef USE_MPI
     MPI_Datatype mpitype;
 #endif
-    Eint32 hdf5type;
+    hid_t hdf5type;
     int element_size;
     int offset;
 
