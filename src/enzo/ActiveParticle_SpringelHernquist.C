@@ -32,17 +32,10 @@ float ActiveParticleType_SpringelHernquist::MinimumMass = FLOAT_UNDEFINED;
 int ActiveParticleType_SpringelHernquist::InitializeParticleType() {
   // get some parameters from the Param object
 
-#ifdef NEW_CONFIG
-  Param.GetScalar(OverDensityThreshold, "Physics.ActiveParticles.SpringelHernquist.OverDensityThreshold");
-  Param.GetScalar(PhysicalDensityThreshold, "Physics.ActiveParticles.SpringelHernquist.PhysicalDensityThreshold");
-  Param.GetScalar(MinimumDynamicalTime, "Physics.ActiveParticles.SpringelHernquist.MinimumDynamicalTime");
-  Param.GetScalar(MinimumMass, "Physics.ActiveParticles.SpringelHernquist.MinimumMass");
-#else
   OverDensityThreshold = StarMakerOverDensityThreshold;
   PhysicalDensityThreshold = StarMakerSHDensityThreshold;
   MinimumDynamicalTime = StarMakerMinimumDynamicalTime;
   MinimumMass = StarMakerMinimumMass;
-#endif
 
   /* Add on the Particle Array Handlers */
   typedef ActiveParticleType_SpringelHernquist ap;

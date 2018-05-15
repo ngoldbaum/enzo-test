@@ -6,29 +6,6 @@
 
 #include "ActiveParticle_Kravtsov.h"
 
-#ifdef NEW_CONFIG
-
-#include "ParameterControl/ParameterControl.h"
-extern Configuration Param;
-
-/* Set default parameter values. */
-
-const char config_kravtsov_particle_defaults[] = 
-"### KRAVTSOV STAR PARTICLE DEFAULTS ###\n"
-"\n"
-"Physics: {\n"
-"    ActiveParticles: {\n"
-"        Kravtsov: {\n"
-"            DensityThreshold = 1e6; # [particles per proper cm^3]\n"
-"            StarFormationTimeConstant = 4.0e9; # [years]\n"
-"            MinimumStarMass = 1.0e9; # [Msun]\n"
-"        };\n"
-"    };\n"
-"};\n";
-
-#endif
-
-
 /* We need to make sure that we can operate on the grid, so this dance is
  * necessary to make sure that grid is 'friend' to this particle type. */
 
@@ -48,24 +25,10 @@ float ActiveParticleType_Kravtsov::MinimumStarMass = FLOAT_UNDEFINED;
 
 int ActiveParticleType_Kravtsov::InitializeParticleType(void) {
 
-#ifdef NEW_CONFIG
-
-  // Update the parameter config to include the local defaults. Note
-  // that this does not overwrite any values previously specified.
-  Param.Update(config_kravtsov_particle_defaults);
-
-  // Retrieve parameters from Param structure
-  Param.GetScalar(DensityThreshold, "Physics.ActiveParticles.Kravtsov.DensityThreshold");
-  Param.GetScalar(StarFormationTimeConstant, "Physics.ActiveParticles.Kravtsov.StarFormationTimeConstant");
-  Param.GetScalar(MinimumStarMass, "Physics.ActiveParticles.Kravtsov.MinimumStarMass");
-
-#else
-
   DensityThreshold = StarMakerOverDensityThreshold;
   StarFormationTimeConstant = StarMakerMinimumDynamicalTime;
   MinimumStarMass = StarMakerMinimumMass;
   
-#endif
   
   /* Add on the Particle Array Handlers */
   typedef ActiveParticleType_Kravtsov ap;

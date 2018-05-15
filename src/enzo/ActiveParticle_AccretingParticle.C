@@ -6,33 +6,6 @@
 
 #include "ActiveParticle_AccretingParticle.h"
 
-#ifdef NEW_CONFIG
-
-#include "ParameterControl/ParameterControl.h"
-extern Configuration Param;
-
-/* Set default parameter values. */
-
-const char config_accreting_particle_defaults[] =
-"### ACCRETING PARTICLE DEFAULTS ###\n"
-"\n"
-"Physics: {\n"
-"    ActiveParticles: {\n"
-"        AccretingParticle: {\n"
-"            OverflowFactor         = 1.01;\n"
-"            LinkingLength          = 4;\n   "
-"            AccretionRadius        = 4;\n   "
-"            RadiationParticle      = 0;\n"
-"            LuminosityPerSolarMass = 1e48;\n"
-"            RadiationSEDNumberOfBins = 1;\n"
-"            RadiationEnergyBins    = [15.0];\n"
-"            RadiationSED           = [1.0];\n"
-"            RadiationLifetime      = 10000;\n"
-"        };\n"
-"    };\n"
-"};\n";
-
-#endif
 
 /* We need to make sure that we can operate on the grid, so this dance is
  * necessary to make sure that grid is 'friend' to this particle type. */
@@ -60,24 +33,6 @@ float ActiveParticleType_AccretingParticle::RadiationLifetime = FLOAT_UNDEFINED;
 
 int ActiveParticleType_AccretingParticle::InitializeParticleType()
 {
-#ifdef NEW_CONFIG
-
-  // Update the parameter config to include the local defaults.  Note
-  // that this does not overwrite any values previously specified.
-  Param.Update(config_sink_particle_defaults);
-
-  // Retrieve parameters from Param structure
-  Param.GetScalar(OverflowFactor, "Physics.ActiveParticles.AccretingParticle.OverflowFactor");
-  Param.GetScalar(LinkingLength, "Physics.ActiveParticles.AccretingParticle.LinkingLength");
-  Param.GetScalar(AccretionRadius, "Physics.ActiveParticles.AccretingParticle.AccretionRadius");
-  Param.GetScalar(RadiationParticle, "Physics.ActiveParticles.AccretingParticle.RadiationParticle");
-  Param.GetScalar(RadiationSEDNumberOfBins, "Physics.ActiveParticles.AccretingParticle.RadiationSEDNumberOfBins");
-  Param.GetScalar(RadiationLifetime, "Physics.ActiveParticles.AccretingParticle.RadiationLifetime");
-  Param.GetArray(RadiationEnergyBins, "Physics.ActiveParticles.AccretingParticle.RadiationEnergyBins");
-  Param.GetArray(RadiationEnergyBins, "Physics.ActiveParticles.AccretingParticle.RadiationSED");
-
-#else
-
   // Leaving these defaults hardcoded for testing. NJG
 
   OverflowFactor = 1.01;
@@ -92,7 +47,6 @@ int ActiveParticleType_AccretingParticle::InitializeParticleType()
   RadiationSED[0] = 1.0;
   RadiationLifetime = 1000;
 
-#endif
 
   /* Error check parameters */
 
