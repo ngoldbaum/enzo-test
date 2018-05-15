@@ -121,7 +121,7 @@ Radiative Transfer (Ray Tracing) Parameters
 ``RadiativeTransferOpticallyThinH2`` (external)
     Set to 1 to include an optically-thin H_2 dissociating
     (Lyman-Werner) radiation field. Only used if ``MultiSpecies`` > 1. If
-   ``MultiSpecies`` > 1 and this option is off, the Lyman-Werner radiation
+    ``MultiSpecies`` > 1 and this option is off, the Lyman-Werner radiation
     field will be calculated with ray tracing. Default: 1.
 ``RadiativeTransferSplitPhotonPackage`` (external)
     Once photons are past this radius, they can no longer split. In
