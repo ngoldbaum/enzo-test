@@ -54,7 +54,7 @@ Finally, you will need to add an entry in ``Grid.h`` for the new particle type::
      friend class Star;
      friend class ActiveParticleType;
      friend class ActiveParticleType_AccretingParticle;
-  +  friend class ActiveParticleType_AwesomeParticle;
+  +  friend class ActiveParticleType_Awesome;
      friend class ActiveParticleType_CenOstriker;
      friend class ActiveParticleType_GalaxyParticle;
      friend class ActiveParticleType_Kravtsov;  
